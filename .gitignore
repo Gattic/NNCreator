@@ -1,0 +1,9 @@
+*.o
+NNCreator
+callgrind.*
+.DS_Store
+docs/*
+build/*
+database/*
+*.sublime-workspace
+*.swp
