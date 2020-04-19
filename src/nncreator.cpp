@@ -1,19 +1,29 @@
 // Copyright 2020 Robert Carneiro, Derek Meer, Matthew Tabak, Eric Lujan
 //
-// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
-// associated documentation files (the "Software"), to deal in the Software without restriction,
-// including without limitation the rights to use, copy, modify, merge, publish, distribute,
-// sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and
+// associated documentation files (the "Software"), to deal in the Software
+// without restriction,
+// including without limitation the rights to use, copy, modify, merge, publish,
+// distribute,
+// sublicense, and/or sell copies of the Software, and to permit persons to whom
+// the Software is
 // furnished to do so, subject to the following conditions:
 //
-// The above copyright notice and this permission notice shall be included in all copies or
+// The above copyright notice and this permission notice shall be included in
+// all copies or
 // substantial portions of the Software.
 //
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
-// NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT
+// NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+// PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+// FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
 #include "nncreator.h"
 #include "Backend/Database/GList.h"
 #include "Backend/Database/gtable.h"
@@ -34,7 +44,6 @@
 #include "Frontend/GLayouts/GLinearLayout.h"
 #include "Frontend/GUI/RUCheckbox.h"
 #include "Frontend/GUI/RUDropdown.h"
-#include "Frontend/GUI/RUGraph/RUGraph.h"
 #include "Frontend/GUI/RUImageComponent.h"
 #include "Frontend/GUI/RUMsgBox.h"
 #include "Frontend/GUI/RUTabContainer.h"
@@ -43,6 +52,7 @@
 #include "Frontend/GUI/Text/RULabel.h"
 #include "Frontend/GUI/Text/RUTextbox.h"
 #include "Frontend/Graphics/graphics.h"
+#include "Frontend/RUGraph/RUGraph.h"
 #include "crt0.h"
 #include "main.h"
 
@@ -58,6 +68,20 @@ using namespace glades;
  */
 NNCreatorPanel::NNCreatorPanel(const std::string& name, int width, int height)
 	: GPanel(name, width, height)
+{
+	serverInstance = NULL;
+	buildPanel();
+}
+
+NNCreatorPanel::NNCreatorPanel(GNet::GServer* newInstance, const std::string& name, int width,
+							   int height)
+	: GPanel(name, width, height)
+{
+	serverInstance = newInstance;
+	buildPanel();
+}
+
+void NNCreatorPanel::buildPanel()
 {
 	currentHiddenLayerIndex = 0;
 	InputLayerInfo* newInputLayer = new InputLayerInfo(0.0f, 1);
@@ -95,8 +119,7 @@ NNCreatorPanel::NNCreatorPanel(const std::string& name, int width, int height)
 	lcGraphLayout->addSubItem(lblGraphLC);
 
 	// Learning curve graph
-	lcGraph =
-		new RUGraph(Graphics::getWidth() / 4, Graphics::getHeight() / 4, RUGraph::QUADRANTS_ONE);
+	lcGraph = new RUGraph(getWidth() / 4, getHeight() / 4, RUGraph::QUADRANTS_ONE);
 	lcGraph->setName("lcGraph");
 	lcGraphLayout->addSubItem(lcGraph);
 
@@ -115,7 +138,7 @@ NNCreatorPanel::NNCreatorPanel(const std::string& name, int width, int height)
 	rocGraphLayout->addSubItem(lblGraphROC);
 
 	// ROC Curve Graph
-	rocCurveGraph = new RUGraph(Graphics::getWidth() / 4, Graphics::getHeight() / 4,
+	rocCurveGraph = new RUGraph(getWidth() / 4, getHeight() / 4,
 								RUGraph::QUADRANTS_ONE); // -4 = adjustment to align with table
 	rocCurveGraph->setName("rocCurveGraph");
 	rocGraphLayout->addSubItem(rocCurveGraph);
@@ -141,7 +164,7 @@ NNCreatorPanel::NNCreatorPanel(const std::string& name, int width, int height)
 	dartGraphLayout->addSubItem(lblGraphDart);
 
 	// Dartboard graph
-	dartboardGraph = new RUGraph(Graphics::getWidth() / 4, Graphics::getHeight() / 4,
+	dartboardGraph = new RUGraph(getWidth() / 4, getHeight() / 4,
 								 RUGraph::QUADRANTS_ONE); // -4 = adjustment to align with table
 	dartboardGraph->setName("dartboardGraph");
 	dartGraphLayout->addSubItem(dartboardGraph);
@@ -163,8 +186,8 @@ NNCreatorPanel::NNCreatorPanel(const std::string& name, int width, int height)
 	// Confusion Matrix Table
 	cMatrixTable = new RUTable();
 	cMatrixTable->setRowsShown(5);
-	cMatrixTable->setWidth(Graphics::getWidth() / 4);
-	cMatrixTable->setHeight(Graphics::getHeight() / 4);
+	cMatrixTable->setWidth(getWidth() / 4);
+	cMatrixTable->setHeight(getHeight() / 4);
 	cMatrixTable->setName("cMatrixTable");
 	confTableLayout->addSubItem(cMatrixTable);
 
@@ -351,7 +374,7 @@ NNCreatorPanel::NNCreatorPanel(const std::string& name, int width, int height)
 
 	// Right Side forms
 	GLinearLayout* rightSideLayout = new GLinearLayout("rightSideLayout");
-	rightSideLayout->setX(Graphics::getWidth() - 500);
+	rightSideLayout->setX(getWidth() - 500);
 	rightSideLayout->setY(45);
 	rightSideLayout->setOrientation(GLinearLayout::VERTICAL);
 	rightSideLayout->setPadding(4);
@@ -735,7 +758,8 @@ void NNCreatorPanel::loadDDNN()
 
 /*!
  * @brief hidden layer textbox populator
- * @details fills in the Hidden Layer variable textboxes and dropdowns based on the
+ * @details fills in the Hidden Layer variable textboxes and dropdowns based on
+ * the
  * currentHiddenLayerIndex and hiddenLayers variables
  */
 void NNCreatorPanel::populateHLayerForm()
@@ -868,7 +892,8 @@ void NNCreatorPanel::syncFormVar()
 }
 /*!
  * @brief IndexToEdit populator
- * @details populates the IndexToEdit dropdown, usually whenever the Hidden Layer Count textbox
+ * @details populates the IndexToEdit dropdown, usually whenever the Hidden
+ * Layer Count textbox
  * changes
  */
 void NNCreatorPanel::populateIndexToEdit(int newSelectedIndex)
@@ -914,7 +939,7 @@ void NNCreatorPanel::loadNNet(glades::NNInfo* info)
 	// Display a popup alert
 	char buffer[netName.length()];
 	sprintf(buffer, "Loaded \"%s\"", netName.c_str());
-	Graphics::MsgBox("Neural Net", buffer, RUMsgBox::MESSAGEBOX);
+	MsgBox("Neural Net", buffer, RUMsgBox::MESSAGEBOX);
 }
 
 /*!
@@ -1019,6 +1044,9 @@ void NNCreatorPanel::GuiCommander3(const std::string& cmpName, int x, int y)
  */
 void NNCreatorPanel::GuiCommander4(const std::string& cmpName, int x, int y)
 {
+	if (!serverInstance)
+		return;
+
 	if (ddTestDataSourceType->getSelectedIndex() == (unsigned int)-1)
 		return;
 
@@ -1035,9 +1063,11 @@ void NNCreatorPanel::GuiCommander4(const std::string& cmpName, int x, int y)
 	}
 
 	std::string serverIP = "127.0.0.1"; // 69.126.139.205
-	if (GNet::getServerInstanceList().find(serverIP) != GNet::getServerInstanceList().end())
+	if (serverInstance->getServerInstanceList().find(serverIP) !=
+		serverInstance->getServerInstanceList().end())
 	{
-		GNet::Instance* cInstance = (GNet::getServerInstanceList().find(serverIP))->second;
+		GNet::Instance* cInstance =
+			(serverInstance->getServerInstanceList().find(serverIP))->second;
 
 		// Get the vars from the components
 		std::string netName = tbNetName->getText();
@@ -1052,7 +1082,8 @@ void NNCreatorPanel::GuiCommander4(const std::string& cmpName, int x, int y)
 		if (trainPct == -1 || testPct == -1 || validationPct == -1 ||
 			trainPct + testPct + validationPct != 100)
 		{
-			printf("Percentages invalid: \n\tTrain: %s \n\tTest: %s \n\tValidation: %s \n",
+			printf("Percentages invalid: \n\tTrain: %s \n\tTest: %s \n\tValidation: "
+				   "%s \n",
 				   tbTrainPct->getText().c_str(), tbTestPct->getText().c_str(),
 				   tbValidationPct->getText().c_str());
 			return;
@@ -1067,7 +1098,7 @@ void NNCreatorPanel::GuiCommander4(const std::string& cmpName, int x, int y)
 		/*wData.addLong(trainPct);
 		wData.addLong(testPct);
 		wData.addLong(validationPct);*/
-		GNet::Service::ExecuteService(wData, cInstance);
+		serverInstance->NewService(wData, cInstance);
 	}
 }
 
@@ -1141,8 +1172,10 @@ void NNCreatorPanel::GuiCommander8(const std::string& cmpName, int x, int y)
 
 /*!
  * @brief Hidden Layer Count change handler
- * @details runs whenever the tbHiddenLayerCount changes (i.e. it loses focus). For now, changes
- * hiddenLayers, currentHiddenLayerIndex, and formInfo->numHiddenLayers() accordingly
+ * @details runs whenever the tbHiddenLayerCount changes (i.e. it loses focus).
+ * For now, changes
+ * hiddenLayers, currentHiddenLayerIndex, and formInfo->numHiddenLayers()
+ * accordingly
  */
 void NNCreatorPanel::GuiCommander9()
 {
@@ -1195,7 +1228,8 @@ void NNCreatorPanel::GuiCommander12(const std::string& cmpName, int x, int y)
 
 void NNCreatorPanel::GuiCommander13(const std::string& cmpName, int x, int y)
 {
-	NNetwork::caboose = true;
+	// REIMPLENT THIS AS cNetwork.stopRunning();
+	// NNetwork::caboose = true;
 }
 
 void NNCreatorPanel::GuiCommander14(const std::string& cmpName, int x, int y)
@@ -1208,7 +1242,7 @@ void NNCreatorPanel::GuiCommander14(const std::string& cmpName, int x, int y)
 	// Display a popup alert
 	char buffer[netName.length()];
 	sprintf(buffer, "Deleted \"%s\"", netName.c_str());
-	Graphics::MsgBox("Neural Net", buffer, RUMsgBox::MESSAGEBOX);
+	MsgBox("Neural Net", buffer, RUMsgBox::MESSAGEBOX);
 }
 
 void NNCreatorPanel::GuiCommander15(int newIndex)
@@ -1227,10 +1261,15 @@ void NNCreatorPanel::GuiCommander15(int newIndex)
 	formInfo->setName(netName);
 
 	// Load a machine learning model
-	NNetwork* cNetwork = glades::getNeuralNetwork(netName);
+	glades::NNetwork cNetwork;
+	if (!cNetwork.load(netName))
+	{
+		printf("[NN] Unable to load \"%s\"", netName.c_str());
+		return;
+	}
 
 	// Load the NN into the form
-	loadNNet(cNetwork->getNNInfo());
+	loadNNet(cNetwork.getNNInfo());
 }
 
 /*!
@@ -1253,7 +1292,8 @@ void NNCreatorPanel::PlotROCCurve(const std::vector<Point2*>& graphPoints)
 
 /*!
  * @brief Plot the Expected vs Predicted of the NN
- * @details Plot the Expected vs Predicted of the neural network on the proper graph
+ * @details Plot the Expected vs Predicted of the neural network on the proper
+ * graph
  */
 void NNCreatorPanel::PlotScatter(const shmea::GTable& graphPoints)
 {

@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <string>
 
+class gfxpp;
 class GItem;
 class GPanel;
 class EventTracker;
@@ -31,7 +32,7 @@ class RUKeyDown : public virtual RUItemArea
 {
 protected:
 	// events
-	virtual void onKeyDown(GPanel*, SDL_Keycode, Uint16);
+	virtual void onKeyDown(gfxpp*, GPanel*, SDL_Keycode, Uint16);
 
 	// event listeners
 	void (GPanel::*KeyDownListener)(const std::string&);
@@ -45,7 +46,7 @@ public:
 	void setKeyDownListener(void (GPanel::*)(const std::string&));
 
 	// events
-	void onKeyDownHelper(EventTracker*, GPanel*, SDL_Keycode, Uint16);
+	void onKeyDownHelper(gfxpp*, EventTracker*, GPanel*, SDL_Keycode, Uint16);
 };
 
 #endif

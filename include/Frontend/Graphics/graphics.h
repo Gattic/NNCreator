@@ -17,6 +17,7 @@
 #ifndef _GRAPHICS
 #define _GRAPHICS
 
+#include "../GFXUtilities/quaternion.h"
 #include "../GItems/GItem.h"
 #include "../GItems/GLayout.h"
 #include "../GItems/GPanel.h"
@@ -35,9 +36,8 @@ class RUComponent;
 class RULabel;
 class GPanel;
 class Object;
-class Quaternion;
 
-class Graphics
+class gfxpp
 {
 	friend class RUComponent;
 	friend class RUTextComponent;
@@ -54,61 +54,62 @@ class Graphics
 	friend class RUKeyUp;
 
 private:
-	static bool running;
-	static int width;
-	static int height;
-	static float hunterZolomon; // zoom
-	static int renderStatus;
+	int errorFlag;
+	bool running;
+	int width;
+	int height;
+	float hunterZolomon; // zoom
+	int renderStatus;
 
-	static int32_t frames;
-	static bool rotate;
-	static bool move;
-	static int32_t now;
-	static int32_t then;
+	int32_t frames;
+	bool rotate;
+	bool move;
+	int32_t now;
+	int32_t then;
 
 	// for mouse
-	static int mouseX;
-	static int mouseY;
+	int mouseX;
+	int mouseY;
 
 	// for key presses
-	static bool CTRLPressed;
-	static bool ALTPressed;
-	static bool spacePressed;
-	static bool fPressed;
-	static bool uPressed;
-	static bool qPressed;
-	static bool gPressed;
-	static bool rPressed;
-	static bool lPressed;
-	static bool upPressed;
-	static bool downPressed;
-	static bool leftPressed;
-	static bool rightPressed;
+	bool CTRLPressed;
+	bool ALTPressed;
+	bool spacePressed;
+	bool fPressed;
+	bool uPressed;
+	bool qPressed;
+	bool gPressed;
+	bool rPressed;
+	bool lPressed;
+	bool upPressed;
+	bool downPressed;
+	bool leftPressed;
+	bool rightPressed;
 
-	static Quaternion roll;
-	static Quaternion pitch;
-	static Quaternion yaw;
+	Quaternion roll;
+	Quaternion pitch;
+	Quaternion yaw;
 
-	static SDL_Window* window;
-	static SDL_GLContext context;
-	static SDL_Renderer* renderer;
+	SDL_Window* window;
+	SDL_GLContext context;
+	SDL_Renderer* renderer;
 
-	static std::vector<GItem*> guiElements; // < RUComponent* || GLayout* >
+	std::vector<GItem*> guiElements; // < RUComponent* || GLayout* >
 
-	static GItem* focusedItem;
-	static std::vector<Object*> objects;
-	static unsigned int cObjIndex;
+	GItem* focusedItem;
+	std::vector<Object*> objects;
+	unsigned int cObjIndex;
 
 	// default gui
-	static RULabel* fpsLabel;
+	RULabel* fpsLabel;
 
 	// main
-	static void display();
-	static int initHelper(bool);
-	static int init2D();
-	static void init3D();
-	static void clean2D();
-	static void clean3D();
+	void display();
+	int initHelper(bool, std::string);
+	int init2D();
+	void init3D();
+	void clean2D();
+	void clean3D();
 
 public:
 	static const float MAX_FRAMES_PER_SECOND = 30.0f;
@@ -120,32 +121,33 @@ public:
 	static const int Y_AXIS = 1;
 	static const int Z_AXIS = 2;
 
+	gfxpp();
+	gfxpp(std::string, int = _2D, bool = true, int = 800, int = 600);
+	int getErrorFlag() const;
+
 	// GFX Utils
 	static unsigned int RGBfromHue(double, int8_t*, int8_t*, int8_t*);
-	static bool contains(const Object*);
-	static bool contains(const Object);
+	bool contains(const Object*) const;
+	bool contains(const Object) const;
 
 	// 2D
-	static GPanel* focusedPanel;
-	static void addGradient(int, int, int);
-	static void addItem(GItem*);
-	static void removeItem(int); // id
-	static GItem* getItemByID(int);
-	static void setFocus(GItem*);
-	static int getWidth();
-	static int getHeight();
-	static void MsgBox(std::string, std::string, int);
+	GPanel* focusedPanel;
+	void addGradient(int, int, int);
+	void addItem(GItem*);
+	void removeItem(int); // id
+	GItem* getItemByID(int);
+	void setFocus(GItem*);
+	int getWidth() const;
+	int getHeight() const;
 
 	// 3D
-	static void addBasis();
-	static void addCube();
+	void addBasis();
+	void addCube();
 
 	// main
-	static int init(int, int, int);
-	static int init(int);
-	static void run();
-	static void changeRenderStatus(int);
-	static void finish();
+	void run();
+	void changeRenderStatus(int);
+	void finish();
 };
 
 #endif

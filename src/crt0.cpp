@@ -1,19 +1,29 @@
 // Copyright 2020 Robert Carneiro, Derek Meer, Matthew Tabak, Eric Lujan
 //
-// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
-// associated documentation files (the "Software"), to deal in the Software without restriction,
-// including without limitation the rights to use, copy, modify, merge, publish, distribute,
-// sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and
+// associated documentation files (the "Software"), to deal in the Software
+// without restriction,
+// including without limitation the rights to use, copy, modify, merge, publish,
+// distribute,
+// sublicense, and/or sell copies of the Software, and to permit persons to whom
+// the Software is
 // furnished to do so, subject to the following conditions:
 //
-// The above copyright notice and this permission notice shall be included in all copies or
+// The above copyright notice and this permission notice shall be included in
+// all copies or
 // substantial portions of the Software.
 //
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
-// NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT
+// NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+// PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+// FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
 #include "crt0.h"
 #include "Backend/Database/GList.h"
 #include "Backend/Machine Learning/glades.h"
@@ -53,9 +63,6 @@ int NNCreator::getDebugType()
 void NNCreator::stop()
 {
 	running = false;
-
-	// shut down the server
-	shutdown(GNet::getSockFD(), 2);
 }
 
 int main(int argc, char* argv[])
@@ -69,9 +76,11 @@ int main(int argc, char* argv[])
 	// for machine learning initialization
 	glades::init();
 
+	GNet::GServer serverInstance;
+
 	// Add services
-	ML_Train* ml_train_srvc = new ML_Train();
-	addService(ml_train_srvc->getName(), ml_train_srvc);
+	ML_Train* ml_train_srvc = new ML_Train(&serverInstance);
+	serverInstance.addService(ml_train_srvc->getName(), ml_train_srvc);
 
 	// command line args
 	bool noguiMode = false;
@@ -85,26 +94,14 @@ int main(int argc, char* argv[])
 	}
 
 	// Launch the server server
-	pthread_t* commandThread = (pthread_t*)malloc(sizeof(pthread_t));
-	pthread_t* writerThread = (pthread_t*)malloc(sizeof(pthread_t));
-	GNet::run(commandThread, writerThread, localOnly);
+	serverInstance.run(localOnly);
 
-	// launch the gui
+	// Launch the gui
 	if (!noguiMode)
-		Frontend::run(fullScreenMode);
+		Frontend::run(&serverInstance, fullScreenMode);
 
-	// cleanup the glades
-	glades::cleanup();
+	// Cleanup GNet
+	serverInstance.stop();
 
-	// cleanup the networking threads
-	GNet::stop();
-	pthread_join(*commandThread, NULL);
-	// pthread_join(*writerThread, NULL);
-	free(commandThread);
-	free(writerThread);
-
-	// cleanup the networking
-	GNet::Sockets::closeSockets();
-
-	return 0;
+	return EXIT_SUCCESS;
 }

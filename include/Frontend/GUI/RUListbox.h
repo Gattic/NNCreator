@@ -23,6 +23,7 @@
 #include <string>
 #include <vector>
 
+class gfxpp;
 class RULabel;
 class RUScrollbar;
 
@@ -40,9 +41,9 @@ protected:
 	bool hoverDraw;
 
 	// events
-	virtual void onMouseMotion(GPanel*, int, int);
-	virtual void onMouseDown(GPanel*, int, int);
-	virtual void onMouseWheel(GPanel*, int, int, int);
+	virtual void onMouseMotion(gfxpp*, GPanel*, int, int);
+	virtual void onMouseDown(gfxpp*, GPanel*, int, int);
+	virtual void onMouseWheel(gfxpp*, GPanel*, int, int, int);
 
 public:
 	static const int DEFAULT_SCROLLBAR_WIDTH = 20;

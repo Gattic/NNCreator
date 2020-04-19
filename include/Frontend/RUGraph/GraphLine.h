@@ -17,7 +17,7 @@
 #ifndef _RUGRAPHLINE
 #define _RUGRAPHLINE
 
-#include "../../GItems/RUColors.h"
+#include "../GItems/RUColors.h"
 #include "Graphable.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>

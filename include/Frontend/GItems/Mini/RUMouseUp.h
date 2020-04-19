@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <string>
 
+class gfxpp;
 class GItem;
 class GPanel;
 class EventTracker;
@@ -31,7 +32,7 @@ class RUMouseUp : public virtual RUItemArea
 {
 protected:
 	// events
-	virtual void onMouseUp(GPanel*, int, int);
+	virtual void onMouseUp(gfxpp*, GPanel*, int, int);
 
 	// event listeners
 	void (GPanel::*MouseUpListener)(int, int);
@@ -45,7 +46,7 @@ public:
 	void setMouseUpListener(void (GPanel::*)(int, int));
 
 	// events
-	void onMouseUpHelper(EventTracker*, GPanel*, int, int, bool = false);
+	void onMouseUpHelper(gfxpp*, EventTracker*, GPanel*, int, int, bool = false);
 };
 
 #endif

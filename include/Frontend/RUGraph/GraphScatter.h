@@ -14,59 +14,40 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _RUDRAWCOMP
-#define _RUDRAWCOMP
+#ifndef _GRAPHSCATTER_H
+#define _GRAPHSCATTER_H
 
-#include "RUGraph.h"
 #include <SDL2/SDL.h>
-#include <map>
+#include <SDL2/SDL_opengl.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
 #include <vector>
 
-class GPanel;
-class Graphable;
-class Point2;
-class Circle;
+#include "../GItems/RUColors.h"
+#include "Graphable.h"
 
-class RUDrawComponent : public RUGraph
+class RUGraph;
+class Point2;
+
+class GraphScatter : public Graphable
 {
 private:
-	float penWidth;
-	bool clickMode;
-	Circle* prevCircle;
-
-	std::vector<Circle*> circles;
-
-protected:
-	// events
-	virtual void onMouseDown(GPanel*, int, int);
+	void drawPoint(SDL_Renderer*, int, int, int = 0);
+	void drawPointOutline(SDL_Renderer*, int, int, int = 0);
+	int pointSize;
 
 public:
-	static const int MODE_CIRCLES = 0;
-	static const int MODE_NELLIPSE = 1;
-
 	// constructors & destructor
-	RUDrawComponent(int, int, int);
-	~RUDrawComponent();
+	GraphScatter(RUGraph*, SDL_Color = RUColors::DEFAULT_COLOR_LINE, int = 4);
+	~GraphScatter();
 
-	// gets
-	int getMode() const;
-	float getPenWidth() const;
+	void setPointSize(int);
+	int getPointSize(int);
 
-	// sets
-	void toggleMode();
-	void setPenWidth(float);
-
-	// render
-	virtual void updateBackground(SDL_Renderer*);
+	virtual void draw(SDL_Renderer*);
 	virtual std::string getType() const;
-	void clear(bool = false);
-
-	// Circle functions
-	void addCircle(const Point2*, double);
 };
 
 #endif

@@ -38,9 +38,9 @@ public:
 	virtual void calculateSubItemPositions(std::pair<int, int>);
 
 	// events
-	virtual void processSubItemEvents(EventTracker*, GPanel*, SDL_Event, int, int);
-	virtual void hover();
-	virtual void unhover();
+	virtual void processSubItemEvents(gfxpp*, EventTracker*, GPanel*, SDL_Event, int, int);
+	virtual void hover(gfxpp*);
+	virtual void unhover(gfxpp*);
 
 	// render
 	virtual void updateBackgroundHelper(SDL_Renderer*);

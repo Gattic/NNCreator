@@ -28,6 +28,7 @@
 #include <time.h>
 #include <vector>
 
+class gfxpp;
 class RUComponent;
 class GLayout;
 
@@ -38,8 +39,8 @@ class GPanel : public GItem
 protected:
 	// Lifetime (virtual) functions
 	virtual void onStart() = 0;
-	virtual void onShow();
-	virtual void onHide();
+	virtual void onShow(gfxpp*);
+	virtual void onHide(gfxpp*);
 
 	// render
 	virtual void updateBackground(SDL_Renderer* renderer);
@@ -51,12 +52,11 @@ public:
 	virtual void calculateSubItemPositions(std::pair<int, int>);
 
 	// events
-	void show();
-	void hide();
-	virtual void hover();
-	virtual void unhover();
-	virtual void processSubItemEvents(EventTracker* eventsStatus, GPanel* parentPanel, SDL_Event,
-									  int, int);
+	void show(gfxpp*);
+	void hide(gfxpp*);
+	virtual void hover(gfxpp*);
+	virtual void unhover(gfxpp*);
+	virtual void processSubItemEvents(gfxpp*, EventTracker*, GPanel*, SDL_Event, int, int);
 	virtual void updateBackgroundHelper(SDL_Renderer*);
 
 	virtual void GuiCommander1(const std::string&, int, int) = 0;
@@ -76,6 +76,8 @@ public:
 	virtual void GuiCommander15(int) = 0;
 
 	virtual std::string getType() const;
+
+	void MsgBox(std::string, std::string, int);
 };
 
 #endif

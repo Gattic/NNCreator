@@ -1,24 +1,13 @@
-// Copyright 2020 Robert Carneiro, Derek Meer, Matthew Tabak, Eric Lujan
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
-// associated documentation files (the "Software"), to deal in the Software without restriction,
-// including without limitation the rights to use, copy, modify, merge, publish, distribute,
-// sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all copies or
-// substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
-// NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+// Confidential, unpublished property of Robert Carneiro
+
+// The access and distribution of this material is limited solely to
+// authorized personnel.  The use, disclosure, reproduction,
+// modification, transfer, or transmittal of this work for any purpose
+// in any form or by any means without the written permission of
+// Robert Carneiro is strictly prohibited.
 #ifndef _ML_TRAIN
 #define _ML_TRAIN
 
-#include "../crt0.h"
-#include "../main.h"
 #include "Backend/Database/GList.h"
 #include "Backend/Database/gtable.h"
 #include "Backend/Machine Learning/State/Terminator.h"
@@ -33,12 +22,32 @@
 #include "Backend/Networking/socket.h"
 #include "Frontend/GUI/RUMsgBox.h"
 #include "Frontend/Graphics/graphics.h"
+#include "../crt0.h"
+#include "../main.h"
 
 class NNInfo;
 
 class ML_Train : public GNet::Service
 {
+private:
+	GNet::GServer* serverInstance;
+
 public:
+	ML_Train()
+	{
+		serverInstance = NULL;
+	}
+
+	ML_Train(GNet::GServer* newInstance)
+	{
+		serverInstance = newInstance;
+	}
+
+	~ML_Train()
+	{
+		serverInstance = NULL; // Not ours to delete
+	}
+
 	shmea::GList execute(class GNet::Instance* cInstance, const shmea::GList& data)
 	{
 		shmea::GList retList;
@@ -55,7 +64,12 @@ public:
 		// data.getLong(6);
 
 		// load the neural network
-		glades::NNetwork* cNetwork = glades::getNeuralNetwork(netName);
+		glades::NNetwork cNetwork;
+		if (!cNetwork.load(netName))
+		{
+			printf("[NN] Unable to load \"%s\"", netName.c_str());
+			return retList;
+		}
 
 		// Termination Conditions
 		glades::Terminator* Arnold = new glades::Terminator();
@@ -65,14 +79,14 @@ public:
 
 		// Run the training and retrieve a metanetwork
 		shmea::GTable inputTable(testFName, ',', importType);
-		glades::MetaNetwork* newTrainNet = glades::train(cNetwork, inputTable, Arnold);
+		glades::MetaNetwork* newTrainNet = glades::train(&cNetwork, inputTable, Arnold);
 
 		return retList;
 	}
 
-	GNet::Service* MakeService() const
+	GNet::Service* MakeService(GNet::GServer* newInstance) const
 	{
-		return new ML_Train();
+		return new ML_Train(newInstance);
 	}
 
 	std::string getName() const

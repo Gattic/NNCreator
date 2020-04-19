@@ -25,6 +25,8 @@
 #include <stdlib.h>
 #include <string>
 
+class gfxpp;
+
 class RUTextComponent : public RUComponent
 {
 protected:
@@ -56,8 +58,8 @@ protected:
 	void calculateRenderInfo();
 
 	// events
-	virtual void onMouseDown(GPanel*, int, int);
-	virtual void onKey(char);
+	virtual void onMouseDown(gfxpp*, GPanel*, int, int);
+	virtual void onKey(gfxpp*, char);
 
 	// event listener
 	void (GPanel::*KeyListener)(char);
@@ -98,7 +100,7 @@ public:
 	void setKeyListener(void (GPanel::*)(char));
 
 	// events
-	virtual bool onKeyHelper(GPanel*, SDL_Keycode, Uint16);
+	virtual bool onKeyHelper(gfxpp*, GPanel*, SDL_Keycode, Uint16);
 
 	// type
 	virtual std::string getType() const = 0;

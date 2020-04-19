@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <string>
 
+class gfxpp;
 class GItem;
 class GPanel;
 class EventTracker;
@@ -35,7 +36,7 @@ protected:
 	bool customCursor;
 
 	// events
-	virtual void onMouseMotion(GPanel*, int, int);
+	virtual void onMouseMotion(gfxpp*, GPanel*, int, int);
 
 	// event listeners
 	void (GPanel::*MouseMotionListener)(int, int);
@@ -55,9 +56,9 @@ public:
 	void setMouseMotionListener(void (GPanel::*)(int, int));
 
 	// events
-	void onMouseMotionHelper(EventTracker*, GPanel*, int, int, bool = false);
-	virtual void hover() = 0;
-	virtual void unhover() = 0;
+	void onMouseMotionHelper(gfxpp*, EventTracker*, GPanel*, int, int, bool = false);
+	virtual void hover(gfxpp*) = 0;
+	virtual void unhover(gfxpp*) = 0;
 };
 
 #endif

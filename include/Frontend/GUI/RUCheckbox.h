@@ -23,6 +23,7 @@
 #include <string>
 #include <vector>
 
+class gfxpp;
 class RULabel;
 class RUImageComponent;
 
@@ -37,8 +38,8 @@ protected:
 	RUImageComponent* checkbox;
 
 	// events
-	virtual void onMouseDown(GPanel*, int, int);
-	virtual void onMouseWheel(GPanel*, int, int, int);
+	virtual void onMouseDown(gfxpp*, GPanel*, int, int);
+	virtual void onMouseWheel(gfxpp*, GPanel*, int, int, int);
 
 public:
 	static const int DEFAULT_SIDE_WIDTH = 24;

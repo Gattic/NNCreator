@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <string>
 
+class gfxpp;
 class GItem;
 class GPanel;
 class EventTracker;
@@ -33,7 +34,7 @@ protected:
 	std::map<int, GItem*> clickedSubItems;
 
 	// events
-	virtual void onMouseDown(GPanel*, int, int);
+	virtual void onMouseDown(gfxpp*, GPanel*, int, int);
 
 	// event listeners
 	void (GPanel::*MouseDownListener)(const std::string&, int, int);
@@ -47,7 +48,7 @@ public:
 	void setMouseDownListener(void (GPanel::*)(const std::string&, int, int));
 
 	// events
-	void onMouseDownHelper(EventTracker*, GPanel*, int, int, bool = false);
+	void onMouseDownHelper(gfxpp*, EventTracker*, GPanel*, int, int, bool = false);
 };
 
 #endif

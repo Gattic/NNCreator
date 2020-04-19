@@ -17,8 +17,8 @@
 #ifndef _RUGRAPH
 #define _RUGRAPH
 
-#include "../../GItems/RUColors.h"
-#include "../../GItems/RUComponent.h"
+#include "../GItems/RUColors.h"
+#include "../GItems/RUComponent.h"
 #include <SDL2/SDL.h>
 #include <map>
 #include <pthread.h>
