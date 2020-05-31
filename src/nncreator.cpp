@@ -937,9 +937,8 @@ void NNCreatorPanel::loadNNet(glades::NNInfo* info)
 	populateIndexToEdit(currentHiddenLayerIndex);
 
 	// Display a popup alert
-	char buffer[netName.length()];
-	sprintf(buffer, "Loaded \"%s\"", netName.c_str());
-	MsgBox("Neural Net", buffer, RUMsgBox::MESSAGEBOX);
+	std::string msgBoxText = "Loaded \"" + netName + "\"";
+	MsgBox("Neural Net", msgBoxText, RUMsgBox::MESSAGEBOX);
 }
 
 /*!

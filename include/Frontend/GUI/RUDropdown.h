@@ -67,6 +67,7 @@ public:
 	void setSelectedIndex(unsigned int);
 	void addOption(std::string);
 	void clearOptions();
+	unsigned int size() const;
 
 	// events
 	void setOptionChangedListener(void (GPanel::*)(int));
