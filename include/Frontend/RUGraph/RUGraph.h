@@ -27,6 +27,7 @@
 #include <string>
 #include <vector>
 
+class gfxpp;
 class Graphable;
 class Point2;
 class RULabel;
@@ -54,7 +55,7 @@ protected:
 	RULabel* titleLabel;
 
 	// render
-	virtual void updateBackground(SDL_Renderer*);
+	virtual void updateBackground(gfxpp*);
 
 public:
 	static const unsigned int DEFAULT_NUM_ZONES = 10;

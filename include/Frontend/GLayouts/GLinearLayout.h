@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+class gfxpp;
 class EventTracker;
 
 /*!
@@ -34,7 +35,7 @@ protected:
 	int orientation;
 
 	// render
-	virtual void updateBackground(SDL_Renderer* renderer);
+	virtual void updateBackground(gfxpp*);
 
 public:
 	const static int VERTICAL = 0;
@@ -51,7 +52,7 @@ public:
 	virtual void processSubItemEvents(gfxpp*, EventTracker*, GPanel*, SDL_Event, int, int);
 
 	// render
-	virtual void updateBackgroundHelper(SDL_Renderer*);
+	virtual void updateBackgroundHelper(gfxpp*);
 
 	virtual std::string getType() const;
 };

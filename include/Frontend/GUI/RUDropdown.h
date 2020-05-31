@@ -72,7 +72,7 @@ public:
 	void setOptionChangedListener(void (GPanel::*)(int));
 
 	// render
-	virtual void updateBackground(SDL_Renderer*);
+	virtual void updateBackground(gfxpp*);
 	virtual std::string getType() const;
 };
 

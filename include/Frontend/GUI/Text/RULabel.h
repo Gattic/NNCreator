@@ -33,7 +33,7 @@ public:
 	~RULabel();
 
 	// render
-	void updateBackground(SDL_Renderer*);
+	void updateBackground(gfxpp*);
 	virtual std::string getType() const;
 	virtual void onMouseDown(gfxpp*, GPanel*, int, int);
 };

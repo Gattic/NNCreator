@@ -27,12 +27,13 @@
 #include <string.h>
 #include <string>
 
+class gfxpp;
 class EventTracker;
 
 class RUComponent : public GItem
 {
 protected:
-	virtual void updateBackground(SDL_Renderer*) = 0;
+	virtual void updateBackground(gfxpp*) = 0;
 
 public:
 	virtual void calculateSubItemPositions(std::pair<int, int>);
@@ -43,7 +44,7 @@ public:
 	virtual void unhover(gfxpp*);
 
 	// render
-	virtual void updateBackgroundHelper(SDL_Renderer*);
+	virtual void updateBackgroundHelper(gfxpp*);
 
 	// type
 	virtual std::string getType() const = 0;

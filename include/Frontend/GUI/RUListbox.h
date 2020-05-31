@@ -70,7 +70,7 @@ public:
 	// void clear();
 
 	// render
-	virtual void updateBackground(SDL_Renderer*);
+	virtual void updateBackground(gfxpp*);
 	void updateLabels();
 	virtual std::string getType() const;
 	virtual void unhover();

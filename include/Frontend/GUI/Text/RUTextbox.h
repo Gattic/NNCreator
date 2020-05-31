@@ -22,6 +22,8 @@
 #include <stdlib.h>
 #include <string>
 
+class gfxpp;
+
 class RUTextbox : public RUTextComponent
 {
 protected:
@@ -33,7 +35,7 @@ public:
 	~RUTextbox();
 
 	// render
-	void updateBackground(SDL_Renderer*);
+	void updateBackground(gfxpp*);
 	void setStaticBorder(bool);
 	virtual void hover();
 	virtual void unhover();

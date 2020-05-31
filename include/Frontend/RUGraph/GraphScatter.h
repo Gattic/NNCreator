@@ -28,14 +28,15 @@
 #include "../GItems/RUColors.h"
 #include "Graphable.h"
 
+class gfxpp;
 class RUGraph;
 class Point2;
 
 class GraphScatter : public Graphable
 {
 private:
-	void drawPoint(SDL_Renderer*, int, int, int = 0);
-	void drawPointOutline(SDL_Renderer*, int, int, int = 0);
+	void drawPoint(gfxpp*, int, int, int = 0);
+	void drawPointOutline(gfxpp*, int, int, int = 0);
 	int pointSize;
 
 public:
@@ -46,7 +47,7 @@ public:
 	void setPointSize(int);
 	int getPointSize(int);
 
-	virtual void draw(SDL_Renderer*);
+	virtual void draw(gfxpp*);
 	virtual std::string getType() const;
 };
 

@@ -14,59 +14,94 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _GRAPHABLE_H
-#define _GRAPHABLE_H
+#ifndef _GFONT
+#define _GFONT
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
-#include <pthread.h>
+#include <SDL2/SDL_ttf.h>
+#include <map>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
-#include <vector>
 
-class gfxpp;
-class RUGraph;
-class Point2;
+class SDL_Renderer;
+class SDL_Texture;
 
-namespace shmea {
-class GList;
+class GLetter
+{
+private:
+	char letter; // unnecassary
+	SDL_Texture* tex;
+	int width; // NOT SCALED BY DIMRATIO YET!!
+public:
+	GLetter()
+	{
+	}
+
+	GLetter(char newLetter, SDL_Texture* newTex, int newWidth)
+	{
+		letter = newLetter;
+		tex = newTex;
+		width = newWidth;
+	}
+
+	~GLetter()
+	{
+		// TODO: Destroy the texture here
+	}
+
+	char getLetter() const
+	{
+		return letter;
+	}
+
+	SDL_Texture* getTexture()
+	{
+		return tex;
+	}
+
+	int getWidth() const
+	{
+		return width;
+	}
 };
 
-class Graphable
+class GFont
 {
-protected:
-	std::vector<Point2*> points;
-	float x_max, x_min, y_max, y_min;
-	RUGraph* parent;
-
 private:
-	SDL_Color lineColor;
+	static const int DEFAULT_FONT_SIZE = 30; // font resolution?
 
-	void computeAxisRanges();
+	std::string fontPath;
+	TTF_Font* font;
+	int fontSize;
+	SDL_Color textColor;
+	std::map<char, GLetter*> textureMap;
+	SDL_Renderer* cRenderer;
+	int maxHeight;
+
+	void loadLetters();
 
 public:
-	static const int LINE = 0;
-	static const int SCATTER = 1;
+	// constructor
+	GFont();
+	GFont(SDL_Renderer*, std::string = "");
+	~GFont();
 
-	// constructors & destructor
-	Graphable(RUGraph*, SDL_Color);
-	virtual ~Graphable();
+	SDL_Color getTextColor() const;
+	int getFontSize() const;
+	std::string getFontPath() const;
+	TTF_Font* getFont() const;
+	GLetter* getLetter(char) const;
+	int getMaxHeight() const;
 
-	// gets
-	SDL_Color getColor() const;
+	void setFontSize(int);
+	void setTextColor(SDL_Color);
 
-	// sets
-	void setParent(RUGraph*);
-	void setColor(SDL_Color);
-	void setPoints(const std::vector<Point2*>&);
-	void setLine(const shmea::GList&);
-	virtual void clear();
-
-	// render
-	virtual void updateBackground(gfxpp*);
-	virtual void draw(gfxpp*) = 0;
-	virtual std::string getType() const = 0;
+	//
+	static bool validChar(char);
+	static char keycodeTOchar(SDL_Keycode);
+	static char specialChar(char keyPressed);
 };
 
 #endif

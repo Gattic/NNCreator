@@ -28,6 +28,8 @@
 #define DEFAULT_IMAGE_BG "resources/gui/Components/Background.bmp"
 #define DEFAULT_IMAGE_BG_HIGHLIGHTED "resources/gui/Components/BackgroundHighlighted.bmp"
 
+class gfxpp;
+
 namespace shmea {
 class Image;
 };
@@ -94,7 +96,7 @@ public:
 	void setBGColor(SDL_Color);
 
 	// render
-	void updateBGBackground(SDL_Renderer*);
+	void updateBGBackground(gfxpp*);
 };
 
 #endif

@@ -64,6 +64,7 @@ public:
 	static SDL_Color GRAPH_LINE_3;
 	static SDL_Color GRAPH_LINE_4;
 	static SDL_Color GRAPH_LINE_5;
+	static SDL_Color GRAPH_LINE_6;
 
 	// Specific Colors
 	static SDL_Color COLOR_RED;

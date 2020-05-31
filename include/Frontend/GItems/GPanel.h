@@ -43,7 +43,7 @@ protected:
 	virtual void onHide(gfxpp*);
 
 	// render
-	virtual void updateBackground(SDL_Renderer* renderer);
+	virtual void updateBackground(gfxpp*);
 
 public:
 	GPanel(const std::string&, int, int);
@@ -57,7 +57,7 @@ public:
 	virtual void hover(gfxpp*);
 	virtual void unhover(gfxpp*);
 	virtual void processSubItemEvents(gfxpp*, EventTracker*, GPanel*, SDL_Event, int, int);
-	virtual void updateBackgroundHelper(SDL_Renderer*);
+	virtual void updateBackgroundHelper(gfxpp*);
 
 	virtual void GuiCommander1(const std::string&, int, int) = 0;
 	virtual void GuiCommander2(const std::string&, int, int) = 0;

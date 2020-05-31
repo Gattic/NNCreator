@@ -62,7 +62,7 @@ public:
 	void setPenWidth(float);
 
 	// render
-	virtual void updateBackground(SDL_Renderer*);
+	virtual void updateBackground(gfxpp*);
 	virtual std::string getType() const;
 	void clear(bool = false);
 

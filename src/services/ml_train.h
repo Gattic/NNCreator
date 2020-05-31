@@ -8,8 +8,10 @@
 #ifndef _ML_TRAIN
 #define _ML_TRAIN
 
+#include "../crt0.h"
+#include "../main.h"
 #include "Backend/Database/GList.h"
-#include "Backend/Database/gtable.h"
+#include "Backend/Database/GTable.h"
 #include "Backend/Machine Learning/State/Terminator.h"
 #include "Backend/Machine Learning/Structure/hiddenlayerinfo.h"
 #include "Backend/Machine Learning/Structure/inputlayerinfo.h"
@@ -22,8 +24,6 @@
 #include "Backend/Networking/socket.h"
 #include "Frontend/GUI/RUMsgBox.h"
 #include "Frontend/Graphics/graphics.h"
-#include "../crt0.h"
-#include "../main.h"
 
 class NNInfo;
 
@@ -48,7 +48,7 @@ public:
 		serverInstance = NULL; // Not ours to delete
 	}
 
-	shmea::GList execute(class GNet::Instance* cInstance, const shmea::GList& data)
+	shmea::GList execute(class GNet::Connection* cConnection, const shmea::GList& data)
 	{
 		shmea::GList retList;
 		if (data.size() < 3)

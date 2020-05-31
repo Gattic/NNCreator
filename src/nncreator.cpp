@@ -26,10 +26,10 @@
 // SOFTWARE.
 #include "nncreator.h"
 #include "Backend/Database/GList.h"
-#include "Backend/Database/gtable.h"
-#include "Backend/Database/gtype.h"
-#include "Backend/Database/saveitem.h"
-#include "Backend/Database/savelist.h"
+#include "Backend/Database/GTable.h"
+#include "Backend/Database/GType.h"
+#include "Backend/Database/SaveFolder.h"
+#include "Backend/Database/SaveTable.h"
 #include "Backend/Machine Learning/GMath/gmath.h"
 #include "Backend/Machine Learning/Structure/hiddenlayerinfo.h"
 #include "Backend/Machine Learning/Structure/inputlayerinfo.h"
@@ -37,7 +37,7 @@
 #include "Backend/Machine Learning/Structure/outputlayerinfo.h"
 #include "Backend/Machine Learning/glades.h"
 #include "Backend/Machine Learning/network.h"
-#include "Backend/Networking/instance.h"
+#include "Backend/Networking/connection.h"
 #include "Backend/Networking/main.h"
 #include "Backend/Networking/service.h"
 #include "Frontend/GItems/GItem.h"
@@ -743,12 +743,12 @@ void NNCreatorPanel::loadDDNN()
 	ddNeuralNet->addOption(" New");
 
 	// add items from nnetworks table to dropdown
-	shmea::SaveList* nnList = new shmea::SaveList("neuralnetworks");
+	shmea::SaveFolder* nnList = new shmea::SaveFolder("neuralnetworks");
 	nnList->load();
-	std::vector<shmea::SaveItem*> saveTables = nnList->getItems();
+	std::vector<shmea::SaveTable*> saveTables = nnList->getItems();
 	for (unsigned int i = 0; i < saveTables.size(); ++i)
 	{
-		shmea::SaveItem* cItem = saveTables[i];
+		shmea::SaveTable* cItem = saveTables[i];
 		if (!cItem)
 			continue;
 
@@ -1063,43 +1063,39 @@ void NNCreatorPanel::GuiCommander4(const std::string& cmpName, int x, int y)
 	}
 
 	std::string serverIP = "127.0.0.1"; // 69.126.139.205
-	if (serverInstance->getServerInstanceList().find(serverIP) !=
-		serverInstance->getServerInstanceList().end())
+	GNet::Connection* cConnection = serverInstance->getConnection(serverIP);
+	if (!cConnection)
+		return;
+
+	// Get the vars from the components
+	std::string netName = tbNetName->getText();
+	std::string testFName = tbTestDataSourcePath->getText();
+	int64_t trainPct = parsePct(tbTrainPct->getText()), testPct = parsePct(tbTestPct->getText()),
+			validationPct = parsePct(tbValidationPct->getText());
+
+	if ((netName.length() == 0) || (testFName.length() == 0))
+		return;
+
+	if (trainPct == -1 || testPct == -1 || validationPct == -1 ||
+		trainPct + testPct + validationPct != 100)
 	{
-		GNet::Instance* cInstance =
-			(serverInstance->getServerInstanceList().find(serverIP))->second;
-
-		// Get the vars from the components
-		std::string netName = tbNetName->getText();
-		std::string testFName = tbTestDataSourcePath->getText();
-		int64_t trainPct = parsePct(tbTrainPct->getText()),
-				testPct = parsePct(tbTestPct->getText()),
-				validationPct = parsePct(tbValidationPct->getText());
-
-		if ((netName.length() == 0) || (testFName.length() == 0))
-			return;
-
-		if (trainPct == -1 || testPct == -1 || validationPct == -1 ||
-			trainPct + testPct + validationPct != 100)
-		{
-			printf("Percentages invalid: \n\tTrain: %s \n\tTest: %s \n\tValidation: "
-				   "%s \n",
-				   tbTrainPct->getText().c_str(), tbTestPct->getText().c_str(),
-				   tbValidationPct->getText().c_str());
-			return;
-		}
-
-		// Run a machine learning instance
-		shmea::GList wData;
-		wData.addString("ML_Train");
-		wData.addString(netName);
-		wData.addString(testFName);
-		wData.addInt(importType);
-		/*wData.addLong(trainPct);
-		wData.addLong(testPct);
-		wData.addLong(validationPct);*/
-		serverInstance->NewService(wData, cInstance);
+		printf("Percentages invalid: \n\tTrain: %s \n\tTest: %s \n\tValidation: "
+			   "%s \n",
+			   tbTrainPct->getText().c_str(), tbTestPct->getText().c_str(),
+			   tbValidationPct->getText().c_str());
+		return;
 	}
+
+	// Run a machine learning Connection
+	shmea::GList wData;
+	wData.addString("ML_Train");
+	wData.addString(netName);
+	wData.addString(testFName);
+	wData.addInt(importType);
+	/*wData.addLong(trainPct);
+	wData.addLong(testPct);
+	wData.addLong(validationPct);*/
+	serverInstance->NewService(wData, cConnection);
 }
 
 /*!
@@ -1235,7 +1231,7 @@ void NNCreatorPanel::GuiCommander13(const std::string& cmpName, int x, int y)
 void NNCreatorPanel::GuiCommander14(const std::string& cmpName, int x, int y)
 {
 	std::string netName = tbNetName->getText();
-	shmea::SaveList* nnList = new shmea::SaveList("neuralnetworks");
+	shmea::SaveFolder* nnList = new shmea::SaveFolder("neuralnetworks");
 	nnList->deleteItem(netName);
 	loadDDNN();
 

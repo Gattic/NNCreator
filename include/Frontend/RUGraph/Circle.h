@@ -27,6 +27,7 @@
 #include <string>
 #include <vector>
 
+class gfxpp;
 class RUGraph;
 class Point2;
 
@@ -50,7 +51,7 @@ public:
 	const Point2* getFocalPoint(unsigned int) const;
 	double getRadius() const;
 
-	virtual void draw(SDL_Renderer*);
+	virtual void draw(gfxpp*);
 	virtual std::string getType() const;
 };
 

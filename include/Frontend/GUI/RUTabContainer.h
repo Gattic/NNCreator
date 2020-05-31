@@ -76,7 +76,7 @@ public:
 	void setOptionChangedListener(void (GPanel::*)(int));
 
 	// render
-	virtual void updateBackground(SDL_Renderer*);
+	virtual void updateBackground(gfxpp*);
 	void updateLabels();
 	virtual void unhover();
 	virtual std::string getType() const;

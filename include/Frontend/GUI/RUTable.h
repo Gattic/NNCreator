@@ -17,13 +17,14 @@
 #ifndef _RUTABLE
 #define _RUTABLE
 
-#include "Backend/Database/gtable.h"
 #include "../GItems/RUComponent.h"
+#include "Backend/Database/GTable.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
 #include <vector>
 
+class gfxpp;
 class RULabel;
 class RUScrollbar;
 
@@ -63,7 +64,7 @@ public:
 	// render
 	void updateLabels();
 	void refreshLabels();
-	virtual void updateBackground(SDL_Renderer*);
+	virtual void updateBackground(gfxpp*);
 	virtual std::string getType() const;
 };
 

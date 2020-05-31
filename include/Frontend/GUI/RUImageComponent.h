@@ -22,6 +22,8 @@
 #include <stdlib.h>
 #include <string>
 
+class gfxpp;
+
 namespace shmea {
 class Image;
 };
@@ -35,7 +37,7 @@ public:
 	~RUImageComponent();
 
 	// render
-	virtual void updateBackground(SDL_Renderer*);
+	virtual void updateBackground(gfxpp*);
 	virtual std::string getType() const;
 };
 

@@ -22,6 +22,8 @@
 #include <stdlib.h>
 #include <string>
 
+class gfxpp;
+
 class RUButton : public RUTextComponent
 {
 protected:
@@ -34,7 +36,7 @@ public:
 	~RUButton();
 
 	// render
-	void updateBackground(SDL_Renderer*);
+	void updateBackground(gfxpp*);
 	virtual void hover();
 	virtual void unhover();
 	virtual std::string getType() const;

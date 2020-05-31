@@ -27,10 +27,6 @@
 #include <vector>
 
 class gfxpp;
-class GPanel;
-class RUComponent;
-class RUBackgroundComponent;
-class RUBorderComponent;
 
 class GLayout : public GItem
 {

@@ -27,6 +27,7 @@
 #include <string>
 #include <vector>
 
+class gfxpp;
 class RUGraph;
 class Point2;
 
@@ -36,7 +37,7 @@ public:
 	// constructors & destructor
 	GraphLine(RUGraph*, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
 	~GraphLine();
-	virtual void draw(SDL_Renderer*);
+	virtual void draw(gfxpp*);
 	virtual std::string getType() const;
 };
 

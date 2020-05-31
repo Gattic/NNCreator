@@ -58,7 +58,7 @@ protected:
 	std::vector<GItem*> subitems;
 
 	// render
-	virtual void updateBackground(SDL_Renderer*) = 0;
+	virtual void updateBackground(gfxpp*) = 0;
 
 public:
 	static const int Z_FRONT = -1;
@@ -93,7 +93,7 @@ public:
 	virtual void calculateSubItemPositions(std::pair<int, int>) = 0;
 
 	// render
-	virtual void updateBackgroundHelper(SDL_Renderer*) = 0;
+	virtual void updateBackgroundHelper(gfxpp*) = 0;
 
 	// event functions
 	EventTracker* processEvents(gfxpp*, GPanel*, SDL_Event, int, int);

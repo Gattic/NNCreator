@@ -39,7 +39,7 @@
 class Version;
 
 namespace GNet {
-class Instance;
+class Connection;
 };
 
 namespace shmea {

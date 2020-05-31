@@ -76,7 +76,7 @@ public:
 	void calculateBarPos();
 
 	// render
-	virtual void updateBackground(SDL_Renderer*);
+	virtual void updateBackground(gfxpp*);
 	virtual std::string getType() const;
 };
 
