@@ -47,7 +47,7 @@ public:
 
 	// render
 	virtual void updateBackground(gfxpp*);
-	virtual std::string getType() const;
+	virtual shmea::GString getType() const;
 };
 
 #endif

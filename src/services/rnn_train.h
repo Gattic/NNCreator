@@ -31,6 +31,7 @@
 #include "../main.h"
 #include "Backend/Database/GList.h"
 #include "Backend/Database/GTable.h"
+#include "Backend/Database/ServiceData.h"
 #include "Backend/Machine Learning/RNN.h"
 #include "Backend/Machine Learning/State/Terminator.h"
 #include "Backend/Machine Learning/Structure/hiddenlayerinfo.h"

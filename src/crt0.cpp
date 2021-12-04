@@ -75,11 +75,11 @@ int main(int argc, char* argv[])
 	// for machine learning initialization
 	glades::init();
 
-	GNet::GServer serverInstance;
+	GNet::GServer* serverInstance = new GNet::GServer();
 
 	// Add services
-	ML_Train* ml_train_srvc = new ML_Train(&serverInstance);
-	serverInstance.addService(ml_train_srvc->getName(), ml_train_srvc);
+	ML_Train* ml_train_srvc = new ML_Train(serverInstance);
+	serverInstance->addService(ml_train_srvc);
 
 	// command line args
 	bool noguiMode = false;
@@ -93,14 +93,14 @@ int main(int argc, char* argv[])
 	}
 
 	// Launch the server server
-	serverInstance.run(localOnly);
+	serverInstance->run(localOnly);
 
 	// Launch the gui
 	if (!noguiMode)
-		Frontend::run(&serverInstance, fullScreenMode);
+		Frontend::run(serverInstance, fullScreenMode);
 
 	// Cleanup GNet
-	serverInstance.stop();
+	serverInstance->stop();
 
 	return EXIT_SUCCESS;
 }

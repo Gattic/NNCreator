@@ -18,6 +18,7 @@
 #define _RUBACKGROUNDCOMP
 
 #include "../RUItemArea.h"
+#include "Backend/Database/GString.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_opengl.h>
@@ -41,7 +42,7 @@ protected:
 	SDL_Surface* surfaceTheUSA;
 	shmea::Image* bgImage;
 	SDL_Color bgColor;
-	std::string bgImageLocation;
+	shmea::GString bgImageLocation;
 	int bgImageType;
 
 	bool resetSurface();
@@ -85,12 +86,12 @@ public:
 
 	// gets
 	bool getBGEnabled() const;
-	std::string getBGImageLocation() const;
+	shmea::GString getBGImageLocation() const;
 	SDL_Color getBGColor() const;
 
 	// sets
 	void toggleBG(bool);
-	void setBGImageFromLocation(const std::string&);
+	void setBGImageFromLocation(const shmea::GString&);
 	void setBGImageFromSurface(SDL_Surface*);
 	void setBGImage(shmea::Image*);
 	void setBGColor(SDL_Color);

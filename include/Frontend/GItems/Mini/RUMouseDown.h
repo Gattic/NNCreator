@@ -18,6 +18,7 @@
 #define _RUMOUSEDOWN
 
 #include "../RUItemArea.h"
+#include "../GeneralListener.h"
 #include <SDL2/SDL.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -37,7 +38,7 @@ protected:
 	virtual void onMouseDown(gfxpp*, GPanel*, int, int);
 
 	// event listeners
-	void (GPanel::*MouseDownListener)(const std::string&, int, int);
+	GeneralListener MouseDownListener;
 
 public:
 	// constructors & destructor
@@ -45,7 +46,7 @@ public:
 	virtual ~RUMouseDown();
 
 	// event functions
-	void setMouseDownListener(void (GPanel::*)(const std::string&, int, int));
+	void setMouseDownListener(GeneralListener);
 
 	// events
 	void onMouseDownHelper(gfxpp*, EventTracker*, GPanel*, int, int, bool = false);

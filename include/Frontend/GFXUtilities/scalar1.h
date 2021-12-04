@@ -14,41 +14,75 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _GRAPHSCATTER_H
-#define _GRAPHSCATTER_H
+#ifndef _GSCALAR1
+#define _GSCALAR1
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_opengl.h>
-#include <pthread.h>
+#include <float.h>
+#include <iostream>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string>
 #include <vector>
 
-#include "../GItems/RUColors.h"
-#include "Graphable.h"
-
-class gfxpp;
-class RUGraph;
-class Point2;
-
-class GraphScatter : public Graphable
+class Scalar1
 {
 private:
-	void drawPoint(gfxpp*, int, int, int = 0);
-	void drawPointOutline(gfxpp*, int, int, int = 0);
-	int pointSize;
+	double x;
 
 public:
-	// constructors & destructor
-	GraphScatter(RUGraph*, SDL_Color = RUColors::DEFAULT_COLOR_LINE, int = 4);
-	~GraphScatter();
+	Scalar1();
+	Scalar1(double);
+	Scalar1(const Scalar1&);
+	~Scalar1();
 
-	void setPointSize(int);
-	int getPointSize(int);
+	// get
+	double get() const;
+	double length() const;
 
-	virtual void draw(gfxpp*);
-	virtual std::string getType() const;
+	// set
+	void set(double);
+
+	// operators
+	inline Scalar1 operator+(Scalar1 v)
+	{
+		v.x += x;
+		return v;
+	}
+
+	inline Scalar1 operator-(Scalar1 v)
+	{
+		v.x = x - v.x;
+		return v;
+	}
+
+	inline Scalar1 operator*(double scalar)
+	{
+		return Scalar1(scalar * x);
+	}
+
+	inline Scalar1 operator/(double scalar)
+	{
+		return Scalar1(x / scalar);
+	}
+
+	void operator=(const Scalar1& p)
+	{
+		set(p.x);
+	}
+
+	bool operator==(const Scalar1& v) const
+	{
+		// x
+		double deltaX = v.x - x;
+		bool xChange = ((deltaX > -DBL_EPSILON) && (deltaX < DBL_EPSILON));
+
+		return (xChange);
+	}
+
+	bool operator!=(const Scalar1& v) const
+	{
+		return !(*this == v);
+	}
 };
 
 #endif

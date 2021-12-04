@@ -64,7 +64,7 @@ public:
 private:
 	void init();
 	typedef unsigned char uint1; //  8bit
-	typedef unsigned int uint4;  // 32bit
+	typedef unsigned int uint4;	 // 32bit
 	enum { blocksize = 64 };	 // VC6 won't eat a const static int here
 
 	void transform(const uint1 block[blocksize]);

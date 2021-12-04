@@ -53,6 +53,7 @@
 #include "Frontend/GUI/Text/RUTextbox.h"
 #include "Frontend/Graphics/graphics.h"
 #include "Frontend/RUGraph/RUGraph.h"
+#include "Frontend/RUGraph/RULineGraph.h"
 #include "crt0.h"
 #include "main.h"
 
@@ -66,14 +67,14 @@ using namespace glades;
  * @param width width of the panel
  * @param height height of the panel
  */
-NNCreatorPanel::NNCreatorPanel(const std::string& name, int width, int height)
+NNCreatorPanel::NNCreatorPanel(const shmea::GString& name, int width, int height)
 	: GPanel(name, width, height)
 {
 	serverInstance = NULL;
 	buildPanel();
 }
 
-NNCreatorPanel::NNCreatorPanel(GNet::GServer* newInstance, const std::string& name, int width,
+NNCreatorPanel::NNCreatorPanel(GNet::GServer* newInstance, const shmea::GString& name, int width,
 							   int height)
 	: GPanel(name, width, height)
 {
@@ -119,7 +120,7 @@ void NNCreatorPanel::buildPanel()
 	lcGraphLayout->addSubItem(lblGraphLC);
 
 	// Learning curve graph
-	lcGraph = new RUGraph(getWidth() / 4, getHeight() / 4, RUGraph::QUADRANTS_ONE);
+	lcGraph = new RULineGraph(getWidth() / 4, getHeight() / 4, RULineGraph::QUADRANTS_ONE);
 	lcGraph->setName("lcGraph");
 	lcGraphLayout->addSubItem(lcGraph);
 
@@ -138,8 +139,9 @@ void NNCreatorPanel::buildPanel()
 	rocGraphLayout->addSubItem(lblGraphROC);
 
 	// ROC Curve Graph
-	rocCurveGraph = new RUGraph(getWidth() / 4, getHeight() / 4,
-								RUGraph::QUADRANTS_ONE); // -4 = adjustment to align with table
+	rocCurveGraph =
+		new RULineGraph(getWidth() / 4, getHeight() / 4,
+						RULineGraph::QUADRANTS_ONE); // -4 = adjustment to align with table
 	rocCurveGraph->setName("rocCurveGraph");
 	rocGraphLayout->addSubItem(rocCurveGraph);
 
@@ -164,8 +166,8 @@ void NNCreatorPanel::buildPanel()
 	dartGraphLayout->addSubItem(lblGraphDart);
 
 	// Dartboard graph
-	dartboardGraph = new RUGraph(getWidth() / 4, getHeight() / 4,
-								 RUGraph::QUADRANTS_ONE); // -4 = adjustment to align with table
+	dartboardGraph = new RULineGraph(getWidth() / 4, getHeight() / 4,
+								 RULineGraph::QUADRANTS_ONE); // -4 = adjustment to align with table
 	dartboardGraph->setName("dartboardGraph");
 	dartGraphLayout->addSubItem(dartboardGraph);
 
@@ -228,7 +230,8 @@ void NNCreatorPanel::buildPanel()
 	ddNeuralNet->setHeight(30);
 	ddNeuralNet->setOptionsShown(3);
 	ddNeuralNet->setName("ddNeuralNet");
-	ddNeuralNet->setOptionChangedListener(&GPanel::GuiCommander15);
+	ddNeuralNet->setOptionChangedListener(
+		GeneralListener(this, &NNCreatorPanel::nnSelectorChanged));
 	loadNetLayout->addSubItem(ddNeuralNet);
 
 	// Load button
@@ -236,7 +239,7 @@ void NNCreatorPanel::buildPanel()
 	btnLoad->setWidth(206);
 	btnLoad->setHeight(30);
 	btnLoad->setText("      Reload List");
-	btnLoad->setMouseDownListener(&GPanel::GuiCommander10);
+	btnLoad->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedLoad));
 	btnLoad->setName("btnLoad");
 	loadNetLayout->addSubItem(btnLoad);
 
@@ -269,7 +272,7 @@ void NNCreatorPanel::buildPanel()
 	btnSave->setWidth(100);
 	btnSave->setHeight(30);
 	btnSave->setText("    Save");
-	btnSave->setMouseDownListener(&GPanel::GuiCommander1);
+	btnSave->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedSave));
 	btnSave->setName("btnSave");
 	netNameLayout->addSubItem(btnSave);
 
@@ -278,7 +281,7 @@ void NNCreatorPanel::buildPanel()
 	btnDelete->setWidth(100);
 	btnDelete->setHeight(30);
 	btnDelete->setText("  Delete");
-	btnDelete->setMouseDownListener(&GPanel::GuiCommander14);
+	btnDelete->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedDelete));
 	btnDelete->setName("btnDelete");
 	netNameLayout->addSubItem(btnDelete);
 
@@ -311,7 +314,7 @@ void NNCreatorPanel::buildPanel()
 	sendButton->setWidth(100);
 	sendButton->setHeight(30);
 	sendButton->setText("     Run");
-	sendButton->setMouseDownListener(&GPanel::GuiCommander4);
+	sendButton->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedRun));
 	sendButton->setName("sendButton");
 	runTestLayout->addSubItem(sendButton);
 
@@ -320,7 +323,7 @@ void NNCreatorPanel::buildPanel()
 	killButton->setWidth(100);
 	killButton->setHeight(30);
 	killButton->setText("     Kill");
-	killButton->setMouseDownListener(&GPanel::GuiCommander13);
+	killButton->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedKill));
 	killButton->setName("killButton");
 	runTestLayout->addSubItem(killButton);
 
@@ -335,7 +338,7 @@ void NNCreatorPanel::buildPanel()
 	chkCrossVal->setHeight(30);
 	chkCrossVal->setName("chkCrossVal");
 	chkCrossVal->setCheck(true);
-	chkCrossVal->setMouseDownListener(&GPanel::GuiCommander12);
+	chkCrossVal->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::checkedCV));
 	crossValLayout->addSubItem(chkCrossVal);
 
 	// train % label
@@ -405,9 +408,9 @@ void NNCreatorPanel::buildPanel()
 	tbHiddenLayerCount = new RUTextbox();
 	tbHiddenLayerCount->setWidth(160);
 	tbHiddenLayerCount->setHeight(30);
-	tbHiddenLayerCount->setText(shmea::GType::intTOstring(formInfo->numHiddenLayers()));
+	tbHiddenLayerCount->setText(shmea::GString::intTOstring(formInfo->numHiddenLayers()));
 	tbHiddenLayerCount->setName("tbHiddenLayerCount");
-	tbHiddenLayerCount->setLoseFocusListener(&GPanel::GuiCommander9);
+	tbHiddenLayerCount->setLoseFocusListener(GeneralListener(this, &NNCreatorPanel::tbHLLoseFocus));
 	hlcLayout->addSubItem(tbHiddenLayerCount);
 
 	// Edit Input Layer Header
@@ -476,7 +479,7 @@ void NNCreatorPanel::buildPanel()
 	ddIndexToEdit->setHeight(30);
 	ddIndexToEdit->setOptionsShown(3);
 	ddIndexToEdit->setName("ddIndexToEdit");
-	ddIndexToEdit->setMouseDownListener(&GPanel::GuiCommander3);
+	ddIndexToEdit->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedEditSwitch));
 	hlSelectLayout->addSubItem(ddIndexToEdit);
 
 	GLinearLayout* hlSizeLayout = new GLinearLayout("hlSizeLayout");
@@ -649,7 +652,7 @@ void NNCreatorPanel::buildPanel()
 	btnCopy->setWidth(122);
 	btnCopy->setHeight(30);
 	btnCopy->setText("     Copy");
-	btnCopy->setMouseDownListener(&GPanel::GuiCommander6);
+	btnCopy->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedCopy));
 	btnCopy->setName("btnCopy");
 	bCopyLayout->addSubItem(btnCopy);
 
@@ -658,7 +661,7 @@ void NNCreatorPanel::buildPanel()
 	btnRemove->setWidth(122);
 	btnRemove->setHeight(30);
 	btnRemove->setText("   Remove");
-	btnRemove->setMouseDownListener(&GPanel::GuiCommander7);
+	btnRemove->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedRemove));
 	btnRemove->setName("btnRemove");
 	bCopyLayout->addSubItem(btnRemove);
 
@@ -769,32 +772,34 @@ void NNCreatorPanel::populateHLayerForm()
 
 	HiddenLayerInfo* currentLayer = formInfo->getLayers()[currentHiddenLayerIndex];
 	ddIndexToEdit->setSelectedIndex(currentHiddenLayerIndex);
-	tbHiddenLayerSize->setText(shmea::GType::intTOstring(currentLayer->size()));
+	tbHiddenLayerSize->setText(shmea::GString::intTOstring(currentLayer->size()));
 
 	if (currentLayer->getLearningRate())
-		tbLearningRate->setText(shmea::GType::floatTOstring(currentLayer->getLearningRate()));
+		tbLearningRate->setText(shmea::GString::floatTOstring(currentLayer->getLearningRate()));
 	else
-		tbLearningRate->setText(shmea::GType::floatTOstring(currentLayer->getLearningRate()));
+		tbLearningRate->setText(shmea::GString::floatTOstring(currentLayer->getLearningRate()));
 
 	if (currentLayer->getMomentumFactor())
-		tbMomentumFactor->setText(shmea::GType::floatTOstring(currentLayer->getMomentumFactor()));
+		tbMomentumFactor->setText(shmea::GString::floatTOstring(currentLayer->getMomentumFactor()));
 	else
-		tbMomentumFactor->setText(shmea::GType::floatTOstring(currentLayer->getMomentumFactor()));
+		tbMomentumFactor->setText(shmea::GString::floatTOstring(currentLayer->getMomentumFactor()));
 
 	if (currentLayer->getWeightDecay())
-		tbWeightDecay->setText(shmea::GType::floatTOstring(currentLayer->getWeightDecay()));
+		tbWeightDecay->setText(shmea::GString::floatTOstring(currentLayer->getWeightDecay()));
 	else
-		tbWeightDecay->setText(shmea::GType::floatTOstring(currentLayer->getWeightDecay()));
+		tbWeightDecay->setText(shmea::GString::floatTOstring(currentLayer->getWeightDecay()));
 
 	if (currentLayer->getPHidden())
-		tbPHidden->setText(shmea::GType::floatTOstring(currentLayer->getPHidden()));
+		tbPHidden->setText(shmea::GString::floatTOstring(currentLayer->getPHidden()));
 	else
-		tbPHidden->setText(shmea::GType::floatTOstring(currentLayer->getPHidden()));
+		tbPHidden->setText(shmea::GString::floatTOstring(currentLayer->getPHidden()));
 
 	if (currentLayer->getActivationParam())
-		tbActivationParam->setText(shmea::GType::floatTOstring(currentLayer->getActivationParam()));
+		tbActivationParam->setText(
+			shmea::GString::floatTOstring(currentLayer->getActivationParam()));
 	else
-		tbActivationParam->setText(shmea::GType::floatTOstring(currentLayer->getActivationParam()));
+		tbActivationParam->setText(
+			shmea::GString::floatTOstring(currentLayer->getActivationParam()));
 
 	ddActivationFunctions->setSelectedIndex(currentLayer->getActivationType());
 }
@@ -845,43 +850,35 @@ void NNCreatorPanel::syncFormVar()
 	int activationType = ddActivationFunctions->getSelectedIndex();
 	switch (activationType)
 	{
-	case 0:
-	{
+	case 0: {
 		currentLayer->setActivationType(GMath::TANH);
 		break;
 	}
-	case 1:
-	{
+	case 1: {
 		currentLayer->setActivationType(GMath::TANHP);
 		break;
 	}
-	case 2:
-	{
+	case 2: {
 		currentLayer->setActivationType(GMath::SIGMOID);
 		break;
 	}
-	case 3:
-	{
+	case 3: {
 		currentLayer->setActivationType(GMath::SIGMOIDP);
 		break;
 	}
-	case 4:
-	{
+	case 4: {
 		currentLayer->setActivationType(GMath::LINEAR);
 		break;
 	}
-	case 5:
-	{
+	case 5: {
 		currentLayer->setActivationType(GMath::RELU);
 		break;
 	}
-	case 6:
-	{
+	case 6: {
 		currentLayer->setActivationType(GMath::LEAKY);
 		break;
 	}
-	default:
-	{
+	default: {
 		currentLayer->setActivationType(GMath::TANH);
 		break;
 	}
@@ -902,7 +899,7 @@ void NNCreatorPanel::populateIndexToEdit(int newSelectedIndex)
 
 	// needed to offset the clearOptions action
 	for (int i = 0; i < formInfo->numHiddenLayers(); ++i)
-		ddIndexToEdit->addOption(shmea::GType::intTOstring(i));
+		ddIndexToEdit->addOption(shmea::GString::intTOstring(i));
 
 	if (newSelectedIndex < formInfo->numHiddenLayers())
 		ddIndexToEdit->setSelectedIndex(newSelectedIndex);
@@ -916,28 +913,28 @@ void NNCreatorPanel::populateIndexToEdit(int newSelectedIndex)
 void NNCreatorPanel::loadNNet(glades::NNInfo* info)
 {
 	formInfo = info;
-	std::string netName = formInfo->getName();
+	shmea::GString netName = formInfo->getName().c_str();
 	tbNetName->setText(netName);
 
 	float pInput = formInfo->getPInput();
-	tbPInput->setText(shmea::GType::floatTOstring(pInput));
+	tbPInput->setText(shmea::GString::floatTOstring(pInput));
 
 	int batchSize = formInfo->getBatchSize();
-	tbBatchSize->setText(shmea::GType::intTOstring(batchSize));
+	tbBatchSize->setText(shmea::GString::intTOstring(batchSize));
 
 	currentHiddenLayerIndex = 0;
-	tbHiddenLayerCount->setText(shmea::GType::intTOstring(formInfo->numHiddenLayers()));
+	tbHiddenLayerCount->setText(shmea::GString::intTOstring(formInfo->numHiddenLayers()));
 
 	int outputSize = formInfo->getOutputLayerSize();
 	int outputType = formInfo->getOutputType();
-	tbOutputLayerSize->setText(shmea::GType::intTOstring(outputSize));
+	tbOutputLayerSize->setText(shmea::GString::intTOstring(outputSize));
 	ddOutputType->setSelectedIndex(outputType);
 
 	populateHLayerForm();
 	populateIndexToEdit(currentHiddenLayerIndex);
 
 	// Display a popup alert
-	std::string msgBoxText = "Loaded \"" + netName + "\"";
+	shmea::GString msgBoxText = "Loaded \"" + netName + "\"";
 	MsgBox("Neural Net", msgBoxText, RUMsgBox::MESSAGEBOX);
 }
 
@@ -947,7 +944,7 @@ void NNCreatorPanel::loadNNet(glades::NNInfo* info)
  * @param spct the string containing the percentage
  * @return the percentage between 0 and 100
  */
-int64_t NNCreatorPanel::parsePct(const std::string& spct)
+int64_t NNCreatorPanel::parsePct(const shmea::GString& spct)
 {
 	shmea::GType pct(spct);
 	if (pct.getType() != shmea::GType::LONG_TYPE)
@@ -967,15 +964,15 @@ int64_t NNCreatorPanel::parsePct(const std::string& spct)
  * @param x the x-coordinate where the event happened (not used)
  * @param y the y-coordinate where the event happened (not used)
  */
-void NNCreatorPanel::GuiCommander1(const std::string& cmpName, int x, int y)
+void NNCreatorPanel::clickedSave(const shmea::GString& cmpName, int x, int y)
 {
-	std::string serverIP = "127.0.0.1"; // 69.126.139.205
+	shmea::GString serverIP = "127.0.0.1"; // 69.126.139.205
 
 	// make sure the layers are up to date
 	syncFormVar();
 
-	std::string netName = tbNetName->getText();
-	formInfo->setName(netName);
+	shmea::GString netName = tbNetName->getText();
+	formInfo->setName(netName.c_str());
 
 	shmea::GType pInput(tbPInput->getText());
 	if (pInput.getType() != shmea::GType::FLOAT_TYPE)
@@ -1006,24 +1003,13 @@ void NNCreatorPanel::GuiCommander1(const std::string& cmpName, int x, int y)
 }
 
 /*!
- * @brief Load NN
- * @param cmpName the name of the component where the event happened
- * @param x the x-coordinate where the event happened (not used)
- * @param y the y-coordinate where the event happened (not used)
- */
-void NNCreatorPanel::GuiCommander2(const std::string& cmpName, int x, int y)
-{
-	//
-}
-
-/*!
  * @brief on Index to Edit change
  * @details runs when ddIndexToEdit changes value
  * @param cmpName the name of the component where the event happened
  * @param x the x-coordinate where the event happened (not used)
  * @param y the y-coordinate where the event happened (not used)
  */
-void NNCreatorPanel::GuiCommander3(const std::string& cmpName, int x, int y)
+void NNCreatorPanel::clickedEditSwitch(const shmea::GString& cmpName, int x, int y)
 {
 	int indexToEdit = ddIndexToEdit->getSelectedIndex();
 	if (indexToEdit == currentHiddenLayerIndex)
@@ -1041,7 +1027,7 @@ void NNCreatorPanel::GuiCommander3(const std::string& cmpName, int x, int y)
  * @param x the x-coordinate where the event happened
  * @param y the y-coordinate where the event happened
  */
-void NNCreatorPanel::GuiCommander4(const std::string& cmpName, int x, int y)
+void NNCreatorPanel::clickedRun(const shmea::GString& cmpName, int x, int y)
 {
 	if (!serverInstance)
 		return;
@@ -1061,14 +1047,14 @@ void NNCreatorPanel::GuiCommander4(const std::string& cmpName, int x, int y)
 		importType = shmea::GTable::TYPE_URL;
 	}
 
-	std::string serverIP = "127.0.0.1"; // 69.126.139.205
+	shmea::GString serverIP = "127.0.0.1"; // 69.126.139.205
 	GNet::Connection* cConnection = serverInstance->getConnection(serverIP);
 	if (!cConnection)
 		return;
 
 	// Get the vars from the components
-	std::string netName = tbNetName->getText();
-	std::string testFName = tbTestDataSourcePath->getText();
+	shmea::GString netName = tbNetName->getText();
+	shmea::GString testFName = tbTestDataSourcePath->getText();
 	int64_t trainPct = parsePct(tbTrainPct->getText()), testPct = parsePct(tbTestPct->getText()),
 			validationPct = parsePct(tbValidationPct->getText());
 
@@ -1085,28 +1071,16 @@ void NNCreatorPanel::GuiCommander4(const std::string& cmpName, int x, int y)
 		return;
 	}
 
-	// Run a machine learning Connection
+	// Run a machine learning service
 	shmea::GList wData;
-	wData.addString("ML_Train");
 	wData.addString(netName);
 	wData.addString(testFName);
 	wData.addInt(importType);
 	/*wData.addLong(trainPct);
 	wData.addLong(testPct);
 	wData.addLong(validationPct);*/
-	serverInstance->NewService(wData, cConnection);
-}
-
-/*!
- * @brief
- * @details switches the active UI panel
- * @param cmpName the name of the component where the event happened
- * @param x the x-coordinate where the event happened
- * @param y the y-coordinate where the event happened
- */
-void NNCreatorPanel::GuiCommander5(const std::string& cmpName, int x, int y)
-{
-	//
+	shmea::ServiceData* cSrvc = new shmea::ServiceData(cConnection, "ML_Train", wData);
+	serverInstance->send(cSrvc);
 }
 
 /*!
@@ -1116,7 +1090,7 @@ void NNCreatorPanel::GuiCommander5(const std::string& cmpName, int x, int y)
  * @param x the x-coordinate where the event happened
  * @param y the y-coordinate where the event happened
  */
-void NNCreatorPanel::GuiCommander6(const std::string& cmpName, int x, int y)
+void NNCreatorPanel::clickedCopy(const shmea::GString& cmpName, int x, int y)
 {
 	syncFormVar();
 	shmea::GType destination(tbCopyDestination->getText());
@@ -1138,7 +1112,7 @@ void NNCreatorPanel::GuiCommander6(const std::string& cmpName, int x, int y)
  * @param x the x-coordinate where the event happened
  * @param y the y-coordinate where the event happened
  */
-void NNCreatorPanel::GuiCommander7(const std::string& cmpName, int x, int y)
+void NNCreatorPanel::clickedRemove(const shmea::GString& cmpName, int x, int y)
 {
 	if (formInfo->numHiddenLayers() <= 1)
 		return;
@@ -1149,20 +1123,8 @@ void NNCreatorPanel::GuiCommander7(const std::string& cmpName, int x, int y)
 
 	printf("[GUI] Layer %d deleted\n", currentHiddenLayerIndex);
 	populateHLayerForm();
-	tbHiddenLayerCount->setText(shmea::GType::intTOstring(formInfo->numHiddenLayers()));
+	tbHiddenLayerCount->setText(shmea::GString::intTOstring(formInfo->numHiddenLayers()));
 	populateIndexToEdit(currentHiddenLayerIndex);
-}
-
-/*!
- * @brief event handler 8
- * @details handles a NNCreator event
- * @param cmpName the name of the component where the event happened
- * @param x the x-coordinate where the event happened
- * @param y the y-coordinate where the event happened
- */
-void NNCreatorPanel::GuiCommander8(const std::string& cmpName, int x, int y)
-{
-	//
 }
 
 /*!
@@ -1172,7 +1134,7 @@ void NNCreatorPanel::GuiCommander8(const std::string& cmpName, int x, int y)
  * hiddenLayers, currentHiddenLayerIndex, and formInfo->numHiddenLayers()
  * accordingly
  */
-void NNCreatorPanel::GuiCommander9()
+void NNCreatorPanel::tbHLLoseFocus()
 {
 	shmea::GType newHiddenLayerCount(tbHiddenLayerCount->getText());
 	if (newHiddenLayerCount.getType() != shmea::GType::LONG_TYPE)
@@ -1192,17 +1154,12 @@ void NNCreatorPanel::GuiCommander9()
 	populateIndexToEdit(currentHiddenLayerIndex);
 }
 
-void NNCreatorPanel::GuiCommander10(const std::string& cmpName, int x, int y)
+void NNCreatorPanel::clickedLoad(const shmea::GString& cmpName, int x, int y)
 {
 	loadDDNN();
 }
 
-void NNCreatorPanel::GuiCommander11(char eventKeyPressed)
-{
-	//
-}
-
-void NNCreatorPanel::GuiCommander12(const std::string& cmpName, int x, int y)
+void NNCreatorPanel::checkedCV(const shmea::GString& cmpName, int x, int y)
 {
 	// Hide cross validate options if visible
 	if (lblttv->isVisible())
@@ -1221,15 +1178,15 @@ void NNCreatorPanel::GuiCommander12(const std::string& cmpName, int x, int y)
 	}
 }
 
-void NNCreatorPanel::GuiCommander13(const std::string& cmpName, int x, int y)
+void NNCreatorPanel::clickedKill(const shmea::GString& cmpName, int x, int y)
 {
 	// REIMPLENT THIS AS cNetwork.stopRunning();
 	// NNetwork::caboose = true;
 }
 
-void NNCreatorPanel::GuiCommander14(const std::string& cmpName, int x, int y)
+void NNCreatorPanel::clickedDelete(const shmea::GString& cmpName, int x, int y)
 {
-	std::string netName = tbNetName->getText();
+	shmea::GString netName = tbNetName->getText();
 	shmea::SaveFolder* nnList = new shmea::SaveFolder("neuralnetworks");
 	nnList->deleteItem(netName);
 	loadDDNN();
@@ -1240,7 +1197,7 @@ void NNCreatorPanel::GuiCommander14(const std::string& cmpName, int x, int y)
 	MsgBox("Neural Net", buffer, RUMsgBox::MESSAGEBOX);
 }
 
-void NNCreatorPanel::GuiCommander15(int newIndex)
+void NNCreatorPanel::nnSelectorChanged(int newIndex)
 {
 	// Only load after a selection click (not an open click)
 	if (ddNeuralNet->isOpen())
@@ -1251,13 +1208,13 @@ void NNCreatorPanel::GuiCommander15(int newIndex)
 	if (loadOrSave == 0)
 		return;
 
-	std::string netName = ddNeuralNet->getSelectedText();
+	shmea::GString netName = ddNeuralNet->getSelectedText();
 	tbNetName->setText(netName);
-	formInfo->setName(netName);
+	formInfo->setName(netName.c_str());
 
 	// Load a machine learning model
 	glades::NNetwork cNetwork;
-	if (!cNetwork.load(netName))
+	if (!cNetwork.load(netName.c_str()))
 	{
 		printf("[NN] Unable to load \"%s\"", netName.c_str());
 		return;
@@ -1273,7 +1230,7 @@ void NNCreatorPanel::GuiCommander15(int newIndex)
  */
 void NNCreatorPanel::PlotLearningCurve(const shmea::GList& graphPoints)
 {
-	lcGraph->setLine("lc", graphPoints);
+	// lcGraph->set("lc", graphPoints);
 }
 
 /*!
@@ -1282,7 +1239,7 @@ void NNCreatorPanel::PlotLearningCurve(const shmea::GList& graphPoints)
  */
 void NNCreatorPanel::PlotROCCurve(const std::vector<Point2*>& graphPoints)
 {
-	rocCurveGraph->setPoints("lc", graphPoints);
+	// rocCurveGraph->set("lc", graphPoints);
 }
 
 /*!
@@ -1292,7 +1249,7 @@ void NNCreatorPanel::PlotROCCurve(const std::vector<Point2*>& graphPoints)
  */
 void NNCreatorPanel::PlotScatter(const shmea::GTable& graphPoints)
 {
-	dartboardGraph->addScatterPoints(graphPoints);
+	// dartboardGraph->addScatterPoints(graphPoints);
 }
 
 void NNCreatorPanel::updateConfMatrixTable(const shmea::GTable& confMatrix)

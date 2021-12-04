@@ -30,6 +30,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <vector>
+#include <string>
 
 class GItem;
 class RUComponent;
@@ -97,6 +98,7 @@ private:
 
 	std::vector<GItem*> guiElements; // < RUComponent* || GLayout* >
 
+	SDL_Cursor* systemCursor;
 	GItem* focusedItem;
 	std::vector<Object*> objects;
 	unsigned int cObjIndex;
@@ -106,7 +108,7 @@ private:
 
 	// main
 	void display();
-	int initHelper(bool, std::string);
+	int initHelper(bool, shmea::GString);
 	int init2D();
 	void init3D();
 	void clean2D();
@@ -123,7 +125,7 @@ public:
 	static const int Z_AXIS = 2;
 
 	gfxpp();
-	gfxpp(std::string, int = _2D, bool = true, int = 800, int = 600);
+	gfxpp(shmea::GString, int = _2D, bool = true, int = 800, int = 600);
 	int getErrorFlag() const;
 	SDL_Renderer* getRenderer();
 
@@ -134,7 +136,10 @@ public:
 
 	// 2D
 	GFont* cFont;
+	std::map<int, GFont*> graphicsFonts;
+
 	GPanel* focusedPanel;
+	SDL_Cursor* getSystemCursor();
 	void addGradient(int, int, int);
 	void addItem(GItem*);
 	void removeItem(int); // id

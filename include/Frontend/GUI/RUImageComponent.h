@@ -32,13 +32,13 @@ class RUImageComponent : public RUComponent
 {
 public:
 	// constructors & destructor
-	RUImageComponent(const std::string&);
+	RUImageComponent(const shmea::GString&);
 	RUImageComponent(shmea::Image*);
 	~RUImageComponent();
 
 	// render
 	virtual void updateBackground(gfxpp*);
-	virtual std::string getType() const;
+	virtual shmea::GString getType() const;
 };
 
 #endif

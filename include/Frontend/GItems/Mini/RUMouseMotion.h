@@ -18,6 +18,7 @@
 #define _RUMOUSEMOTION
 
 #include "../RUItemArea.h"
+#include "../GeneralListener.h"
 #include <SDL2/SDL.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -33,13 +34,14 @@ class RUMouseMotion : public virtual RUItemArea
 protected:
 	bool unhovered;
 	SDL_SystemCursor cursor;
+	SDL_Cursor* cursorPtr;
 	bool customCursor;
 
 	// events
 	virtual void onMouseMotion(gfxpp*, GPanel*, int, int);
 
 	// event listeners
-	void (GPanel::*MouseMotionListener)(int, int);
+	GeneralListener MouseMotionListener;
 
 public:
 	// constructors & destructor
@@ -53,7 +55,7 @@ public:
 	void setCursor(SDL_SystemCursor);
 
 	// event functions
-	void setMouseMotionListener(void (GPanel::*)(int, int));
+	void setMouseMotionListener(GeneralListener);
 
 	// events
 	void onMouseMotionHelper(gfxpp*, EventTracker*, GPanel*, int, int, bool = false);

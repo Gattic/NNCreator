@@ -47,7 +47,7 @@ public:
 	virtual void updateBackgroundHelper(gfxpp*);
 
 	// type
-	virtual std::string getType() const = 0;
+	virtual shmea::GString getType() const = 0;
 };
 
 #endif
