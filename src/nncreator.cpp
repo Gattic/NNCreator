@@ -166,8 +166,9 @@ void NNCreatorPanel::buildPanel()
 	dartGraphLayout->addSubItem(lblGraphDart);
 
 	// Dartboard graph
-	dartboardGraph = new RULineGraph(getWidth() / 4, getHeight() / 4,
-								 RULineGraph::QUADRANTS_ONE); // -4 = adjustment to align with table
+	dartboardGraph =
+		new RULineGraph(getWidth() / 4, getHeight() / 4,
+						RULineGraph::QUADRANTS_ONE); // -4 = adjustment to align with table
 	dartboardGraph->setName("dartboardGraph");
 	dartGraphLayout->addSubItem(dartboardGraph);
 
@@ -813,15 +814,15 @@ void NNCreatorPanel::syncFormVar()
 {
 	// Input Stuff
 
-	shmea::GType pInput(tbPInput->getText());
+	shmea::GType pInput = shmea::GString::Typify(tbPInput->getText(), tbPInput->getText().length());
 	formInfo->setPInput(pInput.getFloat());
 
-	shmea::GType batchSize(tbBatchSize->getText());
+	shmea::GType batchSize = shmea::GString::Typify(tbBatchSize->getText(), tbBatchSize->getText().size());
 	formInfo->setBatchSize(batchSize.getLong());
 
 	// Output Stuff
 
-	shmea::GType outputSize(tbOutputLayerSize->getText());
+	shmea::GType outputSize = shmea::GString::Typify(tbOutputLayerSize->getText(), tbOutputLayerSize->getText().size());
 	formInfo->setOutputSize(outputSize.getFloat());
 
 	shmea::GType outputType((int)ddOutputType->getSelectedIndex()); // this is probably fine...
@@ -832,19 +833,19 @@ void NNCreatorPanel::syncFormVar()
 
 	HiddenLayerInfo* currentLayer = formInfo->getLayers()[currentHiddenLayerIndex];
 
-	shmea::GType pHidden(tbPHidden->getText());
+	shmea::GType pHidden = shmea::GString::Typify(tbPHidden->getText(), tbPHidden->getText().size());
 	currentLayer->setPHidden(pHidden.getFloat());
 
-	shmea::GType hLayerSize(tbHiddenLayerSize->getText());
+	shmea::GType hLayerSize = shmea::GString::Typify(tbHiddenLayerSize->getText(), tbHiddenLayerSize->getText().size());
 	currentLayer->setSize((int)hLayerSize.getLong());
 
-	shmea::GType learningRate(tbLearningRate->getText());
+	shmea::GType learningRate = shmea::GString::Typify(tbLearningRate->getText(), tbLearningRate->getText().size());
 	currentLayer->setLearningRate(learningRate.getFloat());
 
-	shmea::GType momentumFactor(tbMomentumFactor->getText());
+	shmea::GType momentumFactor = shmea::GString::Typify(tbMomentumFactor->getText(), tbMomentumFactor->getText().size());
 	currentLayer->setMomentumFactor(momentumFactor.getFloat());
 
-	shmea::GType weightDecay(tbWeightDecay->getText());
+	shmea::GType weightDecay = shmea::GString::Typify(tbWeightDecay->getText(), tbWeightDecay->getText().size());
 	currentLayer->setWeightDecay(weightDecay.getFloat());
 
 	int activationType = ddActivationFunctions->getSelectedIndex();
@@ -884,7 +885,7 @@ void NNCreatorPanel::syncFormVar()
 	}
 	}
 
-	shmea::GType activationParam(tbActivationParam->getText());
+	shmea::GType activationParam = shmea::GString::Typify(tbActivationParam->getText(), tbActivationParam->getText().size());
 	currentLayer->setActivationParam(activationParam.getFloat());
 }
 /*!
@@ -944,7 +945,7 @@ void NNCreatorPanel::loadNNet(glades::NNInfo* info)
  * @param spct the string containing the percentage
  * @return the percentage between 0 and 100
  */
-int64_t NNCreatorPanel::parsePct(const shmea::GString& spct)
+int64_t NNCreatorPanel::parsePct(const shmea::GType& spct)
 {
 	shmea::GType pct(spct);
 	if (pct.getType() != shmea::GType::LONG_TYPE)
@@ -974,20 +975,20 @@ void NNCreatorPanel::clickedSave(const shmea::GString& cmpName, int x, int y)
 	shmea::GString netName = tbNetName->getText();
 	formInfo->setName(netName.c_str());
 
-	shmea::GType pInput(tbPInput->getText());
+	shmea::GType pInput = shmea::GString::Typify(tbPInput->getText(), tbPInput->getText().size());
 	if (pInput.getType() != shmea::GType::FLOAT_TYPE)
 		return;
 
-	shmea::GType batchSize(tbBatchSize->getText());
+	shmea::GType batchSize = shmea::GString::Typify(tbBatchSize->getText(), tbBatchSize->getText().size());
 	if (batchSize.getType() != shmea::GType::LONG_TYPE)
 		return;
 
-	shmea::GType outputSize(tbOutputLayerSize->getText());
+	shmea::GType outputSize = shmea::GString::Typify(tbOutputLayerSize->getText(), tbOutputLayerSize->getText().size());
 	if (outputSize.getType() != shmea::GType::LONG_TYPE)
 		return;
 
 	// just make sure the expected hidden layer counts are equal
-	shmea::GType layerCountCheck(tbHiddenLayerCount->getText());
+	shmea::GType layerCountCheck = shmea::GString::Typify(tbHiddenLayerCount->getText(), tbHiddenLayerCount->getText().size());
 	if (layerCountCheck.getType() != shmea::GType::LONG_TYPE)
 		return;
 
@@ -1055,8 +1056,9 @@ void NNCreatorPanel::clickedRun(const shmea::GString& cmpName, int x, int y)
 	// Get the vars from the components
 	shmea::GString netName = tbNetName->getText();
 	shmea::GString testFName = tbTestDataSourcePath->getText();
-	int64_t trainPct = parsePct(tbTrainPct->getText()), testPct = parsePct(tbTestPct->getText()),
-			validationPct = parsePct(tbValidationPct->getText());
+	int64_t trainPct = parsePct(shmea::GString::Typify(tbTrainPct->getText(), tbTrainPct->getText().size()));
+	int64_t testPct = parsePct(shmea::GString::Typify(tbTestPct->getText(), tbTestPct->getText().size()));
+	int64_t validationPct = parsePct(shmea::GString::Typify(tbValidationPct->getText(), tbValidationPct->getText().size()));
 
 	if ((netName.length() == 0) || (testFName.length() == 0))
 		return;
@@ -1136,7 +1138,7 @@ void NNCreatorPanel::clickedRemove(const shmea::GString& cmpName, int x, int y)
  */
 void NNCreatorPanel::tbHLLoseFocus()
 {
-	shmea::GType newHiddenLayerCount(tbHiddenLayerCount->getText());
+	shmea::GType newHiddenLayerCount = shmea::GString::Typify(tbHiddenLayerCount->getText(), tbHiddenLayerCount->getText().size());
 	if (newHiddenLayerCount.getType() != shmea::GType::LONG_TYPE)
 		return;
 
@@ -1230,7 +1232,10 @@ void NNCreatorPanel::nnSelectorChanged(int newIndex)
  */
 void NNCreatorPanel::PlotLearningCurve(const shmea::GList& graphPoints)
 {
-	// lcGraph->set("lc", graphPoints);
+	std::vector<Point2*> vecGP;
+	for(unsigned int i = 0; i < graphPoints.size(); ++i)
+		vecGP.push_back(new Point2(i, graphPoints.getFloat(i)));
+	lcGraph->set("lc", vecGP);
 }
 
 /*!
@@ -1239,7 +1244,7 @@ void NNCreatorPanel::PlotLearningCurve(const shmea::GList& graphPoints)
  */
 void NNCreatorPanel::PlotROCCurve(const std::vector<Point2*>& graphPoints)
 {
-	// rocCurveGraph->set("lc", graphPoints);
+	rocCurveGraph->set("roc", graphPoints);
 }
 
 /*!

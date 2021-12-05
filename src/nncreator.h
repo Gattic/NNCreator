@@ -73,7 +73,7 @@ protected:
 	glades::NNInfo* formInfo;
 	int currentHiddenLayerIndex;
 
-	int64_t parsePct(const shmea::GString&);
+	int64_t parsePct(const shmea::GType&);
 
 	void buildPanel();
 
