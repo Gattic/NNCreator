@@ -817,12 +817,14 @@ void NNCreatorPanel::syncFormVar()
 	shmea::GType pInput = shmea::GString::Typify(tbPInput->getText(), tbPInput->getText().length());
 	formInfo->setPInput(pInput.getFloat());
 
-	shmea::GType batchSize = shmea::GString::Typify(tbBatchSize->getText(), tbBatchSize->getText().size());
+	shmea::GType batchSize =
+		shmea::GString::Typify(tbBatchSize->getText(), tbBatchSize->getText().size());
 	formInfo->setBatchSize(batchSize.getLong());
 
 	// Output Stuff
 
-	shmea::GType outputSize = shmea::GString::Typify(tbOutputLayerSize->getText(), tbOutputLayerSize->getText().size());
+	shmea::GType outputSize =
+		shmea::GString::Typify(tbOutputLayerSize->getText(), tbOutputLayerSize->getText().size());
 	formInfo->setOutputSize(outputSize.getFloat());
 
 	shmea::GType outputType((int)ddOutputType->getSelectedIndex()); // this is probably fine...
@@ -833,19 +835,24 @@ void NNCreatorPanel::syncFormVar()
 
 	HiddenLayerInfo* currentLayer = formInfo->getLayers()[currentHiddenLayerIndex];
 
-	shmea::GType pHidden = shmea::GString::Typify(tbPHidden->getText(), tbPHidden->getText().size());
+	shmea::GType pHidden =
+		shmea::GString::Typify(tbPHidden->getText(), tbPHidden->getText().size());
 	currentLayer->setPHidden(pHidden.getFloat());
 
-	shmea::GType hLayerSize = shmea::GString::Typify(tbHiddenLayerSize->getText(), tbHiddenLayerSize->getText().size());
+	shmea::GType hLayerSize =
+		shmea::GString::Typify(tbHiddenLayerSize->getText(), tbHiddenLayerSize->getText().size());
 	currentLayer->setSize((int)hLayerSize.getLong());
 
-	shmea::GType learningRate = shmea::GString::Typify(tbLearningRate->getText(), tbLearningRate->getText().size());
+	shmea::GType learningRate =
+		shmea::GString::Typify(tbLearningRate->getText(), tbLearningRate->getText().size());
 	currentLayer->setLearningRate(learningRate.getFloat());
 
-	shmea::GType momentumFactor = shmea::GString::Typify(tbMomentumFactor->getText(), tbMomentumFactor->getText().size());
+	shmea::GType momentumFactor =
+		shmea::GString::Typify(tbMomentumFactor->getText(), tbMomentumFactor->getText().size());
 	currentLayer->setMomentumFactor(momentumFactor.getFloat());
 
-	shmea::GType weightDecay = shmea::GString::Typify(tbWeightDecay->getText(), tbWeightDecay->getText().size());
+	shmea::GType weightDecay =
+		shmea::GString::Typify(tbWeightDecay->getText(), tbWeightDecay->getText().size());
 	currentLayer->setWeightDecay(weightDecay.getFloat());
 
 	int activationType = ddActivationFunctions->getSelectedIndex();
@@ -885,7 +892,8 @@ void NNCreatorPanel::syncFormVar()
 	}
 	}
 
-	shmea::GType activationParam = shmea::GString::Typify(tbActivationParam->getText(), tbActivationParam->getText().size());
+	shmea::GType activationParam =
+		shmea::GString::Typify(tbActivationParam->getText(), tbActivationParam->getText().size());
 	currentLayer->setActivationParam(activationParam.getFloat());
 }
 /*!
@@ -979,16 +987,19 @@ void NNCreatorPanel::clickedSave(const shmea::GString& cmpName, int x, int y)
 	if (pInput.getType() != shmea::GType::FLOAT_TYPE)
 		return;
 
-	shmea::GType batchSize = shmea::GString::Typify(tbBatchSize->getText(), tbBatchSize->getText().size());
+	shmea::GType batchSize =
+		shmea::GString::Typify(tbBatchSize->getText(), tbBatchSize->getText().size());
 	if (batchSize.getType() != shmea::GType::LONG_TYPE)
 		return;
 
-	shmea::GType outputSize = shmea::GString::Typify(tbOutputLayerSize->getText(), tbOutputLayerSize->getText().size());
+	shmea::GType outputSize =
+		shmea::GString::Typify(tbOutputLayerSize->getText(), tbOutputLayerSize->getText().size());
 	if (outputSize.getType() != shmea::GType::LONG_TYPE)
 		return;
 
 	// just make sure the expected hidden layer counts are equal
-	shmea::GType layerCountCheck = shmea::GString::Typify(tbHiddenLayerCount->getText(), tbHiddenLayerCount->getText().size());
+	shmea::GType layerCountCheck =
+		shmea::GString::Typify(tbHiddenLayerCount->getText(), tbHiddenLayerCount->getText().size());
 	if (layerCountCheck.getType() != shmea::GType::LONG_TYPE)
 		return;
 
@@ -1056,9 +1067,12 @@ void NNCreatorPanel::clickedRun(const shmea::GString& cmpName, int x, int y)
 	// Get the vars from the components
 	shmea::GString netName = tbNetName->getText();
 	shmea::GString testFName = tbTestDataSourcePath->getText();
-	int64_t trainPct = parsePct(shmea::GString::Typify(tbTrainPct->getText(), tbTrainPct->getText().size()));
-	int64_t testPct = parsePct(shmea::GString::Typify(tbTestPct->getText(), tbTestPct->getText().size()));
-	int64_t validationPct = parsePct(shmea::GString::Typify(tbValidationPct->getText(), tbValidationPct->getText().size()));
+	int64_t trainPct =
+		parsePct(shmea::GString::Typify(tbTrainPct->getText(), tbTrainPct->getText().size()));
+	int64_t testPct =
+		parsePct(shmea::GString::Typify(tbTestPct->getText(), tbTestPct->getText().size()));
+	int64_t validationPct = parsePct(
+		shmea::GString::Typify(tbValidationPct->getText(), tbValidationPct->getText().size()));
 
 	if ((netName.length() == 0) || (testFName.length() == 0))
 		return;
@@ -1138,7 +1152,8 @@ void NNCreatorPanel::clickedRemove(const shmea::GString& cmpName, int x, int y)
  */
 void NNCreatorPanel::tbHLLoseFocus()
 {
-	shmea::GType newHiddenLayerCount = shmea::GString::Typify(tbHiddenLayerCount->getText(), tbHiddenLayerCount->getText().size());
+	shmea::GType newHiddenLayerCount =
+		shmea::GString::Typify(tbHiddenLayerCount->getText(), tbHiddenLayerCount->getText().size());
 	if (newHiddenLayerCount.getType() != shmea::GType::LONG_TYPE)
 		return;
 
@@ -1233,7 +1248,7 @@ void NNCreatorPanel::nnSelectorChanged(int newIndex)
 void NNCreatorPanel::PlotLearningCurve(const shmea::GList& graphPoints)
 {
 	std::vector<Point2*> vecGP;
-	for(unsigned int i = 0; i < graphPoints.size(); ++i)
+	for (unsigned int i = 0; i < graphPoints.size(); ++i)
 		vecGP.push_back(new Point2(i, graphPoints.getFloat(i)));
 	lcGraph->set("lc", vecGP);
 }
