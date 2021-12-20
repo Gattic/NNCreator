@@ -56,6 +56,7 @@
 #include "Frontend/RUGraph/RULineGraph.h"
 #include "crt0.h"
 #include "main.h"
+#include "services/gui_callback.h"
 
 // using namespace shmea;
 using namespace glades;
@@ -84,6 +85,16 @@ NNCreatorPanel::NNCreatorPanel(GNet::GServer* newInstance, const shmea::GString&
 
 void NNCreatorPanel::buildPanel()
 {
+	lcMutex = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
+	rocMutex = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
+
+	pthread_mutex_init(lcMutex, NULL);
+	pthread_mutex_init(rocMutex, NULL);
+
+	// Add services
+	GUI_Callback* gui_cb_srvc = new GUI_Callback(serverInstance, this);
+	serverInstance->addService(gui_cb_srvc);
+
 	currentHiddenLayerIndex = 0;
 	InputLayerInfo* newInputLayer = new InputLayerInfo(0.0f, 1);
 	std::vector<HiddenLayerInfo*> newHiddenLayers;
@@ -738,6 +749,17 @@ void NNCreatorPanel::onStart()
 	// printf("RUComponentContainer Size: %ld\n", ruComponentContainer.size());
 }
 
+NNCreatorPanel::~NNCreatorPanel()
+{
+	pthread_mutex_destroy(lcMutex);
+	if (lcMutex)
+		free(lcMutex);
+
+	pthread_mutex_destroy(rocMutex);
+	if (rocMutex)
+		free(rocMutex);
+}
+
 void NNCreatorPanel::loadDDNN()
 {
 	// clear the old items
@@ -1245,34 +1267,102 @@ void NNCreatorPanel::nnSelectorChanged(int newIndex)
  * @brief Plot the Learning Curve of the NN
  * @details Plot the learning curve of the neural network on the graph
  */
-void NNCreatorPanel::PlotLearningCurve(const shmea::GList& graphPoints)
+void NNCreatorPanel::PlotLearningCurve(float newXVal, float newYVal)
 {
-	std::vector<Point2*> vecGP;
-	for (unsigned int i = 0; i < graphPoints.size(); ++i)
-		vecGP.push_back(new Point2(i, graphPoints.getFloat(i)));
-	lcGraph->set("lc", vecGP);
+	if (!lcGraph)
+		return;
+
+	pthread_mutex_lock(lcMutex);
+
+	SDL_Color lineColor = RUColors::DEFAULT_COLOR_LINE;
+	lcGraph->add("lc", new Point2(newXVal, newYVal), lineColor);
+
+	pthread_mutex_unlock(lcMutex);
 }
 
 /*!
  * @brief Plot the ROC Curve of the NN
  * @details Plot the ROC Curve of the neural network on the graph
  */
-void NNCreatorPanel::PlotROCCurve(const std::vector<Point2*>& graphPoints)
+void NNCreatorPanel::PlotROCCurve(float newXVal, float newYVal)
 {
-	rocCurveGraph->set("roc", graphPoints);
+	if (!rocCurveGraph)
+		return;
+
+	pthread_mutex_lock(rocMutex);
+
+	SDL_Color lineColor = RUColors::DEFAULT_COLOR_LINE;
+	rocCurveGraph->add("roc", new Point2(newXVal, newYVal), lineColor, false);
+
+	pthread_mutex_unlock(rocMutex);
 }
 
-/*!
- * @brief Plot the Expected vs Predicted of the NN
- * @details Plot the Expected vs Predicted of the neural network on the proper
- * graph
- */
-void NNCreatorPanel::PlotScatter(const shmea::GTable& graphPoints)
+void NNCreatorPanel::updateConfMatrixTable(const shmea::GList& newRow)
 {
-	// dartboardGraph->addScatterPoints(graphPoints);
+	cMatrixTable->addRow(newRow);
+	cMatrixTable->updateLabels();
 }
 
-void NNCreatorPanel::updateConfMatrixTable(const shmea::GTable& confMatrix)
+void NNCreatorPanel::updateFromQ(const shmea::ServiceData* data)
 {
-	cMatrixTable->import(confMatrix);
+	shmea::GList argList = data->getArgList();
+	if (argList.size() == 0)
+		return;
+
+	shmea::GString cName = argList.getString(0);
+	if (cName == "RESET")
+	{
+		// Special case to reset the sim GUI
+		resetSim();
+	}
+	else if (cName == "UPDATE-GRAPHS")
+	{
+		// Special case to update the candle graph
+		lcGraph->update();
+		rocCurveGraph->update();
+	}
+	else if (cName == "CONF")
+	{
+		if (data->getType() != shmea::ServiceData::TYPE_LIST)
+			return;
+
+		shmea::GList argList = data->getArgList();
+		if (argList.size() < 2)
+			return;
+
+		// Closing Price Label
+		float falseAlarm = argList.getFloat(0);
+		float recall = argList.getFloat(1);
+
+		PlotROCCurve(falseAlarm, recall);
+		updateConfMatrixTable(data->getList());
+	}
+	else if (cName == "PROGRESSIVE")
+	{
+		if (data->getType() != shmea::ServiceData::TYPE_LIST)
+			return;
+
+		// Update components by tick
+		shmea::GList cList = data->getList();
+		if (cList.size() < 2)
+			return;
+
+		// Closing Price Label
+		int newXVal = cList.getInt(0);
+		float lcPoint = cList.getFloat(1);
+
+		// Graphs
+		PlotLearningCurve(newXVal, lcPoint);
+	}
+}
+
+void NNCreatorPanel::resetSim()
+{
+	pthread_mutex_lock(lcMutex);
+	lcGraph->clear();
+	pthread_mutex_unlock(lcMutex);
+
+	pthread_mutex_lock(rocMutex);
+	rocCurveGraph->clear();
+	pthread_mutex_unlock(rocMutex);
 }

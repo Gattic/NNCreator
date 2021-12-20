@@ -67,6 +67,7 @@ class NNInfo;
 class NNCreatorPanel : public GPanel
 {
 protected:
+	virtual void updateFromQ(const shmea::ServiceData*);
 	virtual void onStart();
 
 	GNet::GServer* serverInstance;
@@ -152,20 +153,21 @@ protected:
 	RUTextbox* tbValidationPct;
 
 public:
+	pthread_mutex_t* lcMutex;
+	pthread_mutex_t* rocMutex;
+
 	NNCreatorPanel(const shmea::GString&, int, int);
 	NNCreatorPanel(GNet::GServer*, const shmea::GString&, int, int);
+	~NNCreatorPanel();
+
 	void loadDDNN();
 	void populateIndexToEdit(int = 0);
 	void populateHLayerForm();
 	void syncFormVar();
 	void loadNNet(glades::NNInfo*);
-	// void PlotLearningRate(const std::vector<Point2*>&);
-	// void PlotLearningRate(PlotType*);
-	// void PlotCoordinates(const std::vector<shmea::GTable*>&);
-	void PlotLearningCurve(const shmea::GList&);
-	void PlotROCCurve(const std::vector<Point2*>&);
-	void PlotScatter(const shmea::GTable&);
-	void updateConfMatrixTable(const shmea::GTable&);
+	void PlotLearningCurve(float, float);
+	void PlotROCCurve(float, float);
+	void updateConfMatrixTable(const shmea::GList&);
 
 	void clickedSave(const shmea::GString&, int, int);
 	void clickedEditSwitch(const shmea::GString&, int, int);
@@ -178,6 +180,7 @@ public:
 	void clickedKill(const shmea::GString&, int, int);
 	void clickedDelete(const shmea::GString&, int, int);
 	void nnSelectorChanged(int);
+	void resetSim();
 };
 
 #endif

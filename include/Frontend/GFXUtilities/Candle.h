@@ -110,6 +110,16 @@ public:
 
 		return (xChange && openChange && closeChange && highChange && lowChange);
 	}
+
+	bool operator<(const Candle& c2) const // ONLY COMPARES X
+	{
+		return (getX() < c2.getX());
+	}
+
+	bool operator>(const Candle& c2) const // ONLY COMPARES X
+	{
+		return (getX() > c2.getX());
+	}
 };
 
 #endif

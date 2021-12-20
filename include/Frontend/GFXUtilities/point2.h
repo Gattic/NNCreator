@@ -93,6 +93,16 @@ public:
 	{
 		return !(*this == v);
 	}
+
+	bool operator<(const Point2& c2) const // ONLY COMPARES X
+	{
+		return (getX() < c2.getX());
+	}
+
+	bool operator>(const Point2& c2) const // ONLY COMPARES X
+	{
+		return (getX() > c2.getX());
+	}
 };
 
 #endif

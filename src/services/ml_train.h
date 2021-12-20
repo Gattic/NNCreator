@@ -85,7 +85,8 @@ public:
 
 		// Run the training and retrieve a metanetwork
 		shmea::GTable inputTable(testFName, ',', importType);
-		glades::MetaNetwork* newTrainNet = glades::train(&cNetwork, inputTable, Arnold);
+		glades::MetaNetwork* newTrainNet =
+			glades::train(&cNetwork, inputTable, Arnold, serverInstance, destination);
 
 		return retData;
 	}
