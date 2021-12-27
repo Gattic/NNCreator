@@ -167,7 +167,7 @@ public:
 	void loadNNet(glades::NNInfo*);
 	void PlotLearningCurve(float, float);
 	void PlotROCCurve(float, float);
-	void updateConfMatrixTable(const shmea::GList&);
+	void updateConfMatrixTable(const shmea::GTable&);
 
 	void clickedSave(const shmea::GString&, int, int);
 	void clickedEditSwitch(const shmea::GString&, int, int);

@@ -1292,14 +1292,14 @@ void NNCreatorPanel::PlotROCCurve(float newXVal, float newYVal)
 	pthread_mutex_lock(rocMutex);
 
 	SDL_Color lineColor = RUColors::DEFAULT_COLOR_LINE;
-	rocCurveGraph->add("roc", new Point2(newXVal, newYVal), lineColor, false);
+	rocCurveGraph->add("roc", new Point2(newXVal, newYVal), lineColor);
 
 	pthread_mutex_unlock(rocMutex);
 }
 
-void NNCreatorPanel::updateConfMatrixTable(const shmea::GList& newRow)
+void NNCreatorPanel::updateConfMatrixTable(const shmea::GTable& newMatrix)
 {
-	cMatrixTable->addRow(newRow);
+	cMatrixTable->import(newMatrix);
 	cMatrixTable->updateLabels();
 }
 
@@ -1323,7 +1323,7 @@ void NNCreatorPanel::updateFromQ(const shmea::ServiceData* data)
 	}
 	else if (cName == "CONF")
 	{
-		if (data->getType() != shmea::ServiceData::TYPE_LIST)
+		if (data->getType() != shmea::ServiceData::TYPE_TABLE)
 			return;
 
 		shmea::GList argList = data->getArgList();
@@ -1335,7 +1335,7 @@ void NNCreatorPanel::updateFromQ(const shmea::ServiceData* data)
 		float recall = argList.getFloat(1);
 
 		PlotROCCurve(falseAlarm, recall);
-		updateConfMatrixTable(data->getList());
+		updateConfMatrixTable(data->getTable());
 	}
 	else if (cName == "PROGRESSIVE")
 	{
