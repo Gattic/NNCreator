@@ -94,7 +94,7 @@ public:
 
 	// sets
 	void setText(const char*);
-	void setText(shmea::GString);
+	void setText(shmea::GType);
 	void setPasswordChar(char);
 	void setPasswordField(bool);
 	void setReadOnly(bool);
