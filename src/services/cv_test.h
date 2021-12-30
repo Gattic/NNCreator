@@ -31,6 +31,7 @@
 #include "../main.h"
 #include "Backend/Database/GList.h"
 #include "Backend/Database/GTable.h"
+#include "Backend/Database/ServiceData.h"
 #include "Backend/Machine Learning/State/Terminator.h"
 #include "Backend/Machine Learning/Structure/hiddenlayerinfo.h"
 #include "Backend/Machine Learning/Structure/inputlayerinfo.h"
@@ -43,8 +44,6 @@
 #include "Backend/Networking/socket.h"
 #include "Frontend/GUI/RUMsgBox.h"
 #include "Frontend/Graphics/graphics.h"
-
-class NNInfo;
 
 class CV_Test : public Service
 {
@@ -77,5 +76,4 @@ public:
 		return retList;
 	}
 };
-
 #endif

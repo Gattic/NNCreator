@@ -24,6 +24,8 @@
 #include <utility>
 #include <vector>
 
+typedef void (*OptionChangedEvent)(int);
+
 class gfxpp;
 class RULabel;
 
@@ -66,11 +68,11 @@ public:
 	void setWidth(int);
 	void setHeight(int);
 	void setOptionsShown(unsigned int);
-	void addTab(std::string);
-	void addItemToTab(std::string, GItem*);
+	void addTab(shmea::GString);
+	void addItemToTab(shmea::GString, GItem*);
 	void clearOptions();
 	void setSelectedTab(unsigned int); // int = index
-	void setSelectedTab(std::string);  // string = tab name
+	void setSelectedTab(shmea::GString);  // string = tab name
 
 	// events
 	void setOptionChangedListener(void (GPanel::*)(int));
@@ -79,7 +81,7 @@ public:
 	virtual void updateBackground(gfxpp*);
 	void updateLabels();
 	virtual void unhover();
-	virtual std::string getType() const;
+	virtual shmea::GString getType() const;
 };
 
 #endif

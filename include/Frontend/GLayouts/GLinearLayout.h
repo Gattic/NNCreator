@@ -41,7 +41,7 @@ public:
 	const static int VERTICAL = 0;
 	const static int HORIZONTAL = 1;
 
-	GLinearLayout(std::string, int = VERTICAL);
+	GLinearLayout(shmea::GString, int = VERTICAL);
 
 	int getOrientation() const;
 	void setOrientation(int);
@@ -54,7 +54,7 @@ public:
 	// render
 	virtual void updateBackgroundHelper(gfxpp*);
 
-	virtual std::string getType() const;
+	virtual shmea::GString getType() const;
 };
 
 #endif

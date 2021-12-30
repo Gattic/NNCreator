@@ -14,13 +14,15 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _RUGRAPHLINE
-#define _RUGRAPHLINE
+#ifndef _RULINEGRAPH
+#define _RULINEGRAPH
 
+#include "RUGraph.h"
 #include "../GItems/RUColors.h"
+#include "../GFXUtilities/point2.h"
 #include "Graphable.h"
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_opengl.h>
+#include <map>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -28,17 +30,34 @@
 #include <vector>
 
 class gfxpp;
-class RUGraph;
+//class Graphable<Point2>;
 class Point2;
 
-class GraphLine : public Graphable
+namespace shmea {
+class GList;
+}; // namespace shmea
+
+class RULineGraph : public RUGraph
 {
+private:
+	std::map<shmea::GString, Graphable<Point2>*> lines;
+
+protected:
+	// render
+	virtual void updateBackground(gfxpp*);
+
 public:
+
 	// constructors & destructor
-	GraphLine(RUGraph*, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
-	~GraphLine();
-	virtual void draw(gfxpp*);
-	virtual std::string getType() const;
+	RULineGraph(int, int, int = QUADRANTS_ONE);
+	virtual ~RULineGraph();
+
+	virtual shmea::GString getType() const;
+	virtual void add(shmea::GString, const Point2*, SDL_Color = RUColors::DEFAULT_COLOR_LINE, bool = true);
+	virtual void set(const shmea::GString&, const std::vector<Point2*>&, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
+
+	virtual void update();
+	void clear(bool = false);
 };
 
 #endif

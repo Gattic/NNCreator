@@ -36,7 +36,7 @@ class GRelativeLayout : public GLayout
 	void updateBackground(gfxpp*);
 
 public:
-	GRelativeLayout(std::string);
+	GRelativeLayout(shmea::GString);
 
 	virtual void calculateSubItemPositions(std::pair<int, int>);
 
@@ -46,7 +46,7 @@ public:
 	// render
 	virtual void updateBackgroundHelper(gfxpp*);
 
-	virtual std::string getType() const;
+	virtual shmea::GString getType() const;
 };
 
 #endif

@@ -28,14 +28,12 @@
 #include <vector>
 
 class gfxpp;
-class Graphable;
-class Point2;
 class RULabel;
 
 namespace shmea {
 class GList;
 class GTable;
-};
+}; // namespace shmea
 
 class RUGraph : public RUComponent
 {
@@ -48,18 +46,51 @@ private:
 	int gridLineWidth;
 	int quadrants;
 
+	float vscale;
+	unsigned int period;
+	unsigned int sourceAgg; //aggregate level of the source data
+	unsigned int agg; //aggregatelevel of our data
+
 protected:
-	// std::vector<GraphLine*> lines;
-	std::map<std::string, Graphable*> lines;
-	pthread_mutex_t* plotMutex;
 	RULabel* titleLabel;
+	float xMin;
+	float xMax;
+	float yMin;
+	float yMax;
+
+	// events
+	virtual void onMouseUp(gfxpp*, GPanel*, int, int);
+	virtual void onMouseDown(gfxpp*, GPanel*, int, int);
 
 	// render
 	virtual void updateBackground(gfxpp*);
 
 public:
-	static const unsigned int DEFAULT_NUM_ZONES = 10;
 
+	const static unsigned int P_ALL = 0;
+	const static unsigned int P_1D = 1;
+	const static unsigned int P_5D = 2;
+	const static unsigned int P_10D = 3;
+	const static unsigned int P_1M = 4;
+	const static unsigned int P_3M = 5;
+	const static unsigned int P_6M = 6;
+	const static unsigned int P_1Y = 7;
+	const static unsigned int P_5Y = 8;
+	const static unsigned int P_10Y = 9;
+
+	const static unsigned int AGG_1m = 1;
+	const static unsigned int AGG_2m = 2;
+	const static unsigned int AGG_3m = 3;
+	const static unsigned int AGG_5m = 5;
+	const static unsigned int AGG_15m = 15;
+	const static unsigned int AGG_30m = 30;
+	const static unsigned int AGG_1h = 60;
+	const static unsigned int AGG_4h = 240;
+	const static unsigned int AGG_1D = 390;
+	const static unsigned int AGG_1W = 1950;
+	const static unsigned int AGG_3W = 5850;
+
+	static const unsigned int DEFAULT_NUM_ZONES = 10;
 	static const unsigned int DEFAULT_GRAPH_SIZE = 1;
 	static const unsigned int DEFAULT_AXIS_WIDTH = 3;
 	static const unsigned int DEFAULT_GRIDLINE_WIDTH = 1;
@@ -69,7 +100,7 @@ public:
 
 	// constructors & destructor
 	RUGraph(int, int, int = QUADRANTS_ONE);
-	~RUGraph();
+	virtual ~RUGraph();
 
 	// gets
 	int getGraphSize() const;
@@ -81,6 +112,14 @@ public:
 	int getQuadrants() const;
 	float getQuadrantOffsetX() const;
 	float getQuadrantOffsetY() const;
+	float getXMin() const;
+	float getXMax() const;
+	float getYMin() const;
+	float getYMax() const;
+	float getVScale() const;
+	unsigned int getPeriod() const;
+	unsigned int getSourceAggregate() const;
+	unsigned int getAggregate() const;
 
 	// sets
 	void setGraphSize(int);
@@ -88,16 +127,17 @@ public:
 	void setGridEnabled(bool);
 	void setGridLineWidth(int);
 	void setQuadrants(int);
-	void setTitleLabel(std::string);
+	void setTitleLabel(shmea::GString);
+	void setXMin(float);
+	void setXMax(float);
+	void setYMin(float);
+	void setYMax(float);
+	void setVScale(float);
+	void setPeriod(unsigned int);
+	void setSourceAggregate(unsigned int);
+	void setAggregate(unsigned int);
 
-	virtual std::string getType() const;
-	void setPoints(const std::string&, const std::vector<Point2*>&, int = 0,
-				   SDL_Color = RUColors::DEFAULT_COLOR_LINE);
-	void setLine(const std::string&, const shmea::GList&, int = 0,
-				 SDL_Color = RUColors::DEFAULT_COLOR_LINE);
-	void addScatterPoints(const shmea::GTable&);
-	void buildDotMatrix();
-	void clear(bool = false);
+	virtual void update() = 0;
 };
 
 #endif

@@ -17,11 +17,12 @@
 #ifndef _GSOCKET
 #define _GSOCKET
 
-#include "../Database/GList.h"
+#include "../Database/GString.h"
 #include <arpa/inet.h>
 #include <iostream>
 #include <netdb.h>
 #include <pthread.h>
+#include <map>
 #include <queue>
 #include <stdio.h>
 #include <stdlib.h>
@@ -34,6 +35,10 @@
 #include <utility>
 #include <vector>
 
+namespace shmea {
+class ServiceData;
+};
+
 namespace GNet {
 class GServer;
 class Connection;
@@ -42,38 +47,35 @@ class Sockets
 {
 private:
 	static const int64_t DEFAULT_KEY = 420l;
-	static const std::string ANYADDR;
+	static const shmea::GString ANYADDR;
 
-	std::string PORT;
-	int64_t* overflow; // dont free this
-	unsigned int overflowLen;
+	shmea::GString PORT;
 	pthread_mutex_t* inMutex;
 	pthread_mutex_t* outMutex;
-	std::queue<shmea::GList> inboundLists;
-	std::queue<std::pair<Connection*, shmea::GList> > outboundLists;
+	std::map<int64_t, shmea::ServiceData*> inboundLists; // Vector of sds instead? Make the key advanced to take hostnames, usernames,  etc; too
+	std::map<int64_t, shmea::ServiceData*> outboundLists; // Vector of sds instead?
 
 	void initSockets();
 
-	// GList emptyResponseList();
+	// ServiceData* emptyResponseList();
 
 public:
-	static const std::string LOCALHOST;
+	static const shmea::GString LOCALHOST;
 
 	Sockets();
-	Sockets(const std::string&);
+	Sockets(const shmea::GString&);
 	~Sockets();
 
 	// functions
-	void initSockets(const std::string&);
+	void initSockets(const shmea::GString&);
 	void closeSockets();
-	const std::string getPort();
+	const shmea::GString getPort();
 	int openServerConnection();
-	int openClientConnection(const std::string&);
-	int64_t* reader(const int&, unsigned int&);
-	void readConnection(Connection*, const int&, const std::string&, std::vector<shmea::GList>&);
-	void readConnectionHelper(Connection*, const int&, const std::string&,
-							  std::vector<shmea::GList>&);
-	int writeConnection(const Connection*, const int&, const shmea::GList&, int);
+	int openClientConnection(const shmea::GString&);
+	shmea::GString reader(const int&);
+	void readConnection(Connection*, const int&, std::vector<shmea::ServiceData*>&);
+	void readConnectionHelper(Connection*, const int&, std::vector<shmea::ServiceData*>&);
+	int writeConnection(const Connection*, const int&, shmea::ServiceData*);
 	void closeConnection(const int&);
 
 	bool anyInboundLists();
@@ -82,7 +84,7 @@ public:
 	bool readLists(Connection*);
 	void processLists(GServer*, Connection*);
 	void writeLists(GServer*);
-	void addResponseList(GServer*, Connection*, const shmea::GList&);
+	void addResponseList(GServer*, Connection*, shmea::ServiceData*);
 };
 };
 

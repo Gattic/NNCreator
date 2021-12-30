@@ -56,10 +56,12 @@ protected:
 	static const int CUROSR_LEFT = 0;
 	static const int CURSOR_RIGHT = 1;
 
+	int FONT_COLOR;
+
 	SlidingFocusWindow cursor;
 
-	std::string text;
-	std::string strDrawText;
+	shmea::GString text;
+	shmea::GString strDrawText;
 	float strWidth;
 	int cursorX;
 	int xClick;
@@ -82,21 +84,21 @@ protected:
 public:
 	// constructor
 	RUTextComponent();
-	~RUTextComponent();
+	virtual ~RUTextComponent();
 
 	// gets
-	std::string getText() const;
+	shmea::GString getText() const;
 	char getPasswordChar() const;
 	bool isPasswordField() const;
 	bool getReadOnly() const;
 
 	// sets
 	void setText(const char*);
-	void setText(std::string);
+	void setText(shmea::GType);
 	void setPasswordChar(char);
 	void setPasswordField(bool);
 	void setReadOnly(bool);
-	void setFont(GFont*);
+	void setFontColor(int);
 
 	// render
 	void drawText(gfxpp*);
@@ -110,7 +112,7 @@ public:
 	virtual bool onKeyHelper(gfxpp*, GPanel*, SDL_Keycode, Uint16);
 
 	// type
-	virtual std::string getType() const = 0;
+	virtual shmea::GString getType() const = 0;
 };
 
 #endif

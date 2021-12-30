@@ -18,6 +18,7 @@
 #define _RUMOUSEUP
 
 #include "../RUItemArea.h"
+#include "../GeneralListener.h"
 #include <SDL2/SDL.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -35,7 +36,7 @@ protected:
 	virtual void onMouseUp(gfxpp*, GPanel*, int, int);
 
 	// event listeners
-	void (GPanel::*MouseUpListener)(int, int);
+	GeneralListener MouseUpListener;
 
 public:
 	// constructors & destructor
@@ -43,7 +44,7 @@ public:
 	virtual ~RUMouseUp();
 
 	// event functions
-	void setMouseUpListener(void (GPanel::*)(int, int));
+	void setMouseUpListener(GeneralListener);
 
 	// events
 	void onMouseUpHelper(gfxpp*, EventTracker*, GPanel*, int, int, bool = false);

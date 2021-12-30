@@ -29,12 +29,12 @@ class RULabel : public RUTextComponent
 public:
 	// constructors & destructor
 	RULabel();
-	RULabel(std::string);
+	RULabel(shmea::GString);
 	~RULabel();
 
 	// render
 	void updateBackground(gfxpp*);
-	virtual std::string getType() const;
+	virtual shmea::GString getType() const;
 	virtual void onMouseDown(gfxpp*, GPanel*, int, int);
 };
 

@@ -32,7 +32,7 @@ class RUCheckbox : public RUComponent
 
 protected:
 	bool checked;
-	std::string checkboxLocation;
+	shmea::GString checkboxLocation;
 
 	RULabel* checkboxLabel;
 	RUImageComponent* checkbox;
@@ -45,12 +45,12 @@ public:
 	static const int DEFAULT_SIDE_WIDTH = 24;
 
 	// constructors & destructor
-	RUCheckbox(std::string);
+	RUCheckbox(shmea::GString);
 	~RUCheckbox();
 
 	// gets
 	bool isChecked() const;
-	std::string getLabel() const;
+	shmea::GString getLabel() const;
 
 	// sets
 	void toggleCheck();
@@ -60,7 +60,7 @@ public:
 
 	// render
 	virtual void updateBackground(gfxpp*);
-	virtual std::string getType() const;
+	virtual shmea::GString getType() const;
 };
 
 #endif

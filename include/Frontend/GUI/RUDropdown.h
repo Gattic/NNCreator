@@ -35,14 +35,14 @@ protected:
 	bool open;
 	unsigned int prevSelectedIndex;
 	unsigned int selectedIndex;
-	std::string arrowLocation;
+	shmea::GString arrowLocation;
 
 	RULabel* selectedLabel;
 	RUListbox* lbItems;
 	RUImageComponent* arrow;
 
 	// events
-	void (GPanel::*OptionChangedListener)(int);
+	GeneralListener OptionChangedListener;
 	virtual void onMouseDown(gfxpp*, GPanel*, int, int);
 	virtual void onMouseWheel(gfxpp*, GPanel*, int, int, int);
 
@@ -57,7 +57,7 @@ public:
 	bool isOpen() const;
 	unsigned int getOptionsShown() const;
 	unsigned int getSelectedIndex();
-	std::string getSelectedText() const;
+	shmea::GString getSelectedText() const;
 
 	// sets
 	void toggleOpen();
@@ -65,16 +65,16 @@ public:
 	void setHeight(int);
 	void setOptionsShown(unsigned int);
 	void setSelectedIndex(unsigned int);
-	void addOption(std::string);
+	void addOption(shmea::GString);
 	void clearOptions();
 	unsigned int size() const;
 
 	// events
-	void setOptionChangedListener(void (GPanel::*)(int));
+	void setOptionChangedListener(GeneralListener);
 
 	// render
 	virtual void updateBackground(gfxpp*);
-	virtual std::string getType() const;
+	virtual shmea::GString getType() const;
 };
 
 #endif

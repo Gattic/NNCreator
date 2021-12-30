@@ -18,10 +18,13 @@
 #define _RUKEYDOWN
 
 #include "../RUItemArea.h"
+#include "../GeneralListener.h"
 #include <SDL2/SDL.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
+
+typedef void (*KeyDownEvent)(const shmea::GString&);
 
 class gfxpp;
 class GItem;
@@ -35,7 +38,7 @@ protected:
 	virtual void onKeyDown(gfxpp*, GPanel*, SDL_Keycode, Uint16);
 
 	// event listeners
-	void (GPanel::*KeyDownListener)(const std::string&);
+	GeneralListener KeyDownListener;
 
 public:
 	// constructors & destructor
@@ -43,7 +46,7 @@ public:
 	virtual ~RUKeyDown();
 
 	// event functions
-	void setKeyDownListener(void (GPanel::*)(const std::string&));
+	void setKeyDownListener(GeneralListener);
 
 	// events
 	void onKeyDownHelper(gfxpp*, EventTracker*, GPanel*, SDL_Keycode, Uint16);
