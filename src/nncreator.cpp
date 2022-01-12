@@ -1117,7 +1117,8 @@ void NNCreatorPanel::clickedRun(const shmea::GString& cmpName, int x, int y)
 	/*wData.addLong(trainPct);
 	wData.addLong(testPct);
 	wData.addLong(validationPct);*/
-	shmea::ServiceData* cSrvc = new shmea::ServiceData(cConnection, "ML_Train", wData);
+	shmea::ServiceData* cSrvc = new shmea::ServiceData(cConnection, "ML_Train");
+	cSrvc->set(wData);
 	serverInstance->send(cSrvc);
 }
 

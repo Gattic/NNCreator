@@ -51,14 +51,13 @@ public:
 	shmea::ServiceData* execute(const shmea::ServiceData* data)
 	{
 		class GNet::Connection* destination = data->getConnection();
-		shmea::ServiceData* retData = new shmea::ServiceData(destination);
 
 		if (data->getType() != shmea::ServiceData::TYPE_LIST)
-			return retData;
+			return NULL;
 
 		shmea::GList cList = data->getList();
 		if (cList.size() < 1)
-			return retData;
+			return NULL;
 
 		shmea::GString netName = cList.getString(0);
 		shmea::GString testFName = cList.getString(1);
@@ -74,7 +73,7 @@ public:
 		if (!cNetwork.load(netName.c_str()))
 		{
 			printf("[NN] Unable to load \"%s\"", netName.c_str());
-			return retData;
+			return NULL;
 		}
 
 		// Termination Conditions
@@ -88,7 +87,7 @@ public:
 		glades::MetaNetwork* newTrainNet =
 			glades::train(&cNetwork, inputTable, Arnold, serverInstance, destination);
 
-		return retData;
+		return NULL;
 	}
 
 	GNet::Service* MakeService(GNet::GServer* newInstance) const
