@@ -24,27 +24,16 @@
 #include <stdlib.h>
 #include <string>
 #include <vector>
-#include "../GFXUtilities/point2.h"
-#include "../GFXUtilities/Candle.h"
-#include "../Graphics/graphics.h"
-#include "Backend/Database/GList.h"
-#include "RUGraph.h"
+#include "GraphableAttr.h"
+
+class RUGraph;
 
 template <class T>
-class Graphable
+class Graphable : public GraphableAttr
 {
 private:
-	RUGraph* parent;
 	std::vector<T*> points;
-
-	bool redoRange;
-	bool localXMode;
-	bool localYMode;
-	float localXMin;
-	float localXMax;
-	float localYMin;
-	float localYMax;
-	SDL_Color lineColor;
+	bool visible;
 
 public:
 
@@ -53,151 +42,39 @@ public:
 	const static int TEXTURE_MAX_DIM = 16384;
 
 	// constructors & destructor
+	Graphable();
 	Graphable(RUGraph*, SDL_Color);
 	virtual ~Graphable();
 
-	// gets
-	float getXMin() const;
-	float getXMax() const;
-	float getYMin() const;
-	float getYMax() const;
-	bool getLocalXMode() const;
-	float getLocalXMin() const;
-	float getLocalXMax() const;
-	bool getLocalYMode() const;
-	float getLocalYMin() const;
-	float getLocalYMax() const;
-	SDL_Color getColor() const;
 	unsigned int size() const;
 	unsigned int normalizedSize() const;
-
-	// sets
-	void setLocalXMode(bool);
-	void setLocalXMin(float);
-	void setLocalXMax(float);
-	void setLocalYMode(bool);
-	void setLocalYMin(float);
-	void setLocalYMax(float);
-	void setColor(SDL_Color);
+	bool isVisible() const;
+	void setVisible(bool);
 	void add(const T*, bool = true);
 	void set(const std::vector<T*>&);
 	virtual void clear();
 
 	// render
-	virtual void updateBackground(gfxpp*);
 	virtual void draw(gfxpp*);
-
-	void computeAxisRanges(bool = false);
+	virtual void computeAxisRanges(bool = false);
 };
 
 template <class T>
-Graphable<T>::Graphable(RUGraph* newParent, SDL_Color newColor)
+Graphable<T>::Graphable(RUGraph* newParent, SDL_Color newColor) : GraphableAttr(newParent, newColor)
 {
-	parent = newParent;
-	setColor(newColor);
-	localXMode = false;
-	localYMode = false;
-	localXMin = FLT_MAX;
-	localXMax = FLT_MIN;
-	localYMin = FLT_MAX;
-	localYMax = FLT_MIN;
-	redoRange = true;
+	visible = true;
+}
+
+template <class T>
+Graphable<T>::Graphable()
+{
+	//
 }
 
 template <class T>
 Graphable<T>::~Graphable()
 {
 	clear();
-}
-
-template <class T>
-float Graphable<T>::getXMin() const
-{
-	if(!parent)
-		return 0.0f;
-
-	if(localXMode)
-		return localXMin;
-
-	return parent->getXMin();
-}
-
-template <class T>
-float Graphable<T>::getXMax() const
-{
-	if(!parent)
-		return 0.0f;
-
-	if(localXMode)
-		return localXMax;
-
-	return parent->getXMax();
-}
-
-template <class T>
-float Graphable<T>::getYMin() const
-{
-	if(!parent)
-		return 0.0f;
-
-	if(localYMode)
-		return localYMin;
-
-	return parent->getYMin();
-}
-
-template <class T>
-float Graphable<T>::getYMax() const
-{
-	if(!parent)
-		return 0.0f;
-
-	if(localYMode)
-		return localYMax;
-
-	return parent->getYMax();
-}
-
-template <class T>
-bool Graphable<T>::getLocalXMode() const
-{
-	return localXMode;
-}
-
-template <class T>
-float Graphable<T>::getLocalXMin() const
-{
-	return localXMin;
-}
-
-template <class T>
-float Graphable<T>::getLocalXMax() const
-{
-	return localXMax;
-}
-
-template <class T>
-bool Graphable<T>::getLocalYMode() const
-{
-	return localYMode;
-}
-
-template <class T>
-float Graphable<T>::getLocalYMin() const
-{
-	return localYMin;
-}
-
-template <class T>
-float Graphable<T>::getLocalYMax() const
-{
-	return localYMax;
-}
-
-template <class T>
-SDL_Color Graphable<T>::getColor() const
-{
-	return lineColor;
 }
 
 template <class T>
@@ -210,6 +87,18 @@ template <class T>
 unsigned int Graphable<T>::normalizedSize() const
 {
 	return normalizedPoints.size();
+}
+
+template <class T>
+bool Graphable<T>::isVisible() const
+{
+	return visible;
+}
+
+template <class T>
+void Graphable<T>::setVisible(bool newVisible)
+{
+	visible = newVisible;
 }
 
 template <class T>
@@ -232,48 +121,6 @@ void Graphable<T>::add(const T* newPoint, bool recompute)
 	points.push_back(new T(*newPoint));
 	if(recompute)
 		computeAxisRanges(true);
-}
-
-template <class T>
-void Graphable<T>::setLocalXMode(bool newLocalXMode)
-{
-	localXMode = newLocalXMode;
-}
-
-template <class T>
-void Graphable<T>::setLocalXMin(float newXMin)
-{
-	localXMin = newXMin;
-}
-
-template <class T>
-void Graphable<T>::setLocalXMax(float newXMax)
-{
-	localXMax = newXMax;
-}
-
-template <class T>
-void Graphable<T>::setLocalYMode(bool newLocalYMode)
-{
-	localYMode = newLocalYMode;
-}
-
-template <class T>
-void Graphable<T>::setLocalYMin(float newYMin)
-{
-	localYMin = newYMin;
-}
-
-template <class T>
-void Graphable<T>::setLocalYMax(float newYMax)
-{
-	localYMax = newYMax;
-}
-
-template <class T>
-void Graphable<T>::setColor(SDL_Color newColor)
-{
-	lineColor = newColor;
 }
 
 /*
@@ -308,35 +155,7 @@ void Graphable<T>::clear()
 
 	points.clear();
 	normalizedPoints.clear();
-
-	parent = NULL;
-	localXMode = false;
-	localYMode = false;
-	localXMin = FLT_MAX;
-	localXMax = FLT_MIN;
-	localYMin = FLT_MAX;
-	localYMax = FLT_MIN;
-	redoRange = true;
-}
-
-template <class T>
-void Graphable<T>::updateBackground(gfxpp* cGfx)
-{
-	if(!cGfx)
-		return;
-
-	//if(!rawGraph)
-	//	return;
-
-	// Set the render target to draw the cached raw draw space
-	//SDL_SetRenderTarget(cGfx->getRenderer(), rawGraph);
-	//draw(cGfx);
-
-	// draw the line
-	SDL_SetRenderTarget(cGfx->getRenderer(), parent->getBackground());
-	draw(cGfx);
-
-	redoRange = false;
+	visible = false;
 }
 
 #endif

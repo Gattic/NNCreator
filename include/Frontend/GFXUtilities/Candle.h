@@ -33,7 +33,7 @@ public:
 	Candle();
 	Candle(float, float, float, float, float);
 	Candle(const Candle&);
-	~Candle();
+	virtual ~Candle();
 
 	// get
 	float getX() const;

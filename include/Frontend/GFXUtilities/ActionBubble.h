@@ -49,7 +49,7 @@ public:
 	// constructors & destructor
 	ActionBubble();
 	ActionBubble(int, float, int, int);
-	~ActionBubble();
+	virtual ~ActionBubble();
 
 	void setFocalPoint(const Point2*);
 	void setRadius(double);

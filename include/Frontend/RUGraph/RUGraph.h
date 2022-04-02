@@ -19,6 +19,7 @@
 
 #include "../GItems/RUColors.h"
 #include "../GItems/RUComponent.h"
+#include "GeneralGraphable.h"
 #include <SDL2/SDL.h>
 #include <map>
 #include <pthread.h>
@@ -52,6 +53,7 @@ private:
 	unsigned int agg; //aggregatelevel of our data
 
 protected:
+	std::map<shmea::GString, GeneralGraphable*> graphables;
 	RULabel* titleLabel;
 	float xMin;
 	float xMax;
@@ -102,6 +104,12 @@ public:
 	RUGraph(int, int, int = QUADRANTS_ONE);
 	virtual ~RUGraph();
 
+	template< typename T>
+	void add(shmea::GString, const T*, SDL_Color = RUColors::DEFAULT_COLOR_LINE, bool = true);
+
+	template< typename T>
+	void set(const shmea::GString&, const std::vector<T*>&, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
+
 	// gets
 	int getGraphSize() const;
 	int getAxisOriginX() const;
@@ -120,6 +128,7 @@ public:
 	unsigned int getPeriod() const;
 	unsigned int getSourceAggregate() const;
 	unsigned int getAggregate() const;
+	std::map<shmea::GString, GeneralGraphable*>  getGraphables();
 
 	// sets
 	void setGraphSize(int);
@@ -137,7 +146,60 @@ public:
 	void setSourceAggregate(unsigned int);
 	void setAggregate(unsigned int);
 
-	virtual void update() = 0;
+	virtual shmea::GString getType() const;
+	virtual void update();
+	virtual void clear(bool = false);
 };
+
+template< typename T>
+void RUGraph::add(shmea::GString label, const T* newPoint, SDL_Color lineColor, bool recompute)
+{
+	T* plotterPoint = new T(*newPoint);
+	if ((graphables.find(label) == graphables.end()) || (graphables[label] == NULL))
+	{
+		std::vector<T*> newPointVec;
+		newPointVec.push_back(plotterPoint);
+		set(label, newPointVec, lineColor);
+		return;
+	}
+
+	GeneralGraphable* cPlotter = graphables[label];
+	if(!cPlotter)
+		return;
+
+	cPlotter->add(plotterPoint, recompute);
+	cPlotter->setColor(lineColor);
+
+	// DON'T trigger the draw update here
+}
+
+template< typename T>
+void RUGraph::set(const shmea::GString& label, const std::vector<T*>& graphPoints, SDL_Color lineColor)
+{
+	GeneralGraphable* newPlotter = NULL;
+	if (graphables.find(label) != graphables.end())
+	{
+		newPlotter = graphables[label];
+		if(!newPlotter)
+			return;
+
+		newPlotter->setColor(lineColor);
+	}
+	else
+	{
+		newPlotter = new GeneralGraphable(this, lineColor, T());
+		if (!newPlotter)
+			return;
+		graphables[label] = newPlotter;
+		if (!graphables[label])
+			return;
+	}
+
+	newPlotter->set(graphPoints);
+
+	// trigger the draw update
+	drawUpdate = true;
+}
+
 
 #endif

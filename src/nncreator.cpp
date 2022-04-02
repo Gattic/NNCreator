@@ -53,7 +53,6 @@
 #include "Frontend/GUI/Text/RUTextbox.h"
 #include "Frontend/Graphics/graphics.h"
 #include "Frontend/RUGraph/RUGraph.h"
-#include "Frontend/RUGraph/RULineGraph.h"
 #include "crt0.h"
 #include "main.h"
 #include "services/gui_callback.h"
@@ -131,7 +130,7 @@ void NNCreatorPanel::buildPanel()
 	lcGraphLayout->addSubItem(lblGraphLC);
 
 	// Learning curve graph
-	lcGraph = new RULineGraph(getWidth() / 4, getHeight() / 4, RULineGraph::QUADRANTS_ONE);
+	lcGraph = new RUGraph(getWidth() / 4, getHeight() / 4, RUGraph::QUADRANTS_ONE);
 	lcGraph->setName("lcGraph");
 	lcGraphLayout->addSubItem(lcGraph);
 
@@ -150,9 +149,8 @@ void NNCreatorPanel::buildPanel()
 	rocGraphLayout->addSubItem(lblGraphROC);
 
 	// ROC Curve Graph
-	rocCurveGraph =
-		new RULineGraph(getWidth() / 4, getHeight() / 4,
-						RULineGraph::QUADRANTS_ONE); // -4 = adjustment to align with table
+	rocCurveGraph = new RUGraph(getWidth() / 4, getHeight() / 4,
+								RUGraph::QUADRANTS_ONE); // -4 = adjustment to align with table
 	rocCurveGraph->setName("rocCurveGraph");
 	rocGraphLayout->addSubItem(rocCurveGraph);
 
@@ -177,9 +175,8 @@ void NNCreatorPanel::buildPanel()
 	dartGraphLayout->addSubItem(lblGraphDart);
 
 	// Dartboard graph
-	dartboardGraph =
-		new RULineGraph(getWidth() / 4, getHeight() / 4,
-						RULineGraph::QUADRANTS_ONE); // -4 = adjustment to align with table
+	dartboardGraph = new RUGraph(getWidth() / 4, getHeight() / 4,
+								 RUGraph::QUADRANTS_ONE); // -4 = adjustment to align with table
 	dartboardGraph->setName("dartboardGraph");
 	dartGraphLayout->addSubItem(dartboardGraph);
 

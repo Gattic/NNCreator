@@ -33,7 +33,7 @@ public:
 	Point2();
 	Point2(double, double);
 	Point2(const Point2&);
-	~Point2();
+	virtual ~Point2();
 
 	// get
 	double getX() const;

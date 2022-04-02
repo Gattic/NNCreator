@@ -14,45 +14,71 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _RUCIRCLE
-#define _RUCIRCLE
+#ifndef _GRAPHABLEATTR_H
+#define _GRAPHABLEATTR_H
 
-#include "Graphable.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
-#include <map>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
 #include <vector>
+#include "../GFXUtilities/point2.h"
+#include "../GFXUtilities/Candle.h"
+#include "../Graphics/graphics.h"
+#include "Backend/Database/GList.h"
 
-class gfxpp;
 class RUGraph;
-class Point2;
 
-class Circle : public Graphable
+class GraphableAttr
 {
-private:
-	std::map<int, std::map<int, int> > heatmap;
-	std::vector<const Point2*> foci;
-	double radius;
-	int maxHit;
+protected:
+	RUGraph* parent;
+	bool redoRange;
+	bool localXMode;
+	bool localYMode;
+	float localXMin;
+	float localXMax;
+	float localYMin;
+	float localYMax;
+	SDL_Color lineColor;
 
 public:
+
+	const static int TEXTURE_MAX_DIM = 16384;
+
 	// constructors & destructor
-	Circle(RUGraph*, SDL_Color);
-	~Circle();
+	GraphableAttr();
+	GraphableAttr(RUGraph*, SDL_Color);
+	virtual ~GraphableAttr();
 
-	void addFocalPoint(const Point2*);
-	void setRadius(double);
-	void createHeatmap();
+	// gets
+	float getXMin() const;
+	float getXMax() const;
+	float getYMin() const;
+	float getYMax() const;
+	bool getLocalXMode() const;
+	float getLocalXMin() const;
+	float getLocalXMax() const;
+	bool getLocalYMode() const;
+	float getLocalYMin() const;
+	float getLocalYMax() const;
+	SDL_Color getColor() const;
 
-	const Point2* getFocalPoint(unsigned int) const;
-	double getRadius() const;
+	// sets
+	void setLocalXMode(bool);
+	void setLocalXMin(float);
+	void setLocalXMax(float);
+	void setLocalYMode(bool);
+	void setLocalYMin(float);
+	void setLocalYMax(float);
+	void setColor(SDL_Color);
+	virtual void clear();
 
-	virtual void draw(gfxpp*);
-	virtual std::string getType() const;
+	// render
+	virtual void draw(gfxpp*) = 0;
+	virtual void updateBackground(gfxpp*);
 };
 
 #endif

@@ -45,7 +45,7 @@ class RUTextbox;
 class RUCheckbox;
 class RUButton;
 class RUDropdown;
-class RULineGraph;
+class RUGraph;
 class RUTable;
 class RUProgressBar;
 class RUTabContainer;
@@ -78,9 +78,9 @@ protected:
 
 	void buildPanel();
 
-	RULineGraph* lcGraph;
-	RULineGraph* dartboardGraph;
-	RULineGraph* rocCurveGraph;
+	RUGraph* lcGraph;
+	RUGraph* dartboardGraph;
+	RUGraph* rocCurveGraph;
 	RUTable* cMatrixTable;
 
 	RULabel* lblSettings;

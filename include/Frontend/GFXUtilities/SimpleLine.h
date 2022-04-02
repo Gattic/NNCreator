@@ -14,50 +14,85 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _RULINEGRAPH
-#define _RULINEGRAPH
+#ifndef _GSIMPLELINE
+#define _GSIMPLELINE
 
-#include "RUGraph.h"
-#include "../GItems/RUColors.h"
-#include "../GFXUtilities/point2.h"
-#include "Graphable.h"
-#include <SDL2/SDL.h>
-#include <map>
-#include <pthread.h>
+#include <float.h>
+#include <iostream>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string>
 #include <vector>
 
-class gfxpp;
-//class Graphable<Point2>;
-class Point2;
-
-namespace shmea {
-class GList;
-}; // namespace shmea
-
-class RULineGraph : public RUGraph
+class SimpleLine
 {
 private:
-	std::map<shmea::GString, Graphable<Point2>*> lines;
-
-protected:
-	// render
-	virtual void updateBackground(gfxpp*);
+	double y;
 
 public:
+	SimpleLine();
+	SimpleLine(double);
+	SimpleLine(const SimpleLine&);
+	~SimpleLine();
 
-	// constructors & destructor
-	RULineGraph(int, int, int = QUADRANTS_ONE);
-	virtual ~RULineGraph();
+	// get
+	double getY() const;
 
-	virtual shmea::GString getType() const;
-	virtual void add(shmea::GString, const Point2*, SDL_Color = RUColors::DEFAULT_COLOR_LINE, bool = true);
-	virtual void set(const shmea::GString&, const std::vector<Point2*>&, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
+	// set
+	void set(double);
+	void setY(double);
 
-	virtual void update();
-	void clear(bool = false);
+	// operators
+	inline SimpleLine operator+(SimpleLine v)
+	{
+		v.y += y;
+		return v;
+	}
+
+	inline SimpleLine operator-(SimpleLine v)
+	{
+		v.y = y - v.y;
+		return v;
+	}
+
+	inline SimpleLine operator*(double scalar)
+	{
+		return SimpleLine(scalar * y);
+	}
+
+	inline SimpleLine operator/(double scalar)
+	{
+		return SimpleLine(y / scalar);
+	}
+
+	void operator=(const SimpleLine& p)
+	{
+		setY(p.y);
+	}
+
+	bool operator==(const SimpleLine& v) const
+	{
+		// y
+		double deltaY = v.y - y;
+		bool yChange = ((deltaY > -DBL_EPSILON) && (deltaY < DBL_EPSILON));
+
+		return yChange;
+	}
+
+	bool operator!=(const SimpleLine& v) const
+	{
+		return !(*this == v);
+	}
+
+	bool operator<(const SimpleLine& c2) const // ONLY COMPARES X
+	{
+		return (getY() < c2.getY());
+	}
+
+	bool operator>(const SimpleLine& c2) const // ONLY COMPARES X
+	{
+		return (getY() > c2.getY());
+	}
 };
 
 #endif
