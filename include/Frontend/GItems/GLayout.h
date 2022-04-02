@@ -19,6 +19,7 @@
 #define _GLAYOUT
 
 #include "GItem.h"
+#include "Backend/Database/GString.h"
 #include <SDL2/SDL.h>
 #include <map>
 #include <stdio.h>
@@ -27,10 +28,6 @@
 #include <vector>
 
 class gfxpp;
-class GPanel;
-class RUComponent;
-class RUBackgroundComponent;
-class RUBorderComponent;
 
 class GLayout : public GItem
 {
@@ -47,7 +44,7 @@ public:
 
 	virtual void hover(gfxpp*);
 	virtual void unhover(gfxpp*);
-	virtual std::string getType() const = 0;
+	virtual shmea::GString getType() const = 0;
 };
 
 #endif

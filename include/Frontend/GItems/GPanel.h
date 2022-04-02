@@ -18,6 +18,8 @@
 #define _GPANEL
 
 #include "GItem.h"
+#include "Backend/Database/ServiceData.h"
+#include "Backend/Database/GString.h"
 #include <SDL2/SDL.h>
 #include <map>
 #include <pthread.h>
@@ -27,6 +29,7 @@
 #include <string>
 #include <time.h>
 #include <vector>
+#include <queue>
 
 class gfxpp;
 class RUComponent;
@@ -35,20 +38,30 @@ class GLayout;
 // GPanel is highest-level abstraction for rendering.
 class GPanel : public GItem
 {
-
 protected:
+
+	std::queue<const shmea::ServiceData*> updateQueue;
+	pthread_mutex_t* qMutex;
+
+	void processQ();
+	void popQ();
+	virtual void updateFromQ(const shmea::ServiceData*);
+
 	// Lifetime (virtual) functions
 	virtual void onStart() = 0;
 	virtual void onShow(gfxpp*);
 	virtual void onHide(gfxpp*);
 
 	// render
-	virtual void updateBackground(SDL_Renderer* renderer);
+	virtual void updateBackground(gfxpp*);
 
 public:
-	GPanel(const std::string&, int, int);
 
-	virtual void addSubItem(GItem*, int = Z_FRONT);
+	GPanel(const shmea::GString&, int, int);
+	virtual ~GPanel();
+
+	void addToQ(const shmea::ServiceData*);
+	virtual void addSubItem(GItem*, unsigned int = Z_FRONT);
 	virtual void calculateSubItemPositions(std::pair<int, int>);
 
 	// events
@@ -57,27 +70,11 @@ public:
 	virtual void hover(gfxpp*);
 	virtual void unhover(gfxpp*);
 	virtual void processSubItemEvents(gfxpp*, EventTracker*, GPanel*, SDL_Event, int, int);
-	virtual void updateBackgroundHelper(SDL_Renderer*);
+	virtual void updateBackgroundHelper(gfxpp*);
 
-	virtual void GuiCommander1(const std::string&, int, int) = 0;
-	virtual void GuiCommander2(const std::string&, int, int) = 0;
-	virtual void GuiCommander3(const std::string&, int, int) = 0;
-	virtual void GuiCommander4(const std::string&, int, int) = 0;
-	virtual void GuiCommander5(const std::string&, int, int) = 0;
-	virtual void GuiCommander6(const std::string&, int, int) = 0;
-	virtual void GuiCommander7(const std::string&, int, int) = 0;
-	virtual void GuiCommander8(const std::string&, int, int) = 0;
-	virtual void GuiCommander9() = 0;
-	virtual void GuiCommander10(const std::string&, int, int) = 0;
-	virtual void GuiCommander11(char) = 0;
-	virtual void GuiCommander12(const std::string&, int, int) = 0;
-	virtual void GuiCommander13(const std::string&, int, int) = 0;
-	virtual void GuiCommander14(const std::string&, int, int) = 0;
-	virtual void GuiCommander15(int) = 0;
+	virtual shmea::GString getType() const;
 
-	virtual std::string getType() const;
-
-	void MsgBox(std::string, std::string, int);
+	void MsgBox(shmea::GString, shmea::GString, int, GeneralListener = GeneralListener());
 };
 
 #endif

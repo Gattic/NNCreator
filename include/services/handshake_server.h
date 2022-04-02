@@ -17,7 +17,8 @@
 #ifndef _HANDSHAKE_SERVER
 #define _HANDSHAKE_SERVER
 
-#include "../Backend/Database/GList.h"
+#include "../Backend/Database/GString.h"
+#include "../Backend/Database/ServiceData.h"
 #include "../Backend/Networking/main.h"
 #include "../Backend/Networking/service.h"
 #include "../Backend/Networking/socket.h"
@@ -43,43 +44,49 @@ public:
 		serverInstance = NULL; // Not ours to delete
 	}
 
-	shmea::GList execute(class GNet::Instance* cInstance, const shmea::GList& data)
+	shmea::ServiceData* execute(const shmea::ServiceData* data)
 	{
 		// Log the client into the server
-		shmea::GList retList;
+		class GNet::Connection* destination = data->getConnection();
 
 		if (!serverInstance)
-			return retList;
+			return NULL;
 
-		if (data.size() < 1)
-			return retList;
+		if (data->getType() != shmea::ServiceData::TYPE_LIST)
+			return NULL;
+
+		shmea::GList cList = data->getList();
+		if (cList.size() < 1)
+			return NULL;
 
 		// Check the characters in the name
-		std::string clientName = data.getString(0);
-		if (GNet::Instance::validName(clientName))
-			cInstance->setName(clientName);
+		shmea::GString clientName = cList.getString(0);
+		if (GNet::Connection::validName(clientName))
+			destination->setName(clientName);
 
 		// generate a new key for the sockets
-		// if (cInstance->getIP() != GNet::Sockets::LOCALHOST)
+		// if (destination->getIP() != GNet::Sockets::LOCALHOST)
 		{
-			int64_t newKey = GNet::Instance::generateKey();
+			int64_t newKey = GNet::Connection::generateKey();
+			//printf("newKey0: %ld\n", newKey);
 
 			// tell the client the good news
 			shmea::GList wData;
-			wData.addString("Handshake_Client");
-			wData.addString(cInstance->getName());
+			wData.addString(destination->getName());
 			wData.addLong(newKey);
-			// GNet::Service::ExecuteService(serverInstance, wData, cInstance);
-			serverInstance->NewService(wData, cInstance, GNet::GServer::ACK_TYPE);
 
-			// Set the new instance key
-			cInstance->setKey(newKey);
+			shmea::ServiceData* cData = new shmea::ServiceData(destination, "Handshake_Client", wData);
+			serverInstance->send(cData);
+			//printf("newKey1: %ld:%ld\n", newKey, wData.getLong(1));
+
+			// Set the new Connection key
+			destination->setKey(newKey);
 		}
 
-		return retList;
+		return NULL;
 	}
 
-	std::string getName() const
+	shmea::GString getName() const
 	{
 		return "Handshake_Server";
 	}

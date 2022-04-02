@@ -52,7 +52,8 @@ void Frontend::run(GNet::GServer* serverInstance, bool fullscreenMode)
 	}
 
 	// Create the GPanels
-	NNCreatorPanel* nnCreatorPanel = new NNCreatorPanel(serverInstance, "nnCreatorPanel", newWidth, newHeight);
+	NNCreatorPanel* nnCreatorPanel =
+		new NNCreatorPanel(serverInstance, "nnCreatorPanel", newWidth, newHeight);
 	nnCreatorPanel->show(&cGfx);
 	cGfx.addItem(nnCreatorPanel);
 

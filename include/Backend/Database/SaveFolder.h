@@ -14,40 +14,50 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _GRAPHSCATTER_H
-#define _GRAPHSCATTER_H
+#ifndef _GSAVEFOLDER
+#define _GSAVEFOLDER
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_opengl.h>
+#include "GString.h"
+#include <dirent.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <string>
+#include <unistd.h>
 #include <vector>
 
-#include "../GItems/RUColors.h"
-#include "Graphable.h"
+namespace shmea {
 
-class RUGraph;
-class Point2;
+class GTable;
+class SaveTable;
 
-class GraphScatter : public Graphable
+class SaveFolder
 {
 private:
-	void drawPoint(SDL_Renderer*, int, int, int = 0);
-	void drawPointOutline(SDL_Renderer*, int, int, int = 0);
-	int pointSize;
+	std::vector<SaveTable*> saveItems;
+	GString dname;
+
+	GString getPath() const;
+	void addItem(SaveTable*);
+	void clean();
 
 public:
 	// constructors & destructor
-	GraphScatter(RUGraph*, SDL_Color = RUColors::DEFAULT_COLOR_LINE, int = 4);
-	~GraphScatter();
+	SaveFolder(const GString&);
+	virtual ~SaveFolder();
 
-	void setPointSize(int);
-	int getPointSize(int);
+	SaveTable* loadItem(const GString&);
+	bool deleteItem(const GString&);
+	SaveTable* newItem(const GString&, const GTable&);
+	void load();
+	static std::vector<SaveFolder*> loadFolders();
 
-	virtual void draw(SDL_Renderer*);
-	virtual std::string getType() const;
+	// gets
+	GString getName() const;
+	const std::vector<SaveTable*>& getItems() const;
+	int size() const;
+};
 };
 
 #endif

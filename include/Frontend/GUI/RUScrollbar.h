@@ -35,9 +35,9 @@ protected:
 	SDL_Color barColor;
 	float arrowSpace;
 
-	const static std::string arrowUpLocation;
-	const static std::string arrowDownLocation;
-	const static std::string scrollBarLocation;
+	const static shmea::GString arrowUpLocation;
+	const static shmea::GString arrowDownLocation;
+	const static shmea::GString scrollBarLocation;
 
 	// scrollbar images
 	RUImageComponent* arrowUp;
@@ -76,8 +76,8 @@ public:
 	void calculateBarPos();
 
 	// render
-	virtual void updateBackground(SDL_Renderer*);
-	virtual std::string getType() const;
+	virtual void updateBackground(gfxpp*);
+	virtual shmea::GString getType() const;
 };
 
 #endif

@@ -14,8 +14,8 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _INSTANCE
-#define _INSTANCE
+#ifndef _GSERVICEDATA
+#define _GSERVICEDATA
 
 #include <pthread.h>
 #include <stdio.h>
@@ -25,82 +25,55 @@
 #include <time.h>
 #include <vector>
 
+namespace shmea {
+	class GList;
+	class GTable;
+	class Serializable;
+};
+
 namespace GNet {
 
-class newServiceArgs;
-class Service;
+class Connection;
 
-class Instance
+class ServiceData
 {
 private:
-	std::string name;
-	// std::string sid;//session id
-	std::string ip;
-	int connectionType;
-	int64_t key;
-	bool finished;
+
+	Connection* origin;
+	Connection* destination;
+	std::string sid;
+	std::string command;
+	int dataType;
 
 public:
-	// member limits
-	static const int KEY_LENGTH = 6;
+
 	static const int SID_LENGTH = 12;
 
-	// connectionType
-	static const int EMPTY_TYPE = -1;
-	static const int SERVER_TYPE = 0;
-	static const int CLIENT_TYPE = 1;
+	static const int TYPE_ACK = 0;
+	static const int TYPE_LIST = 1;
+	static const int TYPE_TABLE = 2;
+	static const int TYPE_NETWORK_POINTER = 3;
 
-	int sockfd;
-	int64_t* overflow;
-	unsigned int overflowLen;
-	std::vector<Service*> sThreads; // all the active service threads
+	shmea::GList* listData;
+	shmea::GTable* tableData;
 
-	Instance(int, int, std::string);
-	~Instance();
-	void finish();
+	ServiceData(Connection*, Connection*, std::string);
+	ServiceData(Connection*, Connection*, std::string, shmea::GList*);
+	ServiceData(Connection*, Connection*, std::string, shmea::GTable*);
+	ServiceData(Connection*, Connection*, std::string, shmea::Serializable*);
+	ServiceData(const ServiceData&);
+	~ServiceData();
 
-	// gets
-	std::string getName() const
-	{
-		return name;
-	}
-	// std::string getSID() const { return sid; }
-	std::string getIP() const
-	{
-		return ip;
-	}
-	int getConnectionType() const
-	{
-		return connectionType;
-	}
-	int64_t getKey() const
-	{
-		return key;
-	}
-	bool isFinished() const
-	{
-		return finished;
-	}
+	Connection* getOrigin();
+	Connection* getDestination();
+	std::string getSID() const;
+	std::string getCommand() const;
+	int getDataType() const;
+	void setCommand(std::string);
+	void setDataType(int);
 
-	// sets
-	void setName(std::string newName)
-	{
-		name = newName;
-	}
-	// void setSID(std::string newSID) { sid=newSID; }
-	void setIP(std::string newIP)
-	{
-		ip = newIP;
-	}
-	void setKey(int64_t newKey)
-	{
-		key = newKey;
-	}
-
-	static bool validName(const std::string&);
-	static int64_t generateKey();
-	// static bool validSID(const std::string&);
-	// static std::string generateSID();
+	static bool validSID(const std::string&);
+	static std::string generateSID();
 };
 };
 

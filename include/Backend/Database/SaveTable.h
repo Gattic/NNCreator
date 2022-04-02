@@ -14,30 +14,59 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _RUGRAPHLINE
-#define _RUGRAPHLINE
+#ifndef _GSAVETABLE
+#define _GSAVETABLE
 
-#include "../GItems/RUColors.h"
-#include "Graphable.h"
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_opengl.h>
+#include "GString.h"
+#include "GTable.h"
+#include <fstream>
 #include <pthread.h>
+#include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <string>
+#include <unistd.h>
 #include <vector>
 
-class RUGraph;
-class Point2;
-
-class GraphLine : public Graphable
+namespace shmea {
+class SaveTable
 {
+private:
+	int64_t id;
+	GString dname;
+	GString name;
+	GTable value;
+
+	GString getPath() const;
+
+protected:
+	friend class SaveList;
+
+	// Load functions
+	void loadByID(int64_t);
+
+	// Save Functions
+	void saveByID(const GTable&);
+
+	void clean();
+
 public:
 	// constructors & destructor
-	GraphLine(RUGraph*, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
-	~GraphLine();
-	virtual void draw(SDL_Renderer*);
-	virtual std::string getType() const;
+	SaveTable(const GString&, const GString&);
+	virtual ~SaveTable();
+
+	// Database operations
+	void loadByName();
+	void saveByName(const GTable&) const;
+	bool deleteByName();
+
+	// gets
+	int64_t getID() const;
+	GString getName() const;
+	GTable getTable() const;
+	void print() const;
+};
 };
 
 #endif

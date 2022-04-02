@@ -22,6 +22,8 @@
 #include <stdlib.h>
 #include <string>
 
+class gfxpp;
+
 class RUTextbox : public RUTextComponent
 {
 protected:
@@ -33,11 +35,11 @@ public:
 	~RUTextbox();
 
 	// render
-	void updateBackground(SDL_Renderer*);
+	void updateBackground(gfxpp*);
 	void setStaticBorder(bool);
-	virtual void hover();
-	virtual void unhover();
-	virtual std::string getType() const;
+	virtual void hover(gfxpp*);
+	virtual void unhover(gfxpp*);
+	virtual shmea::GString getType() const;
 };
 
 #endif

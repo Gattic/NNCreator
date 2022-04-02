@@ -24,49 +24,138 @@
 #include <stdlib.h>
 #include <string>
 #include <vector>
+#include "GraphableAttr.h"
 
 class RUGraph;
-class Point2;
 
-namespace shmea {
-class GList;
-};
-
-class Graphable
+template <class T>
+class Graphable : public GraphableAttr
 {
-protected:
-	std::vector<Point2*> points;
-	float x_max, x_min, y_max, y_min;
-	RUGraph* parent;
-
 private:
-	SDL_Color lineColor;
-	pthread_mutex_t* plotMutex;
-
-	void computeAxisRanges();
+	std::vector<T*> points;
+	bool visible;
 
 public:
-	static const int LINE = 0;
-	static const int SCATTER = 1;
+
+	std::vector<T*> normalizedPoints;
+
+	const static int TEXTURE_MAX_DIM = 16384;
 
 	// constructors & destructor
+	Graphable();
 	Graphable(RUGraph*, SDL_Color);
 	virtual ~Graphable();
 
-	// gets
-	SDL_Color getColor() const;
-
-	// sets
-	void setParent(RUGraph*);
-	void setColor(SDL_Color);
-	void setPoints(const std::vector<Point2*>&);
-	void setLine(const shmea::GList&);
+	unsigned int size() const;
+	unsigned int normalizedSize() const;
+	bool isVisible() const;
+	void setVisible(bool);
+	void add(const T*, bool = true);
+	void set(const std::vector<T*>&);
 	virtual void clear();
 
 	// render
-	virtual void updateBackground(SDL_Renderer*);
-	virtual void draw(SDL_Renderer*) = 0;
-	virtual std::string getType() const = 0;
+	virtual void draw(gfxpp*);
+	virtual void computeAxisRanges(bool = false);
 };
+
+template <class T>
+Graphable<T>::Graphable(RUGraph* newParent, SDL_Color newColor) : GraphableAttr(newParent, newColor)
+{
+	visible = true;
+}
+
+template <class T>
+Graphable<T>::Graphable()
+{
+	//
+}
+
+template <class T>
+Graphable<T>::~Graphable()
+{
+	clear();
+}
+
+template <class T>
+unsigned int Graphable<T>::size() const
+{
+	return points.size();
+}
+
+template <class T>
+unsigned int Graphable<T>::normalizedSize() const
+{
+	return normalizedPoints.size();
+}
+
+template <class T>
+bool Graphable<T>::isVisible() const
+{
+	return visible;
+}
+
+template <class T>
+void Graphable<T>::setVisible(bool newVisible)
+{
+	visible = newVisible;
+}
+
+template <class T>
+void Graphable<T>::set(const std::vector<T*>& newPoints)
+{
+	if (newPoints.empty())
+		return;
+
+	points = newPoints;
+	computeAxisRanges();//sets redoRange automatically
+}
+
+// This function is recommended for TimeSeries optimizations.
+template <class T>
+void Graphable<T>::add(const T* newPoint, bool recompute)
+{
+	if (!newPoint)
+		return;
+
+	points.push_back(new T(*newPoint));
+	if(recompute)
+		computeAxisRanges(true);
+}
+
+/*
+ * @brief draw point
+ * @details draws a filled point on the renderer at (x,y) with radius r using the Midpoint circle
+ * algorithm. Scatter Helper fnc
+ * @param cGfx the central graphics object
+ * @param cx the desired central x-coordinate
+ * @param cy the desired central y-coordinate
+ * @param r the desired circle radius
+ */
+/*template <class T>
+void Graphable<T>::drawPoint(gfxpp* cGfx, int cx, int cy, int r)//Turn these 3 points into a class?
+{
+	if (r == 0)
+		r = pointSize / 2;
+	for (int i = 1; i <= r; ++i)
+		drawPointOutline(cGfx, cx, cy, i);
+}*/
+
+template <class T>
+void Graphable<T>::clear()
+{
+	for (unsigned int i = 0; i < points.size(); ++i)
+	{
+		T* cPoint = points[i];
+		if (!cPoint)
+			continue;
+		delete cPoint;
+		points.erase(points.begin() + i);
+	}
+
+	points.clear();
+	normalizedPoints.clear();
+	visible = false;
+}
 
 #endif

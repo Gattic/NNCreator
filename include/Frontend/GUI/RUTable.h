@@ -17,13 +17,14 @@
 #ifndef _RUTABLE
 #define _RUTABLE
 
-#include "Backend/Database/gtable.h"
 #include "../GItems/RUComponent.h"
+#include "Backend/Database/GTable.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
 #include <vector>
 
+class gfxpp;
 class RULabel;
 class RUScrollbar;
 
@@ -41,7 +42,7 @@ protected:
 	unsigned int rowsShown;
 
 	// events
-	virtual void onMouseWheel(GPanel*, int, int, int);
+	virtual void onMouseWheel(gfxpp*, GPanel*, int, int, int);
 
 public:
 	static const int DEFAULT_SCROLLBAR_WIDTH = 20;
@@ -63,8 +64,8 @@ public:
 	// render
 	void updateLabels();
 	void refreshLabels();
-	virtual void updateBackground(SDL_Renderer*);
-	virtual std::string getType() const;
+	virtual void updateBackground(gfxpp*);
+	virtual shmea::GString getType() const;
 };
 
 #endif

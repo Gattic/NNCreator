@@ -22,6 +22,8 @@
 #include <stdlib.h>
 #include <string>
 
+class gfxpp;
+
 class RUProgressBar : public RUComponent
 {
 protected:
@@ -44,8 +46,8 @@ public:
 	void setMaxValue(int);
 
 	// render
-	virtual void updateBackground(SDL_Renderer*);
-	virtual std::string getType() const;
+	virtual void updateBackground(gfxpp*);
+	virtual shmea::GString getType() const;
 };
 
 #endif

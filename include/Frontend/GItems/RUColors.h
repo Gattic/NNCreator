@@ -39,6 +39,10 @@ public:
 	static SDL_Color DEFAULT_DROPDOWN_ARROW;
 	static SDL_Color DEFAULT_TEXT_COLOR;
 
+	// Alternative Text Colors
+	static SDL_Color TEXT_COLOR_GREEN;
+	static SDL_Color TEXT_COLOR_RED;
+
 	// Buttons
 	static SDL_Color DEFAULT_BUTTON_GREEN;
 	static SDL_Color DEFAULT_BUTTON_BORDER_GREEN;
@@ -64,6 +68,7 @@ public:
 	static SDL_Color GRAPH_LINE_3;
 	static SDL_Color GRAPH_LINE_4;
 	static SDL_Color GRAPH_LINE_5;
+	static SDL_Color GRAPH_LINE_6;
 
 	// Specific Colors
 	static SDL_Color COLOR_RED;

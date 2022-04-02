@@ -30,7 +30,8 @@
 #include "../crt0.h"
 #include "../main.h"
 #include "Backend/Database/GList.h"
-#include "Backend/Database/gtable.h"
+#include "Backend/Database/GTable.h"
+#include "Backend/Database/ServiceData.h"
 #include "Backend/Machine Learning/RNN.h"
 #include "Backend/Machine Learning/State/Terminator.h"
 #include "Backend/Machine Learning/Structure/hiddenlayerinfo.h"
@@ -50,7 +51,7 @@ class NNInfo;
 class RNN_Train : public Service
 {
 public:
-	GList execute(class Instance* cInstance, const GList& data)
+	GList execute(class Connection* cConnection, const GList& data)
 	{
 		GList retList;
 		if (data.size() < 3)

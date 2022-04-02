@@ -33,7 +33,7 @@ public:
 	Point2();
 	Point2(double, double);
 	Point2(const Point2&);
-	~Point2();
+	virtual ~Point2();
 
 	// get
 	double getX() const;
@@ -92,6 +92,16 @@ public:
 	bool operator!=(const Point2& v) const
 	{
 		return !(*this == v);
+	}
+
+	bool operator<(const Point2& c2) const // ONLY COMPARES X
+	{
+		return (getX() < c2.getX());
+	}
+
+	bool operator>(const Point2& c2) const // ONLY COMPARES X
+	{
+		return (getX() > c2.getX());
 	}
 };
 

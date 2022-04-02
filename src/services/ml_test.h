@@ -30,7 +30,9 @@
 #include "../crt0.h"
 #include "../main.h"
 #include "Backend/Database/GList.h"
-#include "Backend/Database/gtable.h"
+#include "Backend/Database/GTable.h"
+#include "Backend/Database/ServiceData.h"
+#include "Backend/Machine Learning/State/Terminator.h"
 #include "Backend/Machine Learning/Structure/hiddenlayerinfo.h"
 #include "Backend/Machine Learning/Structure/inputlayerinfo.h"
 #include "Backend/Machine Learning/Structure/nninfo.h"
@@ -45,7 +47,7 @@
 class ML_Test : public Service
 {
 public:
-	GList execute(class Instance* cInstance, const GList& data)
+	GList execute(class Connection* cConnection, const GList& data)
 	{
 		GList retList;
 		if (data.size() < 3)

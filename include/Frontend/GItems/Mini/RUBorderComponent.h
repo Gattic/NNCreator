@@ -24,6 +24,8 @@
 #include <stdlib.h>
 #include <string>
 
+class gfxpp;
+
 class RUBorderComponent : public virtual RUItemArea
 {
 protected:
@@ -50,7 +52,7 @@ public:
 	void setBorderWidth(int);
 
 	// render
-	void updateBorderBackground(SDL_Renderer*);
+	void updateBorderBackground(gfxpp*);
 };
 
 #endif

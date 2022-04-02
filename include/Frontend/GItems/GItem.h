@@ -28,6 +28,7 @@
 #include "Mini/RUMouseUp.h"
 #include "Mini/RUMouseWheel.h"
 #include "RUItemArea.h"
+#include "GeneralListener.h"
 #include <SDL2/SDL.h>
 #include <map>
 #include <stdio.h>
@@ -51,18 +52,22 @@ class GItem : public RUBackgroundComponent,
 			  public RULoseFocus
 {
 protected:
+
 	int id;
-	int zindex;
-	std::string name;
+	unsigned int zindex;
+	shmea::GString name;
 	SDL_Texture* background;
 	std::vector<GItem*> subitems;
 
+	EventTracker* eventsStatus;
+
 	// render
-	virtual void updateBackground(SDL_Renderer*) = 0;
+	virtual void updateBackground(gfxpp*) = 0;
 
 public:
-	static const int Z_FRONT = -1;
-	static const int Z_BACK = -2;
+
+	static const unsigned int Z_FRONT = -1; // max unsigned int
+	static const unsigned int Z_BACK = -2; // max unsigned int -1
 
 	GItem();
 	GItem(int, int, int, int);
@@ -70,36 +75,36 @@ public:
 
 	// gets
 	int getID() const;
-	std::string getName() const;
+	shmea::GString getName() const;
 	GItem* getItemByID(int);
-	GItem* getItemByName(const std::string&);
-	int getZIndex() const;
+	GItem* getItemByName(const shmea::GString&);
+	unsigned int getZIndex() const;
 	SDL_Texture* getBackground();
 	std::vector<GItem*> getItems() const;
 
 	// sets
 	void setID(int);
-	void setName(const std::string&);
+	void setName(const shmea::GString&);
 	void setWidth(int);
 	void setHeight(int);
-	void setZIndex(int);
+	void setZIndex(unsigned int);
 
 	// subcomps
-	virtual void addSubItem(GItem*, int = Z_FRONT);
+	virtual void addSubItem(GItem*, unsigned int = Z_FRONT);
 	void removeItem(gfxpp*, int);
-	void removeItem(gfxpp*, const std::string&);
+	void removeItem(gfxpp*, const shmea::GString&);
 	void clearItems(unsigned int = 0);
 
 	virtual void calculateSubItemPositions(std::pair<int, int>) = 0;
 
 	// render
-	virtual void updateBackgroundHelper(SDL_Renderer*) = 0;
+	virtual void updateBackgroundHelper(gfxpp*) = 0;
 
 	// event functions
 	EventTracker* processEvents(gfxpp*, GPanel*, SDL_Event, int, int);
 	virtual void processSubItemEvents(gfxpp*, EventTracker*, GPanel*, SDL_Event, int, int) = 0;
 
-	virtual std::string getType() const = 0;
+	virtual shmea::GString getType() const = 0;
 };
 
 #endif

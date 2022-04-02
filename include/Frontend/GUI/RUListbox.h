@@ -63,16 +63,16 @@ public:
 	void setHeight(int);
 	void setMultiSelect(bool);
 	void setOptionsShown(unsigned int);
-	void addOption(std::string);
+	void addOption(shmea::GString);
 	void addSelection(unsigned int);
 	void clearSelections();
 	void clearOptions();
 	// void clear();
 
 	// render
-	virtual void updateBackground(SDL_Renderer*);
+	virtual void updateBackground(gfxpp*);
 	void updateLabels();
-	virtual std::string getType() const;
+	virtual shmea::GString getType() const;
 	virtual void unhover();
 };
 

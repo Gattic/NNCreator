@@ -31,7 +31,9 @@ public:
 	bool wheeled;
 
 	EventTracker();
-	~EventTracker();
+	virtual ~EventTracker();
+
+	void reset();
 };
 
 #endif

@@ -17,7 +17,7 @@
 #ifndef _NNETWORK
 #define _NNETWORK
 
-#include "../../include/Backend/Database/GList.h"
+#include "Backend/Database/GList.h"
 #include <algorithm>
 #include <map>
 #include <stdio.h>
@@ -30,6 +30,11 @@ class Point2;
 
 namespace shmea {
 class GTable;
+};
+
+namespace GNet {
+class GServer;
+class Connection;
 };
 
 namespace glades {
@@ -53,6 +58,8 @@ private:
 	NNInfo* skeleton;
 	LayerBuilder* meat;
 	CMatrix* confusionMatrix;
+	GNet::GServer* serverInstance;
+	GNet::Connection* cConnection;
 
 	bool running;
 	int netType;
@@ -111,6 +118,7 @@ public:
 	// Database
 	bool load(const std::string&);
 	bool save() const;
+	void setServer(GNet::GServer*, GNet::Connection*);
 
 	// Stochastic Gradient Descent
 	void run(const shmea::GTable&, const Terminator*, int);

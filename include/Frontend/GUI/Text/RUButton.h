@@ -22,22 +22,24 @@
 #include <stdlib.h>
 #include <string>
 
+class gfxpp;
+
 class RUButton : public RUTextComponent
 {
 protected:
-	std::string buttonColor;
+	shmea::GString buttonColor;
 
 public:
 	// constructors & destructor
 	RUButton();
-	RUButton(std::string);
+	RUButton(shmea::GString);
 	~RUButton();
 
 	// render
-	void updateBackground(SDL_Renderer*);
-	virtual void hover();
-	virtual void unhover();
-	virtual std::string getType() const;
+	void updateBackground(gfxpp*);
+	virtual void hover(gfxpp*);
+	virtual void unhover(gfxpp*);
+	virtual shmea::GString getType() const;
 };
 
 #endif

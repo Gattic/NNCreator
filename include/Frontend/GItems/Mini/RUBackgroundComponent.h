@@ -18,6 +18,7 @@
 #define _RUBACKGROUNDCOMP
 
 #include "../RUItemArea.h"
+#include "Backend/Database/GString.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_opengl.h>
@@ -27,6 +28,8 @@
 
 #define DEFAULT_IMAGE_BG "resources/gui/Components/Background.bmp"
 #define DEFAULT_IMAGE_BG_HIGHLIGHTED "resources/gui/Components/BackgroundHighlighted.bmp"
+
+class gfxpp;
 
 namespace shmea {
 class Image;
@@ -39,7 +42,7 @@ protected:
 	SDL_Surface* surfaceTheUSA;
 	shmea::Image* bgImage;
 	SDL_Color bgColor;
-	std::string bgImageLocation;
+	shmea::GString bgImageLocation;
 	int bgImageType;
 
 	bool resetSurface();
@@ -83,18 +86,18 @@ public:
 
 	// gets
 	bool getBGEnabled() const;
-	std::string getBGImageLocation() const;
+	shmea::GString getBGImageLocation() const;
 	SDL_Color getBGColor() const;
 
 	// sets
 	void toggleBG(bool);
-	void setBGImageFromLocation(const std::string&);
+	void setBGImageFromLocation(const shmea::GString&);
 	void setBGImageFromSurface(SDL_Surface*);
 	void setBGImage(shmea::Image*);
 	void setBGColor(SDL_Color);
 
 	// render
-	void updateBGBackground(SDL_Renderer*);
+	void updateBGBackground(gfxpp*);
 };
 
 #endif

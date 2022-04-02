@@ -26,36 +26,53 @@
 #include <string>
 
 class gfxpp;
+class GFont;
+
+class SlidingFocusWindow
+{
+public:
+	unsigned int index;
+	unsigned int maxLen;
+	unsigned int cursorIndex; // innerIndex
+	unsigned int cursorDirection;
+
+	SlidingFocusWindow()
+	{
+		reset();
+	}
+
+	void reset()
+	{
+		index = 0;
+		maxLen = 0;
+		cursorIndex = 0;
+		cursorDirection = 0;
+	}
+};
 
 class RUTextComponent : public RUComponent
 {
 protected:
-	static const int IS_LEFT = 0;
-	static const int IS_RIGHT = 1;
+	static const int CUROSR_LEFT = 0;
+	static const int CURSOR_RIGHT = 1;
 
-	static std::string FONT_PATH;
-	static const int DEFAULT_FONT_SIZE = 30; // font resolution?
-	static TTF_Font* font;
-	int fontSize;
+	int FONT_COLOR;
 
-	std::string text;
-	std::string strDrawText;
+	SlidingFocusWindow cursor;
+
+	shmea::GString text;
+	shmea::GString strDrawText;
 	float strWidth;
-	float cursorXGap;
-	float cursorYGap;
 	int cursorX;
+	int xClick;
 	float dimRatio;
-	unsigned int boxInnerIndex;
-	unsigned int boxIndex;
-	unsigned int boxLen;
 	char passwordChar;
 	bool passwordField;
 	unsigned int cursorStart;
 	bool readOnly;
-	SDL_Color textColor;
 
 	// render
-	void calculateRenderInfo();
+	void calculateRenderInfo(GFont*);
 
 	// events
 	virtual void onMouseDown(gfxpp*, GPanel*, int, int);
@@ -67,34 +84,26 @@ protected:
 public:
 	// constructor
 	RUTextComponent();
-	~RUTextComponent();
+	virtual ~RUTextComponent();
 
 	// gets
-	std::string getText() const;
-	SDL_Color getTextColor() const;
+	shmea::GString getText() const;
 	char getPasswordChar() const;
 	bool isPasswordField() const;
 	bool getReadOnly() const;
-	int getFontSize() const;
 
 	// sets
 	void setText(const char*);
-	void setText(std::string);
+	void setText(shmea::GType);
 	void setPasswordChar(char);
 	void setPasswordField(bool);
 	void setReadOnly(bool);
-	void setTextColor(SDL_Color);
-	void setFontSize(int);
-
-	//
-	static bool validChar(char);
-	static char keycodeTOchar(SDL_Keycode);
-	static char specialChar(char keyPressed);
+	void setFontColor(int);
 
 	// render
-	void drawText(SDL_Renderer*);
-	void drawCursor(SDL_Renderer*);
-	virtual void updateBackground(SDL_Renderer*) = 0;
+	void drawText(gfxpp*);
+	void drawCursor(gfxpp*, float);
+	virtual void updateBackground(gfxpp*) = 0;
 
 	// event functions
 	void setKeyListener(void (GPanel::*)(char));
@@ -103,7 +112,7 @@ public:
 	virtual bool onKeyHelper(gfxpp*, GPanel*, SDL_Keycode, Uint16);
 
 	// type
-	virtual std::string getType() const = 0;
+	virtual shmea::GString getType() const = 0;
 };
 
 #endif

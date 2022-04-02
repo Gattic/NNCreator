@@ -14,44 +14,85 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _RUCIRCLE
-#define _RUCIRCLE
+#ifndef _GSIMPLELINE
+#define _GSIMPLELINE
 
-#include "Graphable.h"
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_opengl.h>
-#include <map>
-#include <pthread.h>
+#include <float.h>
+#include <iostream>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string>
 #include <vector>
 
-class RUGraph;
-class Point2;
-
-class Circle : public Graphable
+class SimpleLine
 {
 private:
-	std::map<int, std::map<int, int> > heatmap;
-	std::vector<const Point2*> foci;
-	double radius;
-	int maxHit;
+	double y;
 
 public:
-	// constructors & destructor
-	Circle(RUGraph*, SDL_Color);
-	~Circle();
+	SimpleLine();
+	SimpleLine(double);
+	SimpleLine(const SimpleLine&);
+	~SimpleLine();
 
-	void addFocalPoint(const Point2*);
-	void setRadius(double);
-	void createHeatmap();
+	// get
+	double getY() const;
 
-	const Point2* getFocalPoint(unsigned int) const;
-	double getRadius() const;
+	// set
+	void set(double);
+	void setY(double);
 
-	virtual void draw(SDL_Renderer*);
-	virtual std::string getType() const;
+	// operators
+	inline SimpleLine operator+(SimpleLine v)
+	{
+		v.y += y;
+		return v;
+	}
+
+	inline SimpleLine operator-(SimpleLine v)
+	{
+		v.y = y - v.y;
+		return v;
+	}
+
+	inline SimpleLine operator*(double scalar)
+	{
+		return SimpleLine(scalar * y);
+	}
+
+	inline SimpleLine operator/(double scalar)
+	{
+		return SimpleLine(y / scalar);
+	}
+
+	void operator=(const SimpleLine& p)
+	{
+		setY(p.y);
+	}
+
+	bool operator==(const SimpleLine& v) const
+	{
+		// y
+		double deltaY = v.y - y;
+		bool yChange = ((deltaY > -DBL_EPSILON) && (deltaY < DBL_EPSILON));
+
+		return yChange;
+	}
+
+	bool operator!=(const SimpleLine& v) const
+	{
+		return !(*this == v);
+	}
+
+	bool operator<(const SimpleLine& c2) const // ONLY COMPARES X
+	{
+		return (getY() < c2.getY());
+	}
+
+	bool operator>(const SimpleLine& c2) const // ONLY COMPARES X
+	{
+		return (getY() > c2.getY());
+	}
 };
 
 #endif

@@ -32,14 +32,14 @@ class RUMsgBox : public RUComponent
 {
 protected:
 	GPanel* panel;
-	std::string title;
-	std::string message;
+	shmea::GString title;
+	shmea::GString message;
 	int type;
 
-	static std::string OK_BUTTON;
-	static std::string YES_BUTTON;
-	static std::string NO_BUTTON;
-	static std::string SUBMIT_BUTTON;
+	static shmea::GString OK_BUTTON;
+	static shmea::GString YES_BUTTON;
+	static shmea::GString NO_BUTTON;
+	static shmea::GString SUBMIT_BUTTON;
 
 	static const int DEFAULT_WIDTH = 500;
 	static const int DEFAULT_HEIGHT = 180;
@@ -59,7 +59,10 @@ protected:
 	// input box
 	RUTextbox* inputText;
 	RUButton* inputButtonSubmit;
-	std::string inputSubmitText;
+	shmea::GString inputSubmitText;
+
+	// event listeners
+	GeneralListener MouseDownListener;
 
 	// events
 	virtual void onMouseDown(gfxpp*, GPanel*, int, int);
@@ -70,7 +73,7 @@ public:
 	static const int INPUTBOX = 2;
 
 	// constructors & destructor
-	RUMsgBox(GPanel*, std::string, std::string, int);
+	RUMsgBox(GPanel*, shmea::GString, shmea::GString, int, GeneralListener = GeneralListener());
 	~RUMsgBox();
 
 	// events
@@ -80,8 +83,8 @@ public:
 	void inputButtonSUBMITClicked(gfxpp*);
 
 	// render
-	virtual void updateBackground(SDL_Renderer*);
-	virtual std::string getType() const;
+	virtual void updateBackground(gfxpp*);
+	virtual shmea::GString getType() const;
 };
 
 #endif

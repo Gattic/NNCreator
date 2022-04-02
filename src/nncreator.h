@@ -54,7 +54,7 @@ class PlotType;
 namespace shmea {
 class GTable;
 class GList;
-};
+}; // namespace shmea
 
 namespace GNet {
 class GServer;
@@ -67,13 +67,14 @@ class NNInfo;
 class NNCreatorPanel : public GPanel
 {
 protected:
+	virtual void updateFromQ(const shmea::ServiceData*);
 	virtual void onStart();
 
 	GNet::GServer* serverInstance;
 	glades::NNInfo* formInfo;
 	int currentHiddenLayerIndex;
 
-	int64_t parsePct(const std::string&);
+	int64_t parsePct(const shmea::GType&);
 
 	void buildPanel();
 
@@ -152,36 +153,34 @@ protected:
 	RUTextbox* tbValidationPct;
 
 public:
-	NNCreatorPanel(const std::string&, int, int);
-	NNCreatorPanel(GNet::GServer*, const std::string&, int, int);
+	pthread_mutex_t* lcMutex;
+	pthread_mutex_t* rocMutex;
+
+	NNCreatorPanel(const shmea::GString&, int, int);
+	NNCreatorPanel(GNet::GServer*, const shmea::GString&, int, int);
+	~NNCreatorPanel();
+
 	void loadDDNN();
 	void populateIndexToEdit(int = 0);
 	void populateHLayerForm();
 	void syncFormVar();
 	void loadNNet(glades::NNInfo*);
-	// void PlotLearningRate(const std::vector<Point2*>&);
-	// void PlotLearningRate(PlotType*);
-	// void PlotCoordinates(const std::vector<shmea::GTable*>&);
-	void PlotLearningCurve(const shmea::GList&);
-	void PlotROCCurve(const std::vector<Point2*>&);
-	void PlotScatter(const shmea::GTable&);
+	void PlotLearningCurve(float, float);
+	void PlotROCCurve(float, float);
 	void updateConfMatrixTable(const shmea::GTable&);
 
-	virtual void GuiCommander1(const std::string&, int, int);
-	virtual void GuiCommander2(const std::string&, int, int);
-	virtual void GuiCommander3(const std::string&, int, int);
-	virtual void GuiCommander4(const std::string&, int, int);
-	virtual void GuiCommander5(const std::string&, int, int);
-	virtual void GuiCommander6(const std::string&, int, int);
-	virtual void GuiCommander7(const std::string&, int, int);
-	virtual void GuiCommander8(const std::string&, int, int);
-	virtual void GuiCommander9();
-	virtual void GuiCommander10(const std::string&, int, int);
-	virtual void GuiCommander11(char);
-	virtual void GuiCommander12(const std::string&, int, int);
-	virtual void GuiCommander13(const std::string&, int, int);
-	virtual void GuiCommander14(const std::string&, int, int);
-	virtual void GuiCommander15(int);
+	void clickedSave(const shmea::GString&, int, int);
+	void clickedEditSwitch(const shmea::GString&, int, int);
+	void clickedRun(const shmea::GString&, int, int);
+	void clickedCopy(const shmea::GString&, int, int);
+	void clickedRemove(const shmea::GString&, int, int);
+	void tbHLLoseFocus();
+	void clickedLoad(const shmea::GString&, int, int);
+	void checkedCV(const shmea::GString&, int, int);
+	void clickedKill(const shmea::GString&, int, int);
+	void clickedDelete(const shmea::GString&, int, int);
+	void nnSelectorChanged(int);
+	void resetSim();
 };
 
 #endif

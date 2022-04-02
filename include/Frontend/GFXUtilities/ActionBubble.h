@@ -14,58 +14,54 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _GQL2_SAVEITEM
-#define _GQL2_SAVEITEM
+#ifndef _RUACTIONBUBBLE
+#define _RUACTIONBUBBLE
 
-#include "gtable.h"
-#include <fstream>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_opengl.h>
+#include <map>
 #include <pthread.h>
-#include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <string>
-#include <unistd.h>
 #include <vector>
 
-namespace shmea {
-class SaveItem
+class gfxpp;
+class Point2;
+
+class ActionBubble
 {
-private:
-	int64_t id;
-	std::string dname;
-	std::string name;
-	GTable value;
-
-	std::string getPath() const;
-
 protected:
-	friend class SaveList;
 
-	// Load functions
-	void loadByID(int64_t);
-
-	// Save Functions
-	void saveByID(const GTable&);
-
-	void clean();
+	float cost;
+	int quantity;
+	double radius;
+	Point2* focalPoint;
+	int actionType;
 
 public:
+
+	const static double AB_DEFAULT_RADIUS = 20.0f;
+
+	const static int ACTION_BUY = 0;
+	const static int ACTION_SELL = 1;
+
 	// constructors & destructor
-	SaveItem(const std::string&, const std::string&);
-	~SaveItem();
+	ActionBubble();
+	ActionBubble(int, float, int, int);
+	virtual ~ActionBubble();
 
-	// Database operations
-	void loadByName();
-	void saveByName(const GTable&) const;
-	bool deleteByName();
+	void setFocalPoint(const Point2*);
+	void setRadius(double);
+	void setCost(float);
+	void setQuantity(int);
+	void setActionType(int);
 
-	// gets
-	int64_t getID() const;
-	std::string getName() const;
-	GTable getTable() const;
-	void print() const;
-};
+	const Point2* getFocalPoint() const;
+	double getRadius() const;
+	float getCost() const;
+	int getQuantity() const;
+	int getActionType() const;
 };
 
 #endif

@@ -14,49 +14,75 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _GQL2_SAVELIST
-#define _GQL2_SAVELIST
+#ifndef _GSCALAR1
+#define _GSCALAR1
 
-#include <dirent.h>
-#include <pthread.h>
+#include <float.h>
+#include <iostream>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <string>
-#include <unistd.h>
 #include <vector>
 
-namespace shmea {
-
-class GTable;
-class SaveItem;
-
-class SaveList
+class Scalar1
 {
 private:
-	std::vector<SaveItem*> saveItems;
-	std::string dname;
-
-	std::string getPath() const;
-	void addItem(SaveItem*);
-	void clean();
+	double x;
 
 public:
-	// constructors & destructor
-	SaveList(const std::string&);
-	~SaveList();
+	Scalar1();
+	Scalar1(double);
+	Scalar1(const Scalar1&);
+	~Scalar1();
 
-	SaveItem* loadItem(const std::string&);
-	bool deleteItem(const std::string&);
-	SaveItem* newItem(const std::string&, const GTable&);
-	void load();
-	static std::vector<SaveList*> loadFolders();
+	// get
+	double get() const;
+	double length() const;
 
-	// gets
-	std::string getName() const;
-	const std::vector<SaveItem*>& getItems() const;
-	int size() const;
-};
+	// set
+	void set(double);
+
+	// operators
+	inline Scalar1 operator+(Scalar1 v)
+	{
+		v.x += x;
+		return v;
+	}
+
+	inline Scalar1 operator-(Scalar1 v)
+	{
+		v.x = x - v.x;
+		return v;
+	}
+
+	inline Scalar1 operator*(double scalar)
+	{
+		return Scalar1(scalar * x);
+	}
+
+	inline Scalar1 operator/(double scalar)
+	{
+		return Scalar1(x / scalar);
+	}
+
+	void operator=(const Scalar1& p)
+	{
+		set(p.x);
+	}
+
+	bool operator==(const Scalar1& v) const
+	{
+		// x
+		double deltaX = v.x - x;
+		bool xChange = ((deltaX > -DBL_EPSILON) && (deltaX < DBL_EPSILON));
+
+		return (xChange);
+	}
+
+	bool operator!=(const Scalar1& v) const
+	{
+		return !(*this == v);
+	}
 };
 
 #endif

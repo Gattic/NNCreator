@@ -8,8 +8,11 @@
 #ifndef _ML_TRAIN
 #define _ML_TRAIN
 
+#include "../crt0.h"
+#include "../main.h"
 #include "Backend/Database/GList.h"
-#include "Backend/Database/gtable.h"
+#include "Backend/Database/GTable.h"
+#include "Backend/Database/ServiceData.h"
 #include "Backend/Machine Learning/State/Terminator.h"
 #include "Backend/Machine Learning/Structure/hiddenlayerinfo.h"
 #include "Backend/Machine Learning/Structure/inputlayerinfo.h"
@@ -19,11 +22,8 @@
 #include "Backend/Machine Learning/metanetwork.h"
 #include "Backend/Machine Learning/network.h"
 #include "Backend/Networking/service.h"
-#include "Backend/Networking/socket.h"
 #include "Frontend/GUI/RUMsgBox.h"
 #include "Frontend/Graphics/graphics.h"
-#include "../crt0.h"
-#include "../main.h"
 
 class NNInfo;
 
@@ -48,27 +48,32 @@ public:
 		serverInstance = NULL; // Not ours to delete
 	}
 
-	shmea::GList execute(class GNet::Instance* cInstance, const shmea::GList& data)
+	shmea::ServiceData* execute(const shmea::ServiceData* data)
 	{
-		shmea::GList retList;
-		if (data.size() < 3)
-			return retList;
+		class GNet::Connection* destination = data->getConnection();
 
-		std::string netName = data.getString(0);
-		std::string testFName = data.getString(1);
-		int importType = data.getInt(2);
-		int64_t maxTimeStamp = data.getLong(3);
-		int64_t maxEpoch = data.getLong(4);
-		float maxAccuracy = data.getFloat(5);
-		// int64_t trainPct = data.getLong(4), testPct = data.getLong(5), validationPct =
-		// data.getLong(6);
+		if (data->getType() != shmea::ServiceData::TYPE_LIST)
+			return NULL;
+
+		shmea::GList cList = data->getList();
+		if (cList.size() < 1)
+			return NULL;
+
+		shmea::GString netName = cList.getString(0);
+		shmea::GString testFName = cList.getString(1);
+		int importType = cList.getInt(2);
+		int64_t maxTimeStamp = cList.getLong(3);
+		int64_t maxEpoch = cList.getLong(4);
+		float maxAccuracy = cList.getFloat(5);
+		// int64_t trainPct = cList.getLong(4), testPct = cList.getLong(5), validationPct =
+		// cList.getLong(6);
 
 		// load the neural network
 		glades::NNetwork cNetwork;
-		if (!cNetwork.load(netName))
+		if (!cNetwork.load(netName.c_str()))
 		{
 			printf("[NN] Unable to load \"%s\"", netName.c_str());
-			return retList;
+			return NULL;
 		}
 
 		// Termination Conditions
@@ -79,9 +84,10 @@ public:
 
 		// Run the training and retrieve a metanetwork
 		shmea::GTable inputTable(testFName, ',', importType);
-		glades::MetaNetwork* newTrainNet = glades::train(&cNetwork, inputTable, Arnold);
+		glades::MetaNetwork* newTrainNet =
+			glades::train(&cNetwork, inputTable, Arnold, serverInstance, destination);
 
-		return retList;
+		return NULL;
 	}
 
 	GNet::Service* MakeService(GNet::GServer* newInstance) const
@@ -89,7 +95,7 @@ public:
 		return new ML_Train(newInstance);
 	}
 
-	std::string getName() const
+	shmea::GString getName() const
 	{
 		return "ML_Train";
 	}
