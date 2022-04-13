@@ -54,7 +54,6 @@ private:
 
 protected:
 	std::map<shmea::GString, GeneralGraphable*> graphables;
-	RULabel* titleLabel;
 	float xMin;
 	float xMax;
 	float yMin;
@@ -65,6 +64,7 @@ protected:
 	virtual void onMouseDown(gfxpp*, GPanel*, int, int);
 
 	// render
+	static void* computeGraph(void* y);
 	virtual void updateBackground(gfxpp*);
 
 public:

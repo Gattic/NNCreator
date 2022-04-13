@@ -14,8 +14,8 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _RUCIRCLE
-#define _RUCIRCLE
+#ifndef _RUELLIPSE
+#define _RUELLIPSE
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
@@ -29,24 +29,29 @@
 class gfxpp;
 class Point2;
 
-class Circle
+class Ellipse
 {
 protected:
 
-	Point2* center;
 	double radius;
+	int maxHit;
 
 public:
 
+	std::map<int, std::map<int, int> > heatmap;
+	std::vector<const Point2*> foci;
+
 	// constructors & destructor
-	Circle();
-	virtual ~Circle();
+	Ellipse();
+	~Ellipse();
 
-	void setCenter(const Point2*);
+	void addFocalPoint(const Point2*);
 	void setRadius(double);
+	void createHeatmap();
 
-	const Point2* getCenter() const;
+	const Point2* getFocalPoint(unsigned int) const;
 	double getRadius() const;
+	int getMaxHit() const;
 };
 
 #endif
