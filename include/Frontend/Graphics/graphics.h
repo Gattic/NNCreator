@@ -156,6 +156,7 @@ public:
 	void run();
 	void changeRenderStatus(int);
 	void finish();
+	bool getRunning() const;
 };
 
 #endif

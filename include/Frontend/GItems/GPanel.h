@@ -43,7 +43,7 @@ protected:
 	std::queue<const shmea::ServiceData*> updateQueue;
 	pthread_mutex_t* qMutex;
 
-	void processQ();
+	void processQ(gfxpp*);
 	void popQ();
 	virtual void updateFromQ(const shmea::ServiceData*);
 
