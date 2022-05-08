@@ -109,6 +109,8 @@ public:
 
 	template< typename T>
 	void set(const shmea::GString&, const std::vector<T*>&, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
+	std::vector<shmea::GString> getNames() const;
+	void remove(const shmea::GString&);
 
 	// gets
 	int getGraphSize() const;

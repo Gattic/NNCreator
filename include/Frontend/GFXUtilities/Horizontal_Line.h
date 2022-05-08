@@ -14,8 +14,8 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _GSIMPLELINE
-#define _GSIMPLELINE
+#ifndef _GHORIZONTALLINE
+#define _GHORIZONTALLINE
 
 #include <float.h>
 #include <iostream>
@@ -24,16 +24,16 @@
 #include <stdlib.h>
 #include <vector>
 
-class SimpleLine
+class Horizontal_Line
 {
 private:
 	double y;
 
 public:
-	SimpleLine();
-	SimpleLine(double);
-	SimpleLine(const SimpleLine&);
-	~SimpleLine();
+	Horizontal_Line();
+	Horizontal_Line(double);
+	Horizontal_Line(const Horizontal_Line&);
+	~Horizontal_Line();
 
 	// get
 	double getY() const;
@@ -43,34 +43,34 @@ public:
 	void setY(double);
 
 	// operators
-	inline SimpleLine operator+(SimpleLine v)
+	inline Horizontal_Line operator+(Horizontal_Line v)
 	{
 		v.y += y;
 		return v;
 	}
 
-	inline SimpleLine operator-(SimpleLine v)
+	inline Horizontal_Line operator-(Horizontal_Line v)
 	{
 		v.y = y - v.y;
 		return v;
 	}
 
-	inline SimpleLine operator*(double scalar)
+	inline Horizontal_Line operator*(double scalar)
 	{
-		return SimpleLine(scalar * y);
+		return Horizontal_Line(scalar * y);
 	}
 
-	inline SimpleLine operator/(double scalar)
+	inline Horizontal_Line operator/(double scalar)
 	{
-		return SimpleLine(y / scalar);
+		return Horizontal_Line(y / scalar);
 	}
 
-	void operator=(const SimpleLine& p)
+	void operator=(const Horizontal_Line& p)
 	{
 		setY(p.y);
 	}
 
-	bool operator==(const SimpleLine& v) const
+	bool operator==(const Horizontal_Line& v) const
 	{
 		// y
 		double deltaY = v.y - y;
@@ -79,17 +79,17 @@ public:
 		return yChange;
 	}
 
-	bool operator!=(const SimpleLine& v) const
+	bool operator!=(const Horizontal_Line& v) const
 	{
 		return !(*this == v);
 	}
 
-	bool operator<(const SimpleLine& c2) const // ONLY COMPARES X
+	bool operator<(const Horizontal_Line& c2) const // ONLY COMPARES X
 	{
 		return (getY() < c2.getY());
 	}
 
-	bool operator>(const SimpleLine& c2) const // ONLY COMPARES X
+	bool operator>(const Horizontal_Line& c2) const // ONLY COMPARES X
 	{
 		return (getY() > c2.getY());
 	}
