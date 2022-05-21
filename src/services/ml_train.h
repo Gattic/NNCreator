@@ -31,6 +31,7 @@ class ML_Train : public GNet::Service
 {
 private:
 	GNet::GServer* serverInstance;
+	glades::NNetwork cNetwork;
 
 public:
 	ML_Train()
@@ -56,21 +57,30 @@ public:
 			return NULL;
 
 		shmea::GList cList = data->getList();
-		if (cList.size() < 1)
+
+		if ((cList.size() == 1) && (cList.getString(0) == "KILL"))
+		{
+			if(!cNetwork.getRunning())
+				return NULL;
+
+			cNetwork.stop();
+			printf("!!---KILLING NET---!!\n");
+		}
+
+		if (cList.size() < 3)
 			return NULL;
 
 		shmea::GString netName = cList.getString(0);
 		shmea::GString testFName = cList.getString(1);
 		int importType = cList.getInt(2);
-		int64_t maxTimeStamp = cList.getLong(3);
+		/*int64_t maxTimeStamp = cList.getLong(3);
 		int64_t maxEpoch = cList.getLong(4);
-		float maxAccuracy = cList.getFloat(5);
+		float maxAccuracy = cList.getFloat(5);*/
 		// int64_t trainPct = cList.getLong(4), testPct = cList.getLong(5), validationPct =
 		// cList.getLong(6);
 
-		// load the neural network
-		glades::NNetwork cNetwork;
-		if (!cNetwork.load(netName.c_str()))
+		// Load the neural network
+		if ((cNetwork.getEpochs() == 0) && (!cNetwork.load(netName.c_str())))
 		{
 			printf("[NN] Unable to load \"%s\"", netName.c_str());
 			return NULL;
@@ -78,9 +88,9 @@ public:
 
 		// Termination Conditions
 		glades::Terminator* Arnold = new glades::Terminator();
-		Arnold->setTimestamp(maxTimeStamp);
+		/*Arnold->setTimestamp(maxTimeStamp);
 		Arnold->setEpoch(maxEpoch);
-		Arnold->setAccuracy(maxAccuracy);
+		Arnold->setAccuracy(maxAccuracy);*/
 
 		// Run the training and retrieve a metanetwork
 		shmea::GTable inputTable(testFName, ',', importType);

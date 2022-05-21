@@ -71,6 +71,7 @@ NNCreatorPanel::NNCreatorPanel(const shmea::GString& name, int width, int height
 	: GPanel(name, width, height)
 {
 	serverInstance = NULL;
+	netCount = 0;
 	buildPanel();
 }
 
@@ -79,6 +80,7 @@ NNCreatorPanel::NNCreatorPanel(GNet::GServer* newInstance, const shmea::GString&
 	: GPanel(name, width, height)
 {
 	serverInstance = newInstance;
+	netCount = 0;
 	buildPanel();
 }
 
@@ -299,17 +301,6 @@ void NNCreatorPanel::buildPanel()
 	runTestLayout->setOrientation(GLinearLayout::HORIZONTAL);
 	leftSideLayout->addSubItem(runTestLayout);
 
-	// sample type dropdown
-	ddTestDataSourceType = new RUDropdown();
-	ddTestDataSourceType->setWidth(120);
-	ddTestDataSourceType->setHeight(30);
-	ddTestDataSourceType->setOptionsShown(2);
-	ddTestDataSourceType->setName("ddTestDataSourceType");
-	runTestLayout->addSubItem(ddTestDataSourceType);
-
-	ddTestDataSourceType->addOption(" File ");
-	ddTestDataSourceType->addOption(" URL  ");
-
 	//  sample path textbox
 	tbTestDataSourcePath = new RUTextbox();
 	tbTestDataSourcePath->setWidth(300);
@@ -320,18 +311,27 @@ void NNCreatorPanel::buildPanel()
 
 	// Run Button
 	RUButton* sendButton = new RUButton("green");
-	sendButton->setWidth(100);
+	sendButton->setWidth(80);
 	sendButton->setHeight(30);
-	sendButton->setText("     Run");
+	sendButton->setText("   Run");
 	sendButton->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedRun));
 	sendButton->setName("sendButton");
 	runTestLayout->addSubItem(sendButton);
 
+	// Continue Button
+	RUButton* contButton = new RUButton("blue");
+	contButton->setWidth(120);
+	contButton->setHeight(30);
+	contButton->setText("  Continue");
+	contButton->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedContinue));
+	contButton->setName("contButton");
+	runTestLayout->addSubItem(contButton);
+
 	// Kill Button
 	RUButton* killButton = new RUButton("red");
-	killButton->setWidth(100);
+	killButton->setWidth(70);
 	killButton->setHeight(30);
-	killButton->setText("     Kill");
+	killButton->setText("   Kill");
 	killButton->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedKill));
 	killButton->setName("killButton");
 	runTestLayout->addSubItem(killButton);
@@ -994,7 +994,7 @@ int64_t NNCreatorPanel::parsePct(const shmea::GType& spct)
  */
 void NNCreatorPanel::clickedSave(const shmea::GString& cmpName, int x, int y)
 {
-	shmea::GString serverIP = "127.0.0.1"; // 69.126.139.205
+	shmea::GString serverIP = "127.0.0.1";
 
 	// make sure the layers are up to date
 	syncFormVar();
@@ -1063,22 +1063,9 @@ void NNCreatorPanel::clickedRun(const shmea::GString& cmpName, int x, int y)
 	if (!serverInstance)
 		return;
 
-	if (ddTestDataSourceType->getSelectedIndex() == (unsigned int)-1)
-		return;
-
 	int importType = shmea::GTable::TYPE_FILE;
-	if (ddTestDataSourceType->getSelectedIndex() == 0)
-	{
-		// If File is selected
-		importType = shmea::GTable::TYPE_FILE;
-	}
-	else if (ddTestDataSourceType->getSelectedIndex() == 1)
-	{
-		// If URL is selected
-		importType = shmea::GTable::TYPE_URL;
-	}
 
-	shmea::GString serverIP = "127.0.0.1"; // 69.126.139.205
+	shmea::GString serverIP = "127.0.0.1";
 	GNet::Connection* cConnection = serverInstance->getConnection(serverIP);
 	if (!cConnection)
 		return;
@@ -1115,7 +1102,59 @@ void NNCreatorPanel::clickedRun(const shmea::GString& cmpName, int x, int y)
 	wData.addLong(testPct);
 	wData.addLong(validationPct);*/
 	shmea::ServiceData* cSrvc = new shmea::ServiceData(cConnection, "ML_Train");
-	cSrvc->set(wData);
+	cSrvc->set("net"+shmea::GString::intTOstring(netCount), wData);
+	serverInstance->send(cSrvc);
+	++netCount;
+}
+
+void NNCreatorPanel::clickedContinue(const shmea::GString& cmpName, int x, int y)
+{
+	if (!serverInstance)
+		return;
+
+	if (netCount == 0)
+		return;
+
+	int importType = shmea::GTable::TYPE_FILE;
+
+	shmea::GString serverIP = "127.0.0.1";
+	GNet::Connection* cConnection = serverInstance->getConnection(serverIP);
+	if (!cConnection)
+		return;
+
+	// Get the vars from the components
+	shmea::GString netName = tbNetName->getText();
+	shmea::GString testFName = tbTestDataSourcePath->getText();
+	int64_t trainPct =
+		parsePct(shmea::GString::Typify(tbTrainPct->getText(), tbTrainPct->getText().size()));
+	int64_t testPct =
+		parsePct(shmea::GString::Typify(tbTestPct->getText(), tbTestPct->getText().size()));
+	int64_t validationPct = parsePct(
+		shmea::GString::Typify(tbValidationPct->getText(), tbValidationPct->getText().size()));
+
+	if ((netName.length() == 0) || (testFName.length() == 0))
+		return;
+
+	if (trainPct == -1 || testPct == -1 || validationPct == -1 ||
+		trainPct + testPct + validationPct != 100)
+	{
+		printf("Percentages invalid: \n\tTrain: %s \n\tTest: %s \n\tValidation: "
+			   "%s \n",
+			   tbTrainPct->getText().c_str(), tbTestPct->getText().c_str(),
+			   tbValidationPct->getText().c_str());
+		return;
+	}
+
+	// Run a machine learning service
+	shmea::GList wData;
+	wData.addString(netName);
+	wData.addString(testFName);
+	wData.addInt(importType);
+	/*wData.addLong(trainPct);
+	wData.addLong(testPct);
+	wData.addLong(validationPct);*/
+	shmea::ServiceData* cSrvc = new shmea::ServiceData(cConnection, "ML_Train");
+	cSrvc->set("net"+shmea::GString::intTOstring(netCount-1), wData);
 	serverInstance->send(cSrvc);
 }
 
@@ -1217,8 +1256,18 @@ void NNCreatorPanel::checkedCV(const shmea::GString& cmpName, int x, int y)
 
 void NNCreatorPanel::clickedKill(const shmea::GString& cmpName, int x, int y)
 {
-	// REIMPLENT THIS AS cNetwork.stopRunning();
-	// NNetwork::caboose = true;
+	shmea::GString serverIP = "127.0.0.1";
+	GNet::Connection* cConnection = serverInstance->getConnection(serverIP);
+	if (!cConnection)
+		return;
+
+	// Kill a neural network instance
+	shmea::GList wData;
+	wData.addString("KILL");
+
+	shmea::ServiceData* cSrvc = new shmea::ServiceData(cConnection, "ML_Train");
+	cSrvc->set("net"+shmea::GString::intTOstring(netCount-1), wData);
+	serverInstance->send(cSrvc);
 }
 
 void NNCreatorPanel::clickedDelete(const shmea::GString& cmpName, int x, int y)

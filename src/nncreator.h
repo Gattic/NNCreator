@@ -73,6 +73,7 @@ protected:
 	GNet::GServer* serverInstance;
 	glades::NNInfo* formInfo;
 	int currentHiddenLayerIndex;
+	unsigned int netCount;
 
 	int64_t parsePct(const shmea::GType&);
 
@@ -141,7 +142,6 @@ protected:
 
 	RUTextbox* tbCopyDestination;
 
-	RUDropdown* ddTestDataSourceType;
 	RUButton* sendButton;
 
 	RUTextbox* tbTestDataSourcePath;
@@ -178,6 +178,7 @@ public:
 	void clickedLoad(const shmea::GString&, int, int);
 	void checkedCV(const shmea::GString&, int, int);
 	void clickedKill(const shmea::GString&, int, int);
+	void clickedContinue(const shmea::GString&, int, int);
 	void clickedDelete(const shmea::GString&, int, int);
 	void nnSelectorChanged(int);
 	void resetSim();
