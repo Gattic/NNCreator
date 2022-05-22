@@ -392,35 +392,28 @@ void NNCreatorPanel::buildPanel()
 	rightSideLayout->setPadding(4);
 	addSubItem(rightSideLayout);
 
-	// Layer Size header
-	lblLayerSize = new RULabel();
-	lblLayerSize->setWidth(160);
-	lblLayerSize->setHeight(40);
-	lblLayerSize->setText("Layer Size");
-	lblLayerSize->setName("lblLayerSize");
-	rightSideLayout->addSubItem(lblLayerSize);
+	// Layer Tab navigation
+	layerTabs = new RUTabContainer();
+	layerTabs->setWidth(90);
+	layerTabs->setHeight(30);
+	layerTabs->setOptionsShown(3);
+	layerTabs->setPadding(10);
+	layerTabs->addTab("   Input");
+	layerTabs->addTab(" Hidden");
+	layerTabs->addTab(" Output");
+	layerTabs->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::changeLayerEdit));
+	layerTabs->setName("layerTabs");
+	rightSideLayout->addSubItem(layerTabs);
+	layerTabs->setSelectedTab(1);
 
-	GLinearLayout* hlcLayout = new GLinearLayout("hlcLayout");
-	hlcLayout->setOrientation(GLinearLayout::HORIZONTAL);
-	rightSideLayout->addSubItem(hlcLayout);
+	printf("LT XY: (%d,%d)\n", layerTabs->getX(), layerTabs->getY());
 
-	// hidden layer count label
-	lblHiddenLayerCount = new RULabel();
-	lblHiddenLayerCount->setWidth(250);
-	lblHiddenLayerCount->setHeight(30);
-	lblHiddenLayerCount->setPadding(10);
-	lblHiddenLayerCount->setText("Hidden Layer Count");
-	lblHiddenLayerCount->setName("lblHiddenLayerCount");
-	hlcLayout->addSubItem(lblHiddenLayerCount);
-
-	// hidden layer count textbox
-	tbHiddenLayerCount = new RUTextbox();
-	tbHiddenLayerCount->setWidth(160);
-	tbHiddenLayerCount->setHeight(30);
-	tbHiddenLayerCount->setText(shmea::GString::intTOstring(formInfo->numHiddenLayers()));
-	tbHiddenLayerCount->setName("tbHiddenLayerCount");
-	tbHiddenLayerCount->setLoseFocusListener(GeneralListener(this, &NNCreatorPanel::tbHLLoseFocus));
-	hlcLayout->addSubItem(tbHiddenLayerCount);
+	inputOverallLayout = new GLinearLayout("inputOverallLayout");
+	inputOverallLayout->setX(getWidth() - 500);
+	inputOverallLayout->setY(90);
+	inputOverallLayout->setOrientation(GLinearLayout::VERTICAL);
+	inputOverallLayout->setVisible(false);
+	addSubItem(inputOverallLayout);
 
 	// Edit Input Layer Header
 	lblEditInputLayer = new RULabel();
@@ -428,11 +421,11 @@ void NNCreatorPanel::buildPanel()
 	lblEditInputLayer->setHeight(40);
 	lblEditInputLayer->setText("Edit Input Layer");
 	lblEditInputLayer->setName("lblEditInputLayer");
-	rightSideLayout->addSubItem(lblEditInputLayer);
+	inputOverallLayout->addSubItem(lblEditInputLayer);
 
 	GLinearLayout* pInputEditLayout = new GLinearLayout("pInputEditLayout");
 	pInputEditLayout->setOrientation(GLinearLayout::HORIZONTAL);
-	rightSideLayout->addSubItem(pInputEditLayout);
+	inputOverallLayout->addSubItem(pInputEditLayout);
 
 	// pInput label
 	lblPInput = new RULabel();
@@ -452,7 +445,7 @@ void NNCreatorPanel::buildPanel()
 
 	GLinearLayout* batchUpdateLayout = new GLinearLayout("batchUpdateLayout");
 	batchUpdateLayout->setOrientation(GLinearLayout::HORIZONTAL);
-	rightSideLayout->addSubItem(batchUpdateLayout);
+	inputOverallLayout->addSubItem(batchUpdateLayout);
 
 	// Batch label
 	RULabel* lblBatchSize = new RULabel();
@@ -470,9 +463,47 @@ void NNCreatorPanel::buildPanel()
 	tbBatchSize->setName("tbBatchSize");
 	batchUpdateLayout->addSubItem(tbBatchSize);
 
+	hiddenOverallLayout = new GLinearLayout("hiddenOverallLayout");
+	hiddenOverallLayout->setX(getWidth() - 500);
+	hiddenOverallLayout->setY(90);
+	hiddenOverallLayout->setOrientation(GLinearLayout::VERTICAL);
+	hiddenOverallLayout->setVisible(true);
+	addSubItem(hiddenOverallLayout);
+
+	// Hidden Layer Title Label
+	RULabel* lbllayertitle = new RULabel();
+	lbllayertitle->setWidth(270);
+	lbllayertitle->setHeight(40);
+	lbllayertitle->setText("Edit Hidden Layers");
+	lbllayertitle->setName("lbllayertitle");
+	hiddenOverallLayout->addSubItem(lbllayertitle);
+
+	GLinearLayout* hlcLayout = new GLinearLayout("hlcLayout");
+	hlcLayout->setOrientation(GLinearLayout::HORIZONTAL);
+	hiddenOverallLayout->addSubItem(hlcLayout);
+
+	// hidden layer count label
+	lblHiddenLayerCount = new RULabel();
+	lblHiddenLayerCount->setWidth(250);
+	lblHiddenLayerCount->setHeight(30);
+	lblHiddenLayerCount->setPadding(10);
+	lblHiddenLayerCount->setText("Hidden Layer Count");
+	lblHiddenLayerCount->setName("lblHiddenLayerCount");
+	hlcLayout->addSubItem(lblHiddenLayerCount);
+
+	// hidden layer count textbox
+	tbHiddenLayerCount = new RUTextbox();
+	tbHiddenLayerCount->setWidth(160);
+	tbHiddenLayerCount->setHeight(30);
+	tbHiddenLayerCount->setText(shmea::GString::intTOstring(formInfo->numHiddenLayers()));
+	tbHiddenLayerCount->setName("tbHiddenLayerCount");
+	tbHiddenLayerCount->setLoseFocusListener(GeneralListener(this, &NNCreatorPanel::tbHLLoseFocus));
+	hlcLayout->addSubItem(tbHiddenLayerCount);
+
+
 	GLinearLayout* hlSelectLayout = new GLinearLayout("hlSelectLayout");
 	hlSelectLayout->setOrientation(GLinearLayout::HORIZONTAL);
-	rightSideLayout->addSubItem(hlSelectLayout);
+	hiddenOverallLayout->addSubItem(hlSelectLayout);
 
 	// edit hidden layer header
 	lblEditHiddenLayer = new RULabel();
@@ -493,7 +524,7 @@ void NNCreatorPanel::buildPanel()
 
 	GLinearLayout* hlSizeLayout = new GLinearLayout("hlSizeLayout");
 	hlSizeLayout->setOrientation(GLinearLayout::HORIZONTAL);
-	rightSideLayout->addSubItem(hlSizeLayout);
+	hiddenOverallLayout->addSubItem(hlSizeLayout);
 
 	// hidden layer size label
 	lblHiddenLayerSize = new RULabel();
@@ -512,7 +543,7 @@ void NNCreatorPanel::buildPanel()
 
 	GLinearLayout* lcLayout = new GLinearLayout("lcLayout");
 	lcLayout->setOrientation(GLinearLayout::HORIZONTAL);
-	rightSideLayout->addSubItem(lcLayout);
+	hiddenOverallLayout->addSubItem(lcLayout);
 
 	// learning rate label
 	lblLearningRate = new RULabel();
@@ -531,7 +562,7 @@ void NNCreatorPanel::buildPanel()
 
 	GLinearLayout* mfLayout = new GLinearLayout("mfLayout");
 	mfLayout->setOrientation(GLinearLayout::HORIZONTAL);
-	rightSideLayout->addSubItem(mfLayout);
+	hiddenOverallLayout->addSubItem(mfLayout);
 
 	// momentum factor label
 	lblMomentumFactor = new RULabel();
@@ -550,7 +581,7 @@ void NNCreatorPanel::buildPanel()
 
 	GLinearLayout* wdLayout = new GLinearLayout("wdLayout");
 	wdLayout->setOrientation(GLinearLayout::HORIZONTAL);
-	rightSideLayout->addSubItem(wdLayout);
+	hiddenOverallLayout->addSubItem(wdLayout);
 
 	// weight decay label
 	lblWeightDecay = new RULabel();
@@ -569,7 +600,7 @@ void NNCreatorPanel::buildPanel()
 
 	GLinearLayout* pHiddenLayout = new GLinearLayout("pHiddenLayout");
 	pHiddenLayout->setOrientation(GLinearLayout::HORIZONTAL);
-	rightSideLayout->addSubItem(pHiddenLayout);
+	hiddenOverallLayout->addSubItem(pHiddenLayout);
 
 	// pHidden label
 	lblPHidden = new RULabel();
@@ -588,7 +619,7 @@ void NNCreatorPanel::buildPanel()
 
 	GLinearLayout* actTypeLayout = new GLinearLayout("actTypeLayout");
 	actTypeLayout->setOrientation(GLinearLayout::HORIZONTAL);
-	rightSideLayout->addSubItem(actTypeLayout);
+	hiddenOverallLayout->addSubItem(actTypeLayout);
 
 	// activation functions label
 	lblActivationFunctions = new RULabel();
@@ -616,7 +647,7 @@ void NNCreatorPanel::buildPanel()
 
 	GLinearLayout* actParamLayout = new GLinearLayout("actParamLayout");
 	actParamLayout->setOrientation(GLinearLayout::HORIZONTAL);
-	rightSideLayout->addSubItem(actParamLayout);
+	hiddenOverallLayout->addSubItem(actParamLayout);
 
 	// Activation param label
 	RULabel* lblActivationParam = new RULabel();
@@ -635,7 +666,7 @@ void NNCreatorPanel::buildPanel()
 
 	GLinearLayout* hCopyLayout = new GLinearLayout("hCopyLayout");
 	hCopyLayout->setOrientation(GLinearLayout::HORIZONTAL);
-	rightSideLayout->addSubItem(hCopyLayout);
+	hiddenOverallLayout->addSubItem(hCopyLayout);
 
 	// Layer Dest label
 	RULabel* lblCopyDest = new RULabel();
@@ -654,7 +685,7 @@ void NNCreatorPanel::buildPanel()
 
 	GLinearLayout* bCopyLayout = new GLinearLayout("bCopyLayout");
 	bCopyLayout->setOrientation(GLinearLayout::HORIZONTAL);
-	rightSideLayout->addSubItem(bCopyLayout);
+	hiddenOverallLayout->addSubItem(bCopyLayout);
 
 	// Copy button
 	RUButton* btnCopy = new RUButton();
@@ -680,7 +711,14 @@ void NNCreatorPanel::buildPanel()
 	lblEditOutputLayer->setHeight(5);
 	lblEditOutputLayer->setText("");
 	lblEditOutputLayer->setName("lblEmpty");
-	rightSideLayout->addSubItem(lblEditOutputLayer);
+	hiddenOverallLayout->addSubItem(lblEditOutputLayer);
+
+	outputOverallLayout = new GLinearLayout("outputOverallLayout");
+	outputOverallLayout->setX(getWidth() - 500);
+	outputOverallLayout->setY(90);
+	outputOverallLayout->setOrientation(GLinearLayout::VERTICAL);
+	outputOverallLayout->setVisible(false);
+	addSubItem(outputOverallLayout);
 
 	// Edit Output Layer Header
 	lblEditOutputLayer = new RULabel();
@@ -688,11 +726,11 @@ void NNCreatorPanel::buildPanel()
 	lblEditOutputLayer->setHeight(40);
 	lblEditOutputLayer->setText("Edit Output Layer");
 	lblEditOutputLayer->setName("lblEditOutputLayer");
-	rightSideLayout->addSubItem(lblEditOutputLayer);
+	outputOverallLayout->addSubItem(lblEditOutputLayer);
 
 	GLinearLayout* outputTypeLayout = new GLinearLayout("outputTypeLayout");
 	outputTypeLayout->setOrientation(GLinearLayout::HORIZONTAL);
-	rightSideLayout->addSubItem(outputTypeLayout);
+	outputOverallLayout->addSubItem(outputTypeLayout);
 
 	// output type label
 	lblOutputType = new RULabel();
@@ -716,7 +754,7 @@ void NNCreatorPanel::buildPanel()
 
 	GLinearLayout* outputSizeLayout = new GLinearLayout("outputSizeLayout");
 	outputSizeLayout->setOrientation(GLinearLayout::HORIZONTAL);
-	rightSideLayout->addSubItem(outputSizeLayout);
+	outputOverallLayout->addSubItem(outputSizeLayout);
 
 	// output layer size label
 	lblOutputLayerSize = new RULabel();
@@ -1200,6 +1238,28 @@ void NNCreatorPanel::clickedRemove(const shmea::GString& cmpName, int x, int y)
 	populateHLayerForm();
 	tbHiddenLayerCount->setText(shmea::GString::intTOstring(formInfo->numHiddenLayers()));
 	populateIndexToEdit(currentHiddenLayerIndex);
+}
+
+void NNCreatorPanel::changeLayerEdit(const shmea::GString& cmpName, int x, int y)
+{
+	if (layerTabs->getTabSelected() == 0)
+	{
+		inputOverallLayout->setVisible(true);
+		hiddenOverallLayout->setVisible(false);
+		outputOverallLayout->setVisible(false);
+	}
+	else if (layerTabs->getTabSelected() == 1)
+	{
+		inputOverallLayout->setVisible(false);
+		hiddenOverallLayout->setVisible(true);
+		outputOverallLayout->setVisible(false);
+	}
+	else if (layerTabs->getTabSelected() == 2)
+	{
+		inputOverallLayout->setVisible(false);
+		hiddenOverallLayout->setVisible(false);
+		outputOverallLayout->setVisible(true);
+	}
 }
 
 /*!

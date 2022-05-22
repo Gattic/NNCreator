@@ -39,6 +39,7 @@
 #include <vector>
 
 class Point2;
+class GLinearLayout;
 class RUImageComponent;
 class RULabel;
 class RUTextbox;
@@ -94,6 +95,11 @@ protected:
 
 	RUButton* btnSave;
 	RUButton* btnDelete;
+
+	RUTabContainer* layerTabs;
+	GLinearLayout* inputOverallLayout;
+	GLinearLayout* hiddenOverallLayout;
+	GLinearLayout* outputOverallLayout;
 
 	RULabel* lblLayerSize;
 
@@ -174,6 +180,7 @@ public:
 	void clickedRun(const shmea::GString&, int, int);
 	void clickedCopy(const shmea::GString&, int, int);
 	void clickedRemove(const shmea::GString&, int, int);
+	void changeLayerEdit(const shmea::GString&, int, int);
 	void tbHLLoseFocus();
 	void clickedLoad(const shmea::GString&, int, int);
 	void checkedCV(const shmea::GString&, int, int);
