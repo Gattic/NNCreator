@@ -398,22 +398,15 @@ void NNCreatorPanel::buildPanel()
 	layerTabs->setHeight(30);
 	layerTabs->setOptionsShown(3);
 	layerTabs->setPadding(10);
-	layerTabs->addTab("   Input");
-	layerTabs->addTab(" Hidden");
-	layerTabs->addTab(" Output");
-	layerTabs->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::changeLayerEdit));
 	layerTabs->setName("layerTabs");
 	rightSideLayout->addSubItem(layerTabs);
 	layerTabs->setSelectedTab(1);
-
-	printf("LT XY: (%d,%d)\n", layerTabs->getX(), layerTabs->getY());
 
 	inputOverallLayout = new GLinearLayout("inputOverallLayout");
 	inputOverallLayout->setX(getWidth() - 500);
 	inputOverallLayout->setY(90);
 	inputOverallLayout->setOrientation(GLinearLayout::VERTICAL);
-	inputOverallLayout->setVisible(false);
-	addSubItem(inputOverallLayout);
+	layerTabs->addTab("   Input", inputOverallLayout);
 
 	// Edit Input Layer Header
 	lblEditInputLayer = new RULabel();
@@ -467,8 +460,7 @@ void NNCreatorPanel::buildPanel()
 	hiddenOverallLayout->setX(getWidth() - 500);
 	hiddenOverallLayout->setY(90);
 	hiddenOverallLayout->setOrientation(GLinearLayout::VERTICAL);
-	hiddenOverallLayout->setVisible(true);
-	addSubItem(hiddenOverallLayout);
+	layerTabs->addTab(" Hidden", hiddenOverallLayout);
 
 	// Hidden Layer Title Label
 	RULabel* lbllayertitle = new RULabel();
@@ -717,8 +709,7 @@ void NNCreatorPanel::buildPanel()
 	outputOverallLayout->setX(getWidth() - 500);
 	outputOverallLayout->setY(90);
 	outputOverallLayout->setOrientation(GLinearLayout::VERTICAL);
-	outputOverallLayout->setVisible(false);
-	addSubItem(outputOverallLayout);
+	layerTabs->addTab(" Output", outputOverallLayout);
 
 	// Edit Output Layer Header
 	lblEditOutputLayer = new RULabel();
@@ -1238,28 +1229,6 @@ void NNCreatorPanel::clickedRemove(const shmea::GString& cmpName, int x, int y)
 	populateHLayerForm();
 	tbHiddenLayerCount->setText(shmea::GString::intTOstring(formInfo->numHiddenLayers()));
 	populateIndexToEdit(currentHiddenLayerIndex);
-}
-
-void NNCreatorPanel::changeLayerEdit(const shmea::GString& cmpName, int x, int y)
-{
-	if (layerTabs->getTabSelected() == 0)
-	{
-		inputOverallLayout->setVisible(true);
-		hiddenOverallLayout->setVisible(false);
-		outputOverallLayout->setVisible(false);
-	}
-	else if (layerTabs->getTabSelected() == 1)
-	{
-		inputOverallLayout->setVisible(false);
-		hiddenOverallLayout->setVisible(true);
-		outputOverallLayout->setVisible(false);
-	}
-	else if (layerTabs->getTabSelected() == 2)
-	{
-		inputOverallLayout->setVisible(false);
-		hiddenOverallLayout->setVisible(false);
-		outputOverallLayout->setVisible(true);
-	}
 }
 
 /*!

@@ -180,7 +180,6 @@ public:
 	void clickedRun(const shmea::GString&, int, int);
 	void clickedCopy(const shmea::GString&, int, int);
 	void clickedRemove(const shmea::GString&, int, int);
-	void changeLayerEdit(const shmea::GString&, int, int);
 	void tbHLLoseFocus();
 	void clickedLoad(const shmea::GString&, int, int);
 	void checkedCV(const shmea::GString&, int, int);
