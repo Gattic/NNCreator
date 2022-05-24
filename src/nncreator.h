@@ -39,6 +39,7 @@
 #include <vector>
 
 class Point2;
+class GLinearLayout;
 class RUImageComponent;
 class RULabel;
 class RUTextbox;
@@ -73,6 +74,7 @@ protected:
 	GNet::GServer* serverInstance;
 	glades::NNInfo* formInfo;
 	int currentHiddenLayerIndex;
+	unsigned int netCount;
 
 	int64_t parsePct(const shmea::GType&);
 
@@ -93,6 +95,11 @@ protected:
 
 	RUButton* btnSave;
 	RUButton* btnDelete;
+
+	RUTabContainer* layerTabs;
+	GLinearLayout* inputOverallLayout;
+	GLinearLayout* hiddenOverallLayout;
+	GLinearLayout* outputOverallLayout;
 
 	RULabel* lblLayerSize;
 
@@ -141,7 +148,6 @@ protected:
 
 	RUTextbox* tbCopyDestination;
 
-	RUDropdown* ddTestDataSourceType;
 	RUButton* sendButton;
 
 	RUTextbox* tbTestDataSourcePath;
@@ -178,6 +184,7 @@ public:
 	void clickedLoad(const shmea::GString&, int, int);
 	void checkedCV(const shmea::GString&, int, int);
 	void clickedKill(const shmea::GString&, int, int);
+	void clickedContinue(const shmea::GString&, int, int);
 	void clickedDelete(const shmea::GString&, int, int);
 	void nnSelectorChanged(int);
 	void resetSim();

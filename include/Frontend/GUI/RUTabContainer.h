@@ -42,7 +42,7 @@ protected:
 	unsigned int tabSelected;
 	unsigned int prevTabSelected;
 
-	typedef std::pair<RULabel*, std::vector<GItem*> > RUTab;
+	typedef std::pair<RULabel*, GItem*> RUTab;
 	std::vector<RUTab> items;
 
 	bool hoverDraw;
@@ -68,8 +68,7 @@ public:
 	void setWidth(int);
 	void setHeight(int);
 	void setOptionsShown(unsigned int);
-	void addTab(shmea::GString);
-	void addItemToTab(shmea::GString, GItem*);
+	void addTab(shmea::GString, GItem* = NULL);
 	void clearOptions();
 	void setSelectedTab(unsigned int); // int = index
 	void setSelectedTab(shmea::GString);  // string = tab name

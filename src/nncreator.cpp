@@ -71,6 +71,7 @@ NNCreatorPanel::NNCreatorPanel(const shmea::GString& name, int width, int height
 	: GPanel(name, width, height)
 {
 	serverInstance = NULL;
+	netCount = 0;
 	buildPanel();
 }
 
@@ -79,6 +80,7 @@ NNCreatorPanel::NNCreatorPanel(GNet::GServer* newInstance, const shmea::GString&
 	: GPanel(name, width, height)
 {
 	serverInstance = newInstance;
+	netCount = 0;
 	buildPanel();
 }
 
@@ -299,17 +301,6 @@ void NNCreatorPanel::buildPanel()
 	runTestLayout->setOrientation(GLinearLayout::HORIZONTAL);
 	leftSideLayout->addSubItem(runTestLayout);
 
-	// sample type dropdown
-	ddTestDataSourceType = new RUDropdown();
-	ddTestDataSourceType->setWidth(120);
-	ddTestDataSourceType->setHeight(30);
-	ddTestDataSourceType->setOptionsShown(2);
-	ddTestDataSourceType->setName("ddTestDataSourceType");
-	runTestLayout->addSubItem(ddTestDataSourceType);
-
-	ddTestDataSourceType->addOption(" File ");
-	ddTestDataSourceType->addOption(" URL  ");
-
 	//  sample path textbox
 	tbTestDataSourcePath = new RUTextbox();
 	tbTestDataSourcePath->setWidth(300);
@@ -320,18 +311,27 @@ void NNCreatorPanel::buildPanel()
 
 	// Run Button
 	RUButton* sendButton = new RUButton("green");
-	sendButton->setWidth(100);
+	sendButton->setWidth(80);
 	sendButton->setHeight(30);
-	sendButton->setText("     Run");
+	sendButton->setText("   Run");
 	sendButton->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedRun));
 	sendButton->setName("sendButton");
 	runTestLayout->addSubItem(sendButton);
 
+	// Continue Button
+	RUButton* contButton = new RUButton("blue");
+	contButton->setWidth(120);
+	contButton->setHeight(30);
+	contButton->setText("  Continue");
+	contButton->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedContinue));
+	contButton->setName("contButton");
+	runTestLayout->addSubItem(contButton);
+
 	// Kill Button
 	RUButton* killButton = new RUButton("red");
-	killButton->setWidth(100);
+	killButton->setWidth(70);
 	killButton->setHeight(30);
-	killButton->setText("     Kill");
+	killButton->setText("   Kill");
 	killButton->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedKill));
 	killButton->setName("killButton");
 	runTestLayout->addSubItem(killButton);
@@ -392,35 +392,21 @@ void NNCreatorPanel::buildPanel()
 	rightSideLayout->setPadding(4);
 	addSubItem(rightSideLayout);
 
-	// Layer Size header
-	lblLayerSize = new RULabel();
-	lblLayerSize->setWidth(160);
-	lblLayerSize->setHeight(40);
-	lblLayerSize->setText("Layer Size");
-	lblLayerSize->setName("lblLayerSize");
-	rightSideLayout->addSubItem(lblLayerSize);
+	// Layer Tab navigation
+	layerTabs = new RUTabContainer();
+	layerTabs->setWidth(90);
+	layerTabs->setHeight(30);
+	layerTabs->setOptionsShown(3);
+	layerTabs->setPadding(10);
+	layerTabs->setName("layerTabs");
+	rightSideLayout->addSubItem(layerTabs);
+	layerTabs->setSelectedTab(1);
 
-	GLinearLayout* hlcLayout = new GLinearLayout("hlcLayout");
-	hlcLayout->setOrientation(GLinearLayout::HORIZONTAL);
-	rightSideLayout->addSubItem(hlcLayout);
-
-	// hidden layer count label
-	lblHiddenLayerCount = new RULabel();
-	lblHiddenLayerCount->setWidth(250);
-	lblHiddenLayerCount->setHeight(30);
-	lblHiddenLayerCount->setPadding(10);
-	lblHiddenLayerCount->setText("Hidden Layer Count");
-	lblHiddenLayerCount->setName("lblHiddenLayerCount");
-	hlcLayout->addSubItem(lblHiddenLayerCount);
-
-	// hidden layer count textbox
-	tbHiddenLayerCount = new RUTextbox();
-	tbHiddenLayerCount->setWidth(160);
-	tbHiddenLayerCount->setHeight(30);
-	tbHiddenLayerCount->setText(shmea::GString::intTOstring(formInfo->numHiddenLayers()));
-	tbHiddenLayerCount->setName("tbHiddenLayerCount");
-	tbHiddenLayerCount->setLoseFocusListener(GeneralListener(this, &NNCreatorPanel::tbHLLoseFocus));
-	hlcLayout->addSubItem(tbHiddenLayerCount);
+	inputOverallLayout = new GLinearLayout("inputOverallLayout");
+	inputOverallLayout->setX(getWidth() - 500);
+	inputOverallLayout->setY(90);
+	inputOverallLayout->setOrientation(GLinearLayout::VERTICAL);
+	layerTabs->addTab("   Input", inputOverallLayout);
 
 	// Edit Input Layer Header
 	lblEditInputLayer = new RULabel();
@@ -428,11 +414,11 @@ void NNCreatorPanel::buildPanel()
 	lblEditInputLayer->setHeight(40);
 	lblEditInputLayer->setText("Edit Input Layer");
 	lblEditInputLayer->setName("lblEditInputLayer");
-	rightSideLayout->addSubItem(lblEditInputLayer);
+	inputOverallLayout->addSubItem(lblEditInputLayer);
 
 	GLinearLayout* pInputEditLayout = new GLinearLayout("pInputEditLayout");
 	pInputEditLayout->setOrientation(GLinearLayout::HORIZONTAL);
-	rightSideLayout->addSubItem(pInputEditLayout);
+	inputOverallLayout->addSubItem(pInputEditLayout);
 
 	// pInput label
 	lblPInput = new RULabel();
@@ -452,7 +438,7 @@ void NNCreatorPanel::buildPanel()
 
 	GLinearLayout* batchUpdateLayout = new GLinearLayout("batchUpdateLayout");
 	batchUpdateLayout->setOrientation(GLinearLayout::HORIZONTAL);
-	rightSideLayout->addSubItem(batchUpdateLayout);
+	inputOverallLayout->addSubItem(batchUpdateLayout);
 
 	// Batch label
 	RULabel* lblBatchSize = new RULabel();
@@ -470,9 +456,46 @@ void NNCreatorPanel::buildPanel()
 	tbBatchSize->setName("tbBatchSize");
 	batchUpdateLayout->addSubItem(tbBatchSize);
 
+	hiddenOverallLayout = new GLinearLayout("hiddenOverallLayout");
+	hiddenOverallLayout->setX(getWidth() - 500);
+	hiddenOverallLayout->setY(90);
+	hiddenOverallLayout->setOrientation(GLinearLayout::VERTICAL);
+	layerTabs->addTab(" Hidden", hiddenOverallLayout);
+
+	// Hidden Layer Title Label
+	RULabel* lbllayertitle = new RULabel();
+	lbllayertitle->setWidth(270);
+	lbllayertitle->setHeight(40);
+	lbllayertitle->setText("Edit Hidden Layers");
+	lbllayertitle->setName("lbllayertitle");
+	hiddenOverallLayout->addSubItem(lbllayertitle);
+
+	GLinearLayout* hlcLayout = new GLinearLayout("hlcLayout");
+	hlcLayout->setOrientation(GLinearLayout::HORIZONTAL);
+	hiddenOverallLayout->addSubItem(hlcLayout);
+
+	// hidden layer count label
+	lblHiddenLayerCount = new RULabel();
+	lblHiddenLayerCount->setWidth(250);
+	lblHiddenLayerCount->setHeight(30);
+	lblHiddenLayerCount->setPadding(10);
+	lblHiddenLayerCount->setText("Hidden Layer Count");
+	lblHiddenLayerCount->setName("lblHiddenLayerCount");
+	hlcLayout->addSubItem(lblHiddenLayerCount);
+
+	// hidden layer count textbox
+	tbHiddenLayerCount = new RUTextbox();
+	tbHiddenLayerCount->setWidth(160);
+	tbHiddenLayerCount->setHeight(30);
+	tbHiddenLayerCount->setText(shmea::GString::intTOstring(formInfo->numHiddenLayers()));
+	tbHiddenLayerCount->setName("tbHiddenLayerCount");
+	tbHiddenLayerCount->setLoseFocusListener(GeneralListener(this, &NNCreatorPanel::tbHLLoseFocus));
+	hlcLayout->addSubItem(tbHiddenLayerCount);
+
+
 	GLinearLayout* hlSelectLayout = new GLinearLayout("hlSelectLayout");
 	hlSelectLayout->setOrientation(GLinearLayout::HORIZONTAL);
-	rightSideLayout->addSubItem(hlSelectLayout);
+	hiddenOverallLayout->addSubItem(hlSelectLayout);
 
 	// edit hidden layer header
 	lblEditHiddenLayer = new RULabel();
@@ -493,7 +516,7 @@ void NNCreatorPanel::buildPanel()
 
 	GLinearLayout* hlSizeLayout = new GLinearLayout("hlSizeLayout");
 	hlSizeLayout->setOrientation(GLinearLayout::HORIZONTAL);
-	rightSideLayout->addSubItem(hlSizeLayout);
+	hiddenOverallLayout->addSubItem(hlSizeLayout);
 
 	// hidden layer size label
 	lblHiddenLayerSize = new RULabel();
@@ -512,7 +535,7 @@ void NNCreatorPanel::buildPanel()
 
 	GLinearLayout* lcLayout = new GLinearLayout("lcLayout");
 	lcLayout->setOrientation(GLinearLayout::HORIZONTAL);
-	rightSideLayout->addSubItem(lcLayout);
+	hiddenOverallLayout->addSubItem(lcLayout);
 
 	// learning rate label
 	lblLearningRate = new RULabel();
@@ -531,7 +554,7 @@ void NNCreatorPanel::buildPanel()
 
 	GLinearLayout* mfLayout = new GLinearLayout("mfLayout");
 	mfLayout->setOrientation(GLinearLayout::HORIZONTAL);
-	rightSideLayout->addSubItem(mfLayout);
+	hiddenOverallLayout->addSubItem(mfLayout);
 
 	// momentum factor label
 	lblMomentumFactor = new RULabel();
@@ -550,7 +573,7 @@ void NNCreatorPanel::buildPanel()
 
 	GLinearLayout* wdLayout = new GLinearLayout("wdLayout");
 	wdLayout->setOrientation(GLinearLayout::HORIZONTAL);
-	rightSideLayout->addSubItem(wdLayout);
+	hiddenOverallLayout->addSubItem(wdLayout);
 
 	// weight decay label
 	lblWeightDecay = new RULabel();
@@ -569,7 +592,7 @@ void NNCreatorPanel::buildPanel()
 
 	GLinearLayout* pHiddenLayout = new GLinearLayout("pHiddenLayout");
 	pHiddenLayout->setOrientation(GLinearLayout::HORIZONTAL);
-	rightSideLayout->addSubItem(pHiddenLayout);
+	hiddenOverallLayout->addSubItem(pHiddenLayout);
 
 	// pHidden label
 	lblPHidden = new RULabel();
@@ -588,7 +611,7 @@ void NNCreatorPanel::buildPanel()
 
 	GLinearLayout* actTypeLayout = new GLinearLayout("actTypeLayout");
 	actTypeLayout->setOrientation(GLinearLayout::HORIZONTAL);
-	rightSideLayout->addSubItem(actTypeLayout);
+	hiddenOverallLayout->addSubItem(actTypeLayout);
 
 	// activation functions label
 	lblActivationFunctions = new RULabel();
@@ -616,7 +639,7 @@ void NNCreatorPanel::buildPanel()
 
 	GLinearLayout* actParamLayout = new GLinearLayout("actParamLayout");
 	actParamLayout->setOrientation(GLinearLayout::HORIZONTAL);
-	rightSideLayout->addSubItem(actParamLayout);
+	hiddenOverallLayout->addSubItem(actParamLayout);
 
 	// Activation param label
 	RULabel* lblActivationParam = new RULabel();
@@ -635,7 +658,7 @@ void NNCreatorPanel::buildPanel()
 
 	GLinearLayout* hCopyLayout = new GLinearLayout("hCopyLayout");
 	hCopyLayout->setOrientation(GLinearLayout::HORIZONTAL);
-	rightSideLayout->addSubItem(hCopyLayout);
+	hiddenOverallLayout->addSubItem(hCopyLayout);
 
 	// Layer Dest label
 	RULabel* lblCopyDest = new RULabel();
@@ -654,7 +677,7 @@ void NNCreatorPanel::buildPanel()
 
 	GLinearLayout* bCopyLayout = new GLinearLayout("bCopyLayout");
 	bCopyLayout->setOrientation(GLinearLayout::HORIZONTAL);
-	rightSideLayout->addSubItem(bCopyLayout);
+	hiddenOverallLayout->addSubItem(bCopyLayout);
 
 	// Copy button
 	RUButton* btnCopy = new RUButton();
@@ -680,7 +703,13 @@ void NNCreatorPanel::buildPanel()
 	lblEditOutputLayer->setHeight(5);
 	lblEditOutputLayer->setText("");
 	lblEditOutputLayer->setName("lblEmpty");
-	rightSideLayout->addSubItem(lblEditOutputLayer);
+	hiddenOverallLayout->addSubItem(lblEditOutputLayer);
+
+	outputOverallLayout = new GLinearLayout("outputOverallLayout");
+	outputOverallLayout->setX(getWidth() - 500);
+	outputOverallLayout->setY(90);
+	outputOverallLayout->setOrientation(GLinearLayout::VERTICAL);
+	layerTabs->addTab(" Output", outputOverallLayout);
 
 	// Edit Output Layer Header
 	lblEditOutputLayer = new RULabel();
@@ -688,11 +717,11 @@ void NNCreatorPanel::buildPanel()
 	lblEditOutputLayer->setHeight(40);
 	lblEditOutputLayer->setText("Edit Output Layer");
 	lblEditOutputLayer->setName("lblEditOutputLayer");
-	rightSideLayout->addSubItem(lblEditOutputLayer);
+	outputOverallLayout->addSubItem(lblEditOutputLayer);
 
 	GLinearLayout* outputTypeLayout = new GLinearLayout("outputTypeLayout");
 	outputTypeLayout->setOrientation(GLinearLayout::HORIZONTAL);
-	rightSideLayout->addSubItem(outputTypeLayout);
+	outputOverallLayout->addSubItem(outputTypeLayout);
 
 	// output type label
 	lblOutputType = new RULabel();
@@ -716,7 +745,7 @@ void NNCreatorPanel::buildPanel()
 
 	GLinearLayout* outputSizeLayout = new GLinearLayout("outputSizeLayout");
 	outputSizeLayout->setOrientation(GLinearLayout::HORIZONTAL);
-	rightSideLayout->addSubItem(outputSizeLayout);
+	outputOverallLayout->addSubItem(outputSizeLayout);
 
 	// output layer size label
 	lblOutputLayerSize = new RULabel();
@@ -994,7 +1023,7 @@ int64_t NNCreatorPanel::parsePct(const shmea::GType& spct)
  */
 void NNCreatorPanel::clickedSave(const shmea::GString& cmpName, int x, int y)
 {
-	shmea::GString serverIP = "127.0.0.1"; // 69.126.139.205
+	shmea::GString serverIP = "127.0.0.1";
 
 	// make sure the layers are up to date
 	syncFormVar();
@@ -1063,22 +1092,9 @@ void NNCreatorPanel::clickedRun(const shmea::GString& cmpName, int x, int y)
 	if (!serverInstance)
 		return;
 
-	if (ddTestDataSourceType->getSelectedIndex() == (unsigned int)-1)
-		return;
-
 	int importType = shmea::GTable::TYPE_FILE;
-	if (ddTestDataSourceType->getSelectedIndex() == 0)
-	{
-		// If File is selected
-		importType = shmea::GTable::TYPE_FILE;
-	}
-	else if (ddTestDataSourceType->getSelectedIndex() == 1)
-	{
-		// If URL is selected
-		importType = shmea::GTable::TYPE_URL;
-	}
 
-	shmea::GString serverIP = "127.0.0.1"; // 69.126.139.205
+	shmea::GString serverIP = "127.0.0.1";
 	GNet::Connection* cConnection = serverInstance->getConnection(serverIP);
 	if (!cConnection)
 		return;
@@ -1115,7 +1131,59 @@ void NNCreatorPanel::clickedRun(const shmea::GString& cmpName, int x, int y)
 	wData.addLong(testPct);
 	wData.addLong(validationPct);*/
 	shmea::ServiceData* cSrvc = new shmea::ServiceData(cConnection, "ML_Train");
-	cSrvc->set(wData);
+	cSrvc->set("net"+shmea::GString::intTOstring(netCount), wData);
+	serverInstance->send(cSrvc);
+	++netCount;
+}
+
+void NNCreatorPanel::clickedContinue(const shmea::GString& cmpName, int x, int y)
+{
+	if (!serverInstance)
+		return;
+
+	if (netCount == 0)
+		return;
+
+	int importType = shmea::GTable::TYPE_FILE;
+
+	shmea::GString serverIP = "127.0.0.1";
+	GNet::Connection* cConnection = serverInstance->getConnection(serverIP);
+	if (!cConnection)
+		return;
+
+	// Get the vars from the components
+	shmea::GString netName = tbNetName->getText();
+	shmea::GString testFName = tbTestDataSourcePath->getText();
+	int64_t trainPct =
+		parsePct(shmea::GString::Typify(tbTrainPct->getText(), tbTrainPct->getText().size()));
+	int64_t testPct =
+		parsePct(shmea::GString::Typify(tbTestPct->getText(), tbTestPct->getText().size()));
+	int64_t validationPct = parsePct(
+		shmea::GString::Typify(tbValidationPct->getText(), tbValidationPct->getText().size()));
+
+	if ((netName.length() == 0) || (testFName.length() == 0))
+		return;
+
+	if (trainPct == -1 || testPct == -1 || validationPct == -1 ||
+		trainPct + testPct + validationPct != 100)
+	{
+		printf("Percentages invalid: \n\tTrain: %s \n\tTest: %s \n\tValidation: "
+			   "%s \n",
+			   tbTrainPct->getText().c_str(), tbTestPct->getText().c_str(),
+			   tbValidationPct->getText().c_str());
+		return;
+	}
+
+	// Run a machine learning service
+	shmea::GList wData;
+	wData.addString(netName);
+	wData.addString(testFName);
+	wData.addInt(importType);
+	/*wData.addLong(trainPct);
+	wData.addLong(testPct);
+	wData.addLong(validationPct);*/
+	shmea::ServiceData* cSrvc = new shmea::ServiceData(cConnection, "ML_Train");
+	cSrvc->set("net"+shmea::GString::intTOstring(netCount-1), wData);
 	serverInstance->send(cSrvc);
 }
 
@@ -1217,8 +1285,18 @@ void NNCreatorPanel::checkedCV(const shmea::GString& cmpName, int x, int y)
 
 void NNCreatorPanel::clickedKill(const shmea::GString& cmpName, int x, int y)
 {
-	// REIMPLENT THIS AS cNetwork.stopRunning();
-	// NNetwork::caboose = true;
+	shmea::GString serverIP = "127.0.0.1";
+	GNet::Connection* cConnection = serverInstance->getConnection(serverIP);
+	if (!cConnection)
+		return;
+
+	// Kill a neural network instance
+	shmea::GList wData;
+	wData.addString("KILL");
+
+	shmea::ServiceData* cSrvc = new shmea::ServiceData(cConnection, "ML_Train");
+	cSrvc->set("net"+shmea::GString::intTOstring(netCount-1), wData);
+	serverInstance->send(cSrvc);
 }
 
 void NNCreatorPanel::clickedDelete(const shmea::GString& cmpName, int x, int y)
