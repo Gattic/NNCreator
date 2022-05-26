@@ -108,8 +108,8 @@ private:
 
 	// main
 	void display();
-	int initHelper(bool, shmea::GString);
-	int init2D();
+	int initHelper(bool, shmea::GString, bool);
+	int init2D(bool);
 	void init3D();
 	void clean2D();
 	void clean3D();
@@ -125,7 +125,7 @@ public:
 	static const int Z_AXIS = 2;
 
 	gfxpp();
-	gfxpp(shmea::GString, int = _2D, bool = true, int = 800, int = 600);
+	gfxpp(shmea::GString, int = _2D, bool = true, bool = true, int = 800, int = 600);
 	int getErrorFlag() const;
 	SDL_Renderer* getRenderer();
 
@@ -154,7 +154,7 @@ public:
 
 	// main
 	void run();
-	void changeRenderStatus(int);
+	void changeRenderStatus(int, bool);
 	void finish();
 	bool getRunning() const;
 };

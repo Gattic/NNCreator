@@ -84,12 +84,15 @@ int main(int argc, char* argv[])
 	// command line args
 	bool noguiMode = false;
 	bool fullScreenMode = false;
+	bool compatMode = false;
 	bool localOnly = false;
-	if (argc > 1)
+	for (int i=1; i < argc; ++i)
 	{
-		noguiMode = (strcmp(argv[1], "nogui") == 0);
-		fullScreenMode = (strcmp(argv[1], "fullscreen") == 0);
-		localOnly = (strcmp(argv[1], "local") == 0);
+		printf("Ingesting program paramter [%d]: %s\n", i, argv[i]);
+		noguiMode = (strcmp(argv[i], "nogui") == 0);
+		fullScreenMode = (strcmp(argv[i], "fullscreen") == 0);
+		compatMode = (strcmp(argv[i], "fullscreen") == 0);
+		localOnly = (strcmp(argv[i], "local") == 0);
 	}
 
 	// Launch the server server
@@ -97,7 +100,7 @@ int main(int argc, char* argv[])
 
 	// Launch the gui
 	if (!noguiMode)
-		Frontend::run(serverInstance, fullScreenMode);
+		Frontend::run(serverInstance, fullScreenMode, compatMode);
 
 	// Cleanup GNet
 	serverInstance->stop();

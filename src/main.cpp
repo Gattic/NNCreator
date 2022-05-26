@@ -35,13 +35,13 @@
  *@detail start up GUI for NNCreator
  *@param fullscreenMode fullscreen flag
  */
-void Frontend::run(GNet::GServer* serverInstance, bool fullscreenMode)
+void Frontend::run(GNet::GServer* serverInstance, bool fullscreenMode, bool compatMode)
 {
 	int newWidth = 1200;
 	int newHeight = 800;
 
 	// Setup the gfx env
-	gfxpp cGfx("NNCreator", gfxpp::_2D, fullscreenMode, newWidth, newHeight);
+	gfxpp cGfx("NNCreator", gfxpp::_2D, fullscreenMode, compatMode, newWidth, newHeight);
 
 	// gfx err check
 	int gfxInitialized = cGfx.getErrorFlag();
