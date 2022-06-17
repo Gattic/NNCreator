@@ -60,7 +60,7 @@ public:
 
 		if ((cList.size() == 1) && (cList.getString(0) == "KILL"))
 		{
-			if(!cNetwork.getRunning())
+			if (!cNetwork.getRunning())
 				return NULL;
 
 			cNetwork.stop();
