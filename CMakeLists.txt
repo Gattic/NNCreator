@@ -15,7 +15,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 #Project
 project(NNCreator)
 set(G_VERSION_MAJOR 0)
-set(G_VERSION_MINOR 55)
+set(G_VERSION_MINOR 57)
 
 set(DEFAULT_BUILD_TYPE "Release")
 
