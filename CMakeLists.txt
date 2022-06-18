@@ -71,6 +71,13 @@ add_custom_target(fullscreen
 	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
 
+#make compat
+add_custom_target(compat
+	COMMAND ${PROJECT_NAME} compat
+	DEPENDS ${PROJECT_NAME}
+	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+)
+
 #make nogui
 add_custom_target(nogui
 	COMMAND ${PROJECT_NAME} nogui

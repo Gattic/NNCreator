@@ -492,7 +492,6 @@ void NNCreatorPanel::buildPanel()
 	tbHiddenLayerCount->setLoseFocusListener(GeneralListener(this, &NNCreatorPanel::tbHLLoseFocus));
 	hlcLayout->addSubItem(tbHiddenLayerCount);
 
-
 	GLinearLayout* hlSelectLayout = new GLinearLayout("hlSelectLayout");
 	hlSelectLayout->setOrientation(GLinearLayout::HORIZONTAL);
 	hiddenOverallLayout->addSubItem(hlSelectLayout);
@@ -1131,7 +1130,7 @@ void NNCreatorPanel::clickedRun(const shmea::GString& cmpName, int x, int y)
 	wData.addLong(testPct);
 	wData.addLong(validationPct);*/
 	shmea::ServiceData* cSrvc = new shmea::ServiceData(cConnection, "ML_Train");
-	cSrvc->set("net"+shmea::GString::intTOstring(netCount), wData);
+	cSrvc->set("net" + shmea::GString::intTOstring(netCount), wData);
 	serverInstance->send(cSrvc);
 	++netCount;
 }
@@ -1183,7 +1182,7 @@ void NNCreatorPanel::clickedContinue(const shmea::GString& cmpName, int x, int y
 	wData.addLong(testPct);
 	wData.addLong(validationPct);*/
 	shmea::ServiceData* cSrvc = new shmea::ServiceData(cConnection, "ML_Train");
-	cSrvc->set("net"+shmea::GString::intTOstring(netCount-1), wData);
+	cSrvc->set("net" + shmea::GString::intTOstring(netCount - 1), wData);
 	serverInstance->send(cSrvc);
 }
 
@@ -1295,7 +1294,7 @@ void NNCreatorPanel::clickedKill(const shmea::GString& cmpName, int x, int y)
 	wData.addString("KILL");
 
 	shmea::ServiceData* cSrvc = new shmea::ServiceData(cConnection, "ML_Train");
-	cSrvc->set("net"+shmea::GString::intTOstring(netCount-1), wData);
+	cSrvc->set("net" + shmea::GString::intTOstring(netCount - 1), wData);
 	serverInstance->send(cSrvc);
 }
 

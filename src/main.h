@@ -39,7 +39,7 @@ class GServer;
 class Frontend
 {
 public:
-	static void run(GNet::GServer*, bool);
+	static void run(GNet::GServer*, bool, bool);
 };
 
 #endif
