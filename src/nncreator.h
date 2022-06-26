@@ -87,6 +87,9 @@ protected:
 
 	RULabel* lblSettings;
 
+	RULabel* lblEpochs;
+	RULabel* lblAccuracy;
+
 	RULabel* lblNeuralNet;
 	RUDropdown* ddNeuralNet;
 
