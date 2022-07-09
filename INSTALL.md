@@ -32,11 +32,6 @@ One-liner for convenience:
 sudo apt-get install cmake make gcc g++ libsdl2-dev libsdl2-ttf-dev libsdl2-image-dev libssl-dev clang-format libcurl4-openssl-dev gdb
 ```
 
-## Python Dependencies
-```
-https://github.com/mtusman/gemini-python
-```
-
 ---
 
 ## Compilation

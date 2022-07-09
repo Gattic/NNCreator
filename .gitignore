@@ -1,7 +1,6 @@
 *.o
 NNCreator
 callgrind.*
-GQL/*.html
 .DS_Store
 build/*
 unit-tests/build/*
