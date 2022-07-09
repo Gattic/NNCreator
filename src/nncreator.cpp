@@ -106,7 +106,7 @@ void NNCreatorPanel::buildPanel()
 	// Stores all the graphs
 	GLinearLayout* graphsLayout = new GLinearLayout("graphsLayout");
 	graphsLayout->setX(15);
-	graphsLayout->setY(60);
+	graphsLayout->setY(10);
 	graphsLayout->setPadding(5);
 	graphsLayout->setOrientation(GLinearLayout::VERTICAL);
 	addSubItem(graphsLayout);
@@ -213,6 +213,30 @@ void NNCreatorPanel::buildPanel()
 	leftSideLayout->setPadding(10);
 	leftSideLayout->setOrientation(GLinearLayout::VERTICAL);
 	addSubItem(leftSideLayout);
+
+	//============STATS============
+
+	GLinearLayout* statsLayout = new GLinearLayout("statsLayout");
+	statsLayout->setOrientation(GLinearLayout::HORIZONTAL);
+	leftSideLayout->addSubItem(statsLayout);
+
+	// Epochs Label
+	lblEpochs = new RULabel();
+	lblEpochs->setWidth(100);
+	lblEpochs->setHeight(26);
+	lblEpochs->setText("");
+	lblEpochs->setName("lblEpochs");
+	statsLayout->addSubItem(lblEpochs);
+
+	// Accuracy Label
+	lblAccuracy = new RULabel();
+	lblAccuracy->setWidth(200);
+	lblAccuracy->setHeight(26);
+	lblAccuracy->setText("");
+	lblAccuracy->setName("lblAccuracy");
+	statsLayout->addSubItem(lblAccuracy);
+
+	//============FORM============
 
 	// Neural Network Settings header
 	lblSettings = new RULabel();
@@ -1395,6 +1419,23 @@ void NNCreatorPanel::updateFromQ(const shmea::ServiceData* data)
 		// Special case to update the candle graph
 		lcGraph->update();
 		rocCurveGraph->update();
+	}
+	else if (cName == "ACC")
+	{
+		if (data->getType() != shmea::ServiceData::TYPE_LIST)
+			return;
+
+		// Update components by tick
+		shmea::GList cList = data->getList();
+		if (cList.size() < 2)
+			return;
+
+		int epochs = cList.getInt(0);
+		float accuracy = cList.getFloat(1);
+		char accBuf[64];
+		sprintf(accBuf, "%.2f", accuracy);
+		lblEpochs->setText(shmea::GString::intTOstring(epochs)+"(t)");
+		lblAccuracy->setText(shmea::GString(accBuf)+"% Accuracy");
 	}
 	else if (cName == "CONF")
 	{

@@ -26,8 +26,8 @@
 // SOFTWARE.
 #include "crt0.h"
 #include "Backend/Database/GList.h"
-#include "Backend/Machine Learning/glades.h"
 #include "Backend/Machine Learning/bayes.h"
+#include "Backend/Machine Learning/glades.h"
 #include "Backend/Machine Learning/network.h"
 #include "Backend/Networking/main.h"
 #include "Backend/Networking/service.h"
@@ -36,8 +36,8 @@
 #include "core/md5.h"
 #include "core/version.h"
 #include "main.h"
-#include "services/ml_train.h"
 #include "services/bayes_train.h"
+#include "services/ml_train.h"
 
 bool NNCreator::running = true;
 Version* NNCreator::version = new Version("0.57");
@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
 	bool fullScreenMode = false;
 	bool compatMode = false;
 	bool localOnly = false;
-	for (int i=1; i < argc; ++i)
+	for (int i = 1; i < argc; ++i)
 	{
 		printf("Ingesting program paramter [%d]: %s\n", i, argv[i]);
 		noguiMode = (strcmp(argv[i], "nogui") == 0);
