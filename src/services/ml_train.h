@@ -31,20 +31,22 @@ class ML_Train : public GNet::Service
 {
 private:
 	GNet::GServer* serverInstance;
-	glades::NNetwork cNetwork;
+	glades::NNetwork* cNetwork;
 
 public:
 	ML_Train()
 	{
 		serverInstance = NULL;
+		cNetwork = new glades::NNetwork();
 	}
 
 	ML_Train(GNet::GServer* newInstance)
 	{
 		serverInstance = newInstance;
+		cNetwork = new glades::NNetwork();
 	}
 
-	~ML_Train()
+	virtual ~ML_Train()
 	{
 		serverInstance = NULL; // Not ours to delete
 	}
@@ -60,10 +62,10 @@ public:
 
 		if ((cList.size() == 1) && (cList.getString(0) == "KILL"))
 		{
-			if (!cNetwork.getRunning())
+			if (!cNetwork->getRunning())
 				return NULL;
 
-			cNetwork.stop();
+			cNetwork->stop();
 			printf("!!---KILLING NET---!!\n");
 		}
 
@@ -80,7 +82,7 @@ public:
 		// cList.getLong(6);
 
 		// Load the neural network
-		if ((cNetwork.getEpochs() == 0) && (!cNetwork.load(netName.c_str())))
+		if ((cNetwork->getEpochs() == 0) && (!cNetwork->load(netName.c_str())))
 		{
 			printf("[NN] Unable to load \"%s\"", netName.c_str());
 			return NULL;
@@ -95,7 +97,7 @@ public:
 		// Run the training and retrieve a metanetwork
 		shmea::GTable inputTable(testFName, ',', importType);
 		glades::MetaNetwork* newTrainNet =
-			glades::train(&cNetwork, inputTable, Arnold, serverInstance, destination);
+			glades::train(cNetwork, inputTable, Arnold, serverInstance, destination);
 
 		return NULL;
 	}

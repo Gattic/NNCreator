@@ -28,20 +28,16 @@
 #include "../GFXUtilities/Candle.h"
 #include "../Graphics/graphics.h"
 #include "Backend/Database/GList.h"
+#include "Backend/Database/standardizable.h"
 
 class RUGraph;
 
-class GraphableAttr
+class GraphableAttr : public shmea::GStandardizable
 {
 protected:
 	RUGraph* parent;
-	bool redoRange;
-	bool localXMode;
-	bool localYMode;
-	float localXMin;
-	float localXMax;
-	float localYMin;
-	float localYMax;
+	bool xMode;
+	bool yMode;
 	SDL_Color lineColor;
 
 public:
@@ -54,25 +50,17 @@ public:
 	virtual ~GraphableAttr();
 
 	// gets
-	float getXMin() const;
-	float getXMax() const;
-	float getYMin() const;
-	float getYMax() const;
-	bool getLocalXMode() const;
-	float getLocalXMin() const;
-	float getLocalXMax() const;
-	bool getLocalYMode() const;
-	float getLocalYMin() const;
-	float getLocalYMax() const;
+	float getXMinModed() const;
+	float getXMaxModed() const;
+	float getYMinModed() const;
+	float getYMaxModed() const;
+	bool getXMode() const;
+	bool getYMode() const;
 	SDL_Color getColor() const;
 
 	// sets
-	void setLocalXMode(bool);
-	void setLocalXMin(float);
-	void setLocalXMax(float);
-	void setLocalYMode(bool);
-	void setLocalYMin(float);
-	void setLocalYMax(float);
+	void setXMode(bool);
+	void setYMode(bool);
 	void setColor(SDL_Color);
 	virtual void clear();
 

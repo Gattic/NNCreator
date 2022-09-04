@@ -36,7 +36,7 @@ class GList;
 class GTable;
 }; // namespace shmea
 
-class RUGraph : public RUComponent
+class RUGraph : public RUComponent, public shmea::GStandardizable
 {
 private:
 	int graphSize;
@@ -54,10 +54,6 @@ private:
 
 protected:
 	std::map<shmea::GString, GeneralGraphable*> graphables;
-	float xMin;
-	float xMax;
-	float yMin;
-	float yMax;
 
 	// events
 	virtual void onMouseUp(gfxpp*, GPanel*, int, int);
@@ -122,10 +118,6 @@ public:
 	int getQuadrants() const;
 	float getQuadrantOffsetX() const;
 	float getQuadrantOffsetY() const;
-	float getXMin() const;
-	float getXMax() const;
-	float getYMin() const;
-	float getYMax() const;
 	float getVScale() const;
 	unsigned int getPeriod() const;
 	unsigned int getSourceAggregate() const;
@@ -139,10 +131,6 @@ public:
 	void setGridLineWidth(int);
 	void setQuadrants(int);
 	void setTitleLabel(shmea::GString);
-	void setXMin(float);
-	void setXMax(float);
-	void setYMin(float);
-	void setYMax(float);
 	void setVScale(float);
 	void setPeriod(unsigned int);
 	void setSourceAggregate(unsigned int);

@@ -14,64 +14,18 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _LAYER
-#define _LAYER
+#ifndef _GSTANDITEM
+#define _GSTANDITEM
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string>
-#include <vector>
+#include "GList.h"
 
-namespace glades {
+namespace shmea {
 
-class Node;
-
-class Layer
+class StandItem
 {
-private:
-	std::vector<Node*> children;
-	std::vector<bool> dropoutFlag;
-	int64_t id;
-	float biasWeight;
-	int type;
-
 public:
-	static const int INPUT_TYPE = 0;
-	static const int HIDDEN_TYPE = 1;
-	static const int OUTPUT_TYPE = 2;
-	static const int CONTEXT_TYPE = 3;
-
-	// constructors and destructors
-	Layer(int64_t, int, float = 0.0f);
-	Layer(int);
-	virtual ~Layer();
-
-	// gets
-	int64_t getID() const;
-	float getBiasWeight() const;
-	int getType() const;
-	unsigned int size() const;
-	bool possiblePath(unsigned int) const;
-	unsigned int firstValidPath() const;
-	unsigned int lastValidPath() const;
-
-	// sets
-	void setID(int64_t);
-	void setBiasWeight(float);
-	void setType(int);
-
-	// children
-	const std::vector<glades::Node*>& getChildren() const;
-	Node* getNode(unsigned int);
-	void generateDropout(float);
-	void clearDropout();
-	void addNode(Node*);
-	void initWeights(int, unsigned int, int, int);
-	std::vector<Node*>::iterator removeNode(Node*);
-	void clean();
-	void print() const;
-
-	Node* operator[](unsigned int);
+	virtual GList toXVectorData() const = 0;
+	virtual GList toYVectorData() const = 0;
 };
 };
 
