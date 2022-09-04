@@ -32,55 +32,108 @@
 #include "Backend/Database/GList.h"
 #include "Backend/Database/GTable.h"
 #include "Backend/Database/ServiceData.h"
-#include "Backend/Machine Learning/RNN.h"
 #include "Backend/Machine Learning/State/Terminator.h"
 #include "Backend/Machine Learning/Structure/hiddenlayerinfo.h"
 #include "Backend/Machine Learning/Structure/inputlayerinfo.h"
 #include "Backend/Machine Learning/Structure/nninfo.h"
 #include "Backend/Machine Learning/Structure/outputlayerinfo.h"
-#include "Backend/Machine Learning/main.h"
+#include "Backend/Machine Learning/glades.h"
 #include "Backend/Machine Learning/metanetwork.h"
 #include "Backend/Machine Learning/network.h"
 #include "Backend/Networking/service.h"
-#include "Backend/Networking/socket.h"
 #include "Frontend/GUI/RUMsgBox.h"
 #include "Frontend/Graphics/graphics.h"
 
 class NNInfo;
 
-class RNN_Train : public Service
+class RNN_Train : public GNet::Service
 {
+private:
+	GNet::GServer* serverInstance;
+	glades::NNetwork* cNetwork;
+
 public:
-	GList execute(class Connection* cConnection, const GList& data)
+	RNN_Train()
 	{
-		GList retList;
-		if (data.size() < 3)
-			return retList;
+		serverInstance = NULL;
+		cNetwork = new glades::NNetwork(glades::NNetwork::TYPE_RNN);
+	}
 
-		std::string netName = data.getString(0);
-		std::string testFName = data.getString(1);
-		int importType = data.getInt(2);
-		int64_t maxTimeStamp = data.getLong(3);
-		int64_t maxEpoch = data.getLong(4);
-		float maxAccuracy = data.getFloat(5);
-		// int64_t trainPct = data.getLong(4), testPct = data.getLong(5),
-		// validationPct =
-		// data.getLong(6);
+	RNN_Train(GNet::GServer* newInstance)
+	{
+		serverInstance = newInstance;
+		cNetwork = new glades::NNetwork(glades::NNetwork::TYPE_RNN);
+	}
 
-		// load the neural network
-		RNN* cNetwork = GQL::getRNN(netName);
+	virtual ~RNN_Train()
+	{
+		serverInstance = NULL; // Not ours to delete
+	}
+
+	shmea::ServiceData* execute(const shmea::ServiceData* data)
+	{
+		class GNet::Connection* destination = data->getConnection();
+
+		printf("RNN WHY0\n");
+
+		if (data->getType() != shmea::ServiceData::TYPE_LIST)
+			return NULL;
+
+		printf("RNN WHY1\n");
+		shmea::GList cList = data->getList();
+
+		if ((cList.size() == 1) && (cList.getString(0) == "KILL"))
+		{
+			if (!cNetwork->getRunning())
+				return NULL;
+
+			cNetwork->stop();
+			printf("!!---KILLING NET---!!\n");
+		}
+
+		printf("RNN WHY2\n");
+		if (cList.size() < 3)
+			return NULL;
+
+		printf("RNN WHY3\n");
+		shmea::GString netName = cList.getString(0);
+		shmea::GString testFName = cList.getString(1);
+		int importType = cList.getInt(2);
+		/*int64_t maxTimeStamp = cList.getLong(3);
+		int64_t maxEpoch = cList.getLong(4);
+		float maxAccuracy = cList.getFloat(5);*/
+		// int64_t trainPct = cList.getLong(4), testPct = cList.getLong(5), validationPct =
+		// cList.getLong(6);
+
+		// Load the neural network
+		if ((cNetwork->getEpochs() == 0) && (!cNetwork->load(netName.c_str())))
+		{
+			printf("[NN] Unable to load \"%s\"", netName.c_str());
+			return NULL;
+		}
 
 		// Termination Conditions
-		Terminator* Arnold = new Terminator();
-		Arnold->setTimestamp(maxTimeStamp);
+		glades::Terminator* Arnold = new glades::Terminator();
+		/*Arnold->setTimestamp(maxTimeStamp);
 		Arnold->setEpoch(maxEpoch);
-		Arnold->setAccuracy(maxAccuracy);
+		Arnold->setAccuracy(maxAccuracy);*/
 
 		// Run the training and retrieve a metanetwork
-		GTable inputTable(testFName, ',', importType);
-		MetaNetwork* newTrainNet = GQL::train(cNetwork, inputTable, Arnold);
+		shmea::GTable inputTable(testFName, ',', importType);
+		glades::MetaNetwork* newTrainNet =
+			glades::train(cNetwork, inputTable, Arnold, serverInstance, destination);
 
-		return retList;
+		return NULL;
+	}
+
+	GNet::Service* MakeService(GNet::GServer* newInstance) const
+	{
+		return new RNN_Train(newInstance);
+	}
+
+	shmea::GString getName() const
+	{
+		return "RNN_Train";
 	}
 };
 
