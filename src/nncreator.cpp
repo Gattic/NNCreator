@@ -236,20 +236,36 @@ void NNCreatorPanel::buildPanel()
 	lblAccuracy->setName("lblAccuracy");
 	statsLayout->addSubItem(lblAccuracy);
 
+	// Layer Tab navigation
+	mainVisualTabs = new RUTabContainer();
+	mainVisualTabs->setWidth(90);
+	mainVisualTabs->setHeight(30);
+	mainVisualTabs->setOptionsShown(3);
+	mainVisualTabs->setPadding(10);
+	mainVisualTabs->setName("mainVisualTabs");
+	leftSideLayout->addSubItem(mainVisualTabs);
+	mainVisualTabs->setSelectedTab(1);
+
+	GLinearLayout* mainSettingsLayout = new GLinearLayout("mainSettingsLayout");
+	mainSettingsLayout->setX(getWidth() - 500);
+	mainSettingsLayout->setY(90);
+	mainSettingsLayout->setOrientation(GLinearLayout::VERTICAL);
+	mainVisualTabs->addTab("   Main", mainSettingsLayout);
+
 	//============FORM============
 
 	// Neural Network Settings header
 	lblSettings = new RULabel();
-	lblSettings->setWidth(250);
+	lblSettings->setWidth(350);
 	lblSettings->setHeight(40);
 	lblSettings->setPadding(10);
 	lblSettings->setText("Neural Network Settings");
 	lblSettings->setName("lblSettings");
-	leftSideLayout->addSubItem(lblSettings);
+	mainSettingsLayout->addSubItem(lblSettings);
 
 	GLinearLayout* loadNetLayout = new GLinearLayout("loadNetLayout");
 	loadNetLayout->setOrientation(GLinearLayout::HORIZONTAL);
-	leftSideLayout->addSubItem(loadNetLayout);
+	mainSettingsLayout->addSubItem(loadNetLayout);
 
 	// Neural Net selector label
 	lblNeuralNet = new RULabel();
@@ -280,7 +296,7 @@ void NNCreatorPanel::buildPanel()
 
 	GLinearLayout* netNameLayout = new GLinearLayout("netNameLayout");
 	netNameLayout->setOrientation(GLinearLayout::HORIZONTAL);
-	leftSideLayout->addSubItem(netNameLayout);
+	mainSettingsLayout->addSubItem(netNameLayout);
 
 	// Network Name label
 	lblNetName = new RULabel();
@@ -323,7 +339,7 @@ void NNCreatorPanel::buildPanel()
 	// Run file/url  layout
 	GLinearLayout* runTestLayout = new GLinearLayout("runTestLayout");
 	runTestLayout->setOrientation(GLinearLayout::HORIZONTAL);
-	leftSideLayout->addSubItem(runTestLayout);
+	mainSettingsLayout->addSubItem(runTestLayout);
 
 	//  sample path textbox
 	tbTestDataSourcePath = new RUTextbox();
@@ -360,10 +376,21 @@ void NNCreatorPanel::buildPanel()
 	killButton->setName("killButton");
 	runTestLayout->addSubItem(killButton);
 
+	//------------Meta Settings Tab------------
+
+	GLinearLayout* metaSettingsLayout = new GLinearLayout("metaSettingsLayout");
+	metaSettingsLayout->setX(getWidth() - 500);
+	metaSettingsLayout->setY(90);
+	metaSettingsLayout->setOrientation(GLinearLayout::VERTICAL);
+	mainVisualTabs->addTab("   Meta", metaSettingsLayout);
+
+	//------------Cross Validate Tab------------
+
 	// Cross Validation Layout
 	GLinearLayout* crossValLayout = new GLinearLayout("crossValLayout");
 	crossValLayout->setOrientation(GLinearLayout::HORIZONTAL);
-	leftSideLayout->addSubItem(crossValLayout);
+	mainSettingsLayout->addSubItem(crossValLayout);
+	mainVisualTabs->addTab("   CV", crossValLayout);
 
 	// Cross Validation checkbox
 	chkCrossVal = new RUCheckbox(" Cross Validate");

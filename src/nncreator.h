@@ -85,6 +85,7 @@ protected:
 	RUGraph* rocCurveGraph;
 	RUTable* cMatrixTable;
 
+	RUTabContainer* mainVisualTabs;
 	RULabel* lblSettings;
 
 	RULabel* lblEpochs;
