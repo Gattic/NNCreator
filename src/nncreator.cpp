@@ -1180,7 +1180,7 @@ void NNCreatorPanel::clickedRun(const shmea::GString& cmpName, int x, int y)
 	/*wData.addLong(trainPct);
 	wData.addLong(testPct);
 	wData.addLong(validationPct);*/
-	shmea::ServiceData* cSrvc = new shmea::ServiceData(cConnection, "ML_Train");
+	shmea::ServiceData* cSrvc = new shmea::ServiceData(cConnection, "RNN_Train");
 	cSrvc->set("net" + shmea::GString::intTOstring(netCount), wData);
 	serverInstance->send(cSrvc);
 	++netCount;
@@ -1232,7 +1232,7 @@ void NNCreatorPanel::clickedContinue(const shmea::GString& cmpName, int x, int y
 	/*wData.addLong(trainPct);
 	wData.addLong(testPct);
 	wData.addLong(validationPct);*/
-	shmea::ServiceData* cSrvc = new shmea::ServiceData(cConnection, "ML_Train");
+	shmea::ServiceData* cSrvc = new shmea::ServiceData(cConnection, "RNN_Train");
 	cSrvc->set("net" + shmea::GString::intTOstring(netCount - 1), wData);
 	serverInstance->send(cSrvc);
 }
@@ -1344,7 +1344,7 @@ void NNCreatorPanel::clickedKill(const shmea::GString& cmpName, int x, int y)
 	shmea::GList wData;
 	wData.addString("KILL");
 
-	shmea::ServiceData* cSrvc = new shmea::ServiceData(cConnection, "ML_Train");
+	shmea::ServiceData* cSrvc = new shmea::ServiceData(cConnection, "RNN_Train");
 	cSrvc->set("net" + shmea::GString::intTOstring(netCount - 1), wData);
 	serverInstance->send(cSrvc);
 }
