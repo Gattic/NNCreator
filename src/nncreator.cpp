@@ -220,6 +220,15 @@ void NNCreatorPanel::buildPanel()
 	statsLayout->setOrientation(GLinearLayout::HORIZONTAL);
 	leftSideLayout->addSubItem(statsLayout);
 
+	// Clear Graphs button
+	RUButton* btnClearGraphs = new RUButton();
+	btnClearGraphs->setWidth(150);
+	btnClearGraphs->setHeight(30);
+	btnClearGraphs->setText("  Clear Graphs");
+	btnClearGraphs->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedGraphClear));
+	btnClearGraphs->setName("btnClearGraphs");
+	statsLayout->addSubItem(btnClearGraphs);
+
 	// Epochs Label
 	lblEpochs = new RULabel();
 	lblEpochs->setWidth(100);
@@ -329,7 +338,7 @@ void NNCreatorPanel::buildPanel()
 
 	// Delete button
 	btnDelete = new RUButton("red");
-	btnDelete->setWidth(100);
+	btnDelete->setWidth(90);
 	btnDelete->setHeight(30);
 	btnDelete->setText("  Delete");
 	btnDelete->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedDelete));
@@ -349,32 +358,41 @@ void NNCreatorPanel::buildPanel()
 	tbTestDataSourcePath->setName("tbTestDataSourcePath");
 	runTestLayout->addSubItem(tbTestDataSourcePath);
 
-	// Run Button
-	RUButton* sendButton = new RUButton("green");
-	sendButton->setWidth(80);
-	sendButton->setHeight(30);
-	sendButton->setText("   Run");
-	sendButton->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedRun));
-	sendButton->setName("sendButton");
-	runTestLayout->addSubItem(sendButton);
+	// Run/Train Button
+	RUButton* btnMLTrain = new RUButton("green");
+	btnMLTrain->setWidth(80);
+	btnMLTrain->setHeight(30);
+	btnMLTrain->setText("   Train");
+	btnMLTrain->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedRun));
+	btnMLTrain->setName("btnMLTrain");
+	runTestLayout->addSubItem(btnMLTrain);
 
-	// Continue Button
-	RUButton* contButton = new RUButton("blue");
-	contButton->setWidth(120);
-	contButton->setHeight(30);
-	contButton->setText("  Continue");
-	contButton->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedContinue));
-	contButton->setName("contButton");
-	runTestLayout->addSubItem(contButton);
+	// Test Button
+	RUButton* btnMLTest = new RUButton("green");
+	btnMLTest->setWidth(80);
+	btnMLTest->setHeight(30);
+	btnMLTest->setText("   Test");
+	btnMLTest->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedRun));
+	btnMLTest->setName("btnMLTest");
+	runTestLayout->addSubItem(btnMLTest);
 
 	// Kill Button
 	RUButton* killButton = new RUButton("red");
 	killButton->setWidth(70);
 	killButton->setHeight(30);
-	killButton->setText("   Kill");
+	killButton->setText("  Stop");
 	killButton->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedKill));
 	killButton->setName("killButton");
 	runTestLayout->addSubItem(killButton);
+
+	// Continue Button
+	RUButton* btnReset = new RUButton("blue");
+	btnReset->setWidth(90);
+	btnReset->setHeight(30);
+	btnReset->setText("  Reset");
+	btnReset->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedReset));
+	btnReset->setName("btnReset");
+	runTestLayout->addSubItem(btnReset);
 
 	//------------Meta Settings Tab------------
 
@@ -1130,6 +1148,13 @@ void NNCreatorPanel::clickedEditSwitch(const shmea::GString& cmpName, int x, int
 	populateHLayerForm();
 }
 
+void NNCreatorPanel::clickedReset(const shmea::GString& cmpName, int x, int y)
+{
+	// This variable represents which neural net instance we are touching
+	// TODO: Listbox with size of maxNetCount
+	++netCount;
+}
+
 /*!
  * @brief event handler 4
  * @details handles a NNCreator event
@@ -1139,10 +1164,14 @@ void NNCreatorPanel::clickedEditSwitch(const shmea::GString& cmpName, int x, int
  */
 void NNCreatorPanel::clickedRun(const shmea::GString& cmpName, int x, int y)
 {
-	if (!serverInstance)
+	if(!serverInstance)
 		return;
 
-	int importType = shmea::GTable::TYPE_FILE;
+	int runType = 0;
+	if (cmpName == "btnMLTrain")
+		runType = 0;
+	else if (cmpName == "btnMLTest")
+		runType = 1;
 
 	shmea::GString serverIP = "127.0.0.1";
 	GNet::Connection* cConnection = serverInstance->getConnection(serverIP);
@@ -1151,7 +1180,7 @@ void NNCreatorPanel::clickedRun(const shmea::GString& cmpName, int x, int y)
 
 	// Get the vars from the components
 	shmea::GString netName = tbNetName->getText();
-	shmea::GString testFName = tbTestDataSourcePath->getText();
+	shmea::GString datasetName = tbTestDataSourcePath->getText();
 	int64_t trainPct =
 		parsePct(shmea::GString::Typify(tbTrainPct->getText(), tbTrainPct->getText().size()));
 	int64_t testPct =
@@ -1159,7 +1188,7 @@ void NNCreatorPanel::clickedRun(const shmea::GString& cmpName, int x, int y)
 	int64_t validationPct = parsePct(
 		shmea::GString::Typify(tbValidationPct->getText(), tbValidationPct->getText().size()));
 
-	if ((netName.length() == 0) || (testFName.length() == 0))
+	if ((netName.length() == 0) || (datasetName.length() == 0))
 		return;
 
 	if (trainPct == -1 || testPct == -1 || validationPct == -1 ||
@@ -1175,65 +1204,13 @@ void NNCreatorPanel::clickedRun(const shmea::GString& cmpName, int x, int y)
 	// Run a machine learning service
 	shmea::GList wData;
 	wData.addString(netName);
-	wData.addString(testFName);
-	wData.addInt(importType);
+	wData.addInt(runType);
+	wData.addString(datasetName);
 	/*wData.addLong(trainPct);
 	wData.addLong(testPct);
 	wData.addLong(validationPct);*/
-	shmea::ServiceData* cSrvc = new shmea::ServiceData(cConnection, "RNN_Train");
+	shmea::ServiceData* cSrvc = new shmea::ServiceData(cConnection, "ML_Train");
 	cSrvc->set("net" + shmea::GString::intTOstring(netCount), wData);
-	serverInstance->send(cSrvc);
-	++netCount;
-}
-
-void NNCreatorPanel::clickedContinue(const shmea::GString& cmpName, int x, int y)
-{
-	if (!serverInstance)
-		return;
-
-	if (netCount == 0)
-		return;
-
-	int importType = shmea::GTable::TYPE_FILE;
-
-	shmea::GString serverIP = "127.0.0.1";
-	GNet::Connection* cConnection = serverInstance->getConnection(serverIP);
-	if (!cConnection)
-		return;
-
-	// Get the vars from the components
-	shmea::GString netName = tbNetName->getText();
-	shmea::GString testFName = tbTestDataSourcePath->getText();
-	int64_t trainPct =
-		parsePct(shmea::GString::Typify(tbTrainPct->getText(), tbTrainPct->getText().size()));
-	int64_t testPct =
-		parsePct(shmea::GString::Typify(tbTestPct->getText(), tbTestPct->getText().size()));
-	int64_t validationPct = parsePct(
-		shmea::GString::Typify(tbValidationPct->getText(), tbValidationPct->getText().size()));
-
-	if ((netName.length() == 0) || (testFName.length() == 0))
-		return;
-
-	if (trainPct == -1 || testPct == -1 || validationPct == -1 ||
-		trainPct + testPct + validationPct != 100)
-	{
-		printf("Percentages invalid: \n\tTrain: %s \n\tTest: %s \n\tValidation: "
-			   "%s \n",
-			   tbTrainPct->getText().c_str(), tbTestPct->getText().c_str(),
-			   tbValidationPct->getText().c_str());
-		return;
-	}
-
-	// Run a machine learning service
-	shmea::GList wData;
-	wData.addString(netName);
-	wData.addString(testFName);
-	wData.addInt(importType);
-	/*wData.addLong(trainPct);
-	wData.addLong(testPct);
-	wData.addLong(validationPct);*/
-	shmea::ServiceData* cSrvc = new shmea::ServiceData(cConnection, "RNN_Train");
-	cSrvc->set("net" + shmea::GString::intTOstring(netCount - 1), wData);
 	serverInstance->send(cSrvc);
 }
 
@@ -1309,6 +1286,11 @@ void NNCreatorPanel::tbHLLoseFocus()
 	populateIndexToEdit(currentHiddenLayerIndex);
 }
 
+void NNCreatorPanel::clickedGraphClear(const shmea::GString& cmpName, int x, int y)
+{
+	resetSim();
+}
+
 void NNCreatorPanel::clickedLoad(const shmea::GString& cmpName, int x, int y)
 {
 	loadDDNN();
@@ -1344,8 +1326,8 @@ void NNCreatorPanel::clickedKill(const shmea::GString& cmpName, int x, int y)
 	shmea::GList wData;
 	wData.addString("KILL");
 
-	shmea::ServiceData* cSrvc = new shmea::ServiceData(cConnection, "RNN_Train");
-	cSrvc->set("net" + shmea::GString::intTOstring(netCount - 1), wData);
+	shmea::ServiceData* cSrvc = new shmea::ServiceData(cConnection, "ML_Train");
+	cSrvc->set("net" + shmea::GString::intTOstring(netCount), wData);
 	serverInstance->send(cSrvc);
 }
 
@@ -1508,4 +1490,13 @@ void NNCreatorPanel::resetSim()
 	pthread_mutex_lock(rocMutex);
 	rocCurveGraph->clear();
 	pthread_mutex_unlock(rocMutex);
+
+	rocCurveGraph->update();
+	lcGraph->update();
+
+	cMatrixTable->clear();
+	cMatrixTable->updateLabels();
+
+	lblEpochs->setText("");
+	lblAccuracy->setText("");
 }

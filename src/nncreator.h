@@ -181,10 +181,12 @@ public:
 
 	void clickedSave(const shmea::GString&, int, int);
 	void clickedEditSwitch(const shmea::GString&, int, int);
+	void clickedReset(const shmea::GString&, int, int);
 	void clickedRun(const shmea::GString&, int, int);
 	void clickedCopy(const shmea::GString&, int, int);
 	void clickedRemove(const shmea::GString&, int, int);
 	void tbHLLoseFocus();
+	void clickedGraphClear(const shmea::GString&, int, int);
 	void clickedLoad(const shmea::GString&, int, int);
 	void checkedCV(const shmea::GString&, int, int);
 	void clickedKill(const shmea::GString&, int, int);

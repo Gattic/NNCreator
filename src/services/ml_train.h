@@ -73,8 +73,8 @@ public:
 			return NULL;
 
 		shmea::GString netName = cList.getString(0);
-		shmea::GString testFName = cList.getString(1);
-		int importType = cList.getInt(2);
+		int runType = cList.getInt(1);
+		shmea::GString datasetName = cList.getString(2);
 		/*int64_t maxTimeStamp = cList.getLong(3);
 		int64_t maxEpoch = cList.getLong(4);
 		float maxAccuracy = cList.getFloat(5);*/
@@ -95,9 +95,14 @@ public:
 		Arnold->setAccuracy(maxAccuracy);*/
 
 		// Run the training and retrieve a metanetwork
-		shmea::GTable inputTable(testFName, ',', importType);
-		glades::MetaNetwork* newTrainNet =
-			glades::train(cNetwork, inputTable, Arnold, serverInstance, destination);
+		shmea::GTable inputTable(datasetName, ',', shmea::GTable::TYPE_FILE);
+		glades::MetaNetwork* metanet = NULL;
+		if(runType == 0)
+			metanet = glades::train(cNetwork, inputTable, Arnold, serverInstance, destination);
+		else if(runType == 1)
+			metanet = glades::test(cNetwork, inputTable, serverInstance, destination);
+		//else if(runType == 2)
+			//metanet = glades::crossValidate(cNetwork, inputTable, Arnold, serverInstance, destination);
 
 		return NULL;
 	}
