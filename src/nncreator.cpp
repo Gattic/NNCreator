@@ -1153,6 +1153,7 @@ void NNCreatorPanel::clickedReset(const shmea::GString& cmpName, int x, int y)
 	// This variable represents which neural net instance we are touching
 	// TODO: Listbox with size of maxNetCount
 	++netCount;
+	resetSim();
 }
 
 /*!
@@ -1164,7 +1165,7 @@ void NNCreatorPanel::clickedReset(const shmea::GString& cmpName, int x, int y)
  */
 void NNCreatorPanel::clickedRun(const shmea::GString& cmpName, int x, int y)
 {
-	if(!serverInstance)
+	if (!serverInstance)
 		return;
 
 	int runType = 0;
@@ -1497,6 +1498,6 @@ void NNCreatorPanel::resetSim()
 	cMatrixTable->clear();
 	cMatrixTable->updateLabels();
 
-	lblEpochs->setText("");
-	lblAccuracy->setText("");
+	lblEpochs->setText(" ");
+	lblAccuracy->setText(" ");
 }

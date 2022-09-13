@@ -37,13 +37,15 @@ public:
 	ML_Train()
 	{
 		serverInstance = NULL;
-		cNetwork = new glades::NNetwork();
+		//cNetwork = new glades::NNetwork();
+		cNetwork = new glades::NNetwork(glades::NNetwork::TYPE_RNN);
 	}
 
 	ML_Train(GNet::GServer* newInstance)
 	{
 		serverInstance = newInstance;
-		cNetwork = new glades::NNetwork();
+		//cNetwork = new glades::NNetwork();
+		cNetwork = new glades::NNetwork(glades::NNetwork::TYPE_RNN);
 	}
 
 	virtual ~ML_Train()
@@ -97,12 +99,13 @@ public:
 		// Run the training and retrieve a metanetwork
 		shmea::GTable inputTable(datasetName, ',', shmea::GTable::TYPE_FILE);
 		glades::MetaNetwork* metanet = NULL;
-		if(runType == 0)
+		if (runType == 0)
 			metanet = glades::train(cNetwork, inputTable, Arnold, serverInstance, destination);
-		else if(runType == 1)
+		else if (runType == 1)
 			metanet = glades::test(cNetwork, inputTable, serverInstance, destination);
-		//else if(runType == 2)
-			//metanet = glades::crossValidate(cNetwork, inputTable, Arnold, serverInstance, destination);
+		// else if(runType == 2)
+		// metanet = glades::crossValidate(cNetwork, inputTable, Arnold, serverInstance,
+		// destination);
 
 		return NULL;
 	}
