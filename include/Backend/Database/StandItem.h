@@ -14,59 +14,19 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _GRAPHABLEATTR_H
-#define _GRAPHABLEATTR_H
+#ifndef _GSTANDITEM
+#define _GSTANDITEM
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_opengl.h>
-#include <pthread.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string>
-#include <vector>
-#include "../GFXUtilities/point2.h"
-#include "../GFXUtilities/Candle.h"
-#include "../Graphics/graphics.h"
-#include "Backend/Database/GList.h"
-#include "Backend/Database/standardizable.h"
+#include "GList.h"
 
-class RUGraph;
+namespace shmea {
 
-class GraphableAttr : public shmea::GStandardizable
+class StandItem
 {
-protected:
-	RUGraph* parent;
-	bool xMode;
-	bool yMode;
-	SDL_Color lineColor;
-
 public:
-
-	const static int TEXTURE_MAX_DIM = 16384;
-
-	// constructors & destructor
-	GraphableAttr();
-	GraphableAttr(RUGraph*, SDL_Color);
-	virtual ~GraphableAttr();
-
-	// gets
-	float getXMinModed() const;
-	float getXMaxModed() const;
-	float getYMinModed() const;
-	float getYMaxModed() const;
-	bool getXMode() const;
-	bool getYMode() const;
-	SDL_Color getColor() const;
-
-	// sets
-	void setXMode(bool);
-	void setYMode(bool);
-	void setColor(SDL_Color);
-	virtual void clear();
-
-	// render
-	virtual void draw(gfxpp*) = 0;
-	virtual void updateBackground(gfxpp*);
+	virtual GList toXVectorData() const = 0;
+	virtual GList toYVectorData() const = 0;
+};
 };
 
 #endif

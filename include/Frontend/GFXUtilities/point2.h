@@ -23,8 +23,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <vector>
+#include "Backend/Database/StandItem.h"
 
-class Point2
+class Point2 : public shmea::StandItem
 {
 private:
 	double x, y;
@@ -45,6 +46,8 @@ public:
 	void setX(double);
 	void setY(double);
 	void normalize();
+	virtual shmea::GList toXVectorData() const;
+	virtual shmea::GList toYVectorData() const;
 
 	// operators
 	inline Point2 operator+(Point2 v)

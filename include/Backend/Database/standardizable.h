@@ -14,59 +14,42 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _GRAPHABLEATTR_H
-#define _GRAPHABLEATTR_H
+#ifndef _GSTANDARDIZABLE
+#define _GSTANDARDIZABLE
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_opengl.h>
-#include <pthread.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string>
-#include <vector>
-#include "../GFXUtilities/point2.h"
-#include "../GFXUtilities/Candle.h"
-#include "../Graphics/graphics.h"
-#include "Backend/Database/GList.h"
-#include "Backend/Database/standardizable.h"
+#include <cfloat>
+#include "GList.h"
 
-class RUGraph;
+namespace shmea {
 
-class GraphableAttr : public shmea::GStandardizable
+class GStandardizable
 {
 protected:
-	RUGraph* parent;
-	bool xMode;
-	bool yMode;
-	SDL_Color lineColor;
+	float xMin;
+	float xMax;
+	float yMin;
+	float yMax;
 
 public:
 
-	const static int TEXTURE_MAX_DIM = 16384;
+	bool redoRange;
 
-	// constructors & destructor
-	GraphableAttr();
-	GraphableAttr(RUGraph*, SDL_Color);
-	virtual ~GraphableAttr();
+	GStandardizable();
+	virtual ~GStandardizable();
 
 	// gets
-	float getXMinModed() const;
-	float getXMaxModed() const;
-	float getYMinModed() const;
-	float getYMaxModed() const;
-	bool getXMode() const;
-	bool getYMode() const;
-	SDL_Color getColor() const;
+	float getXMin() const;
+	float getXMax() const;
+	float getYMin() const;
+	float getYMax() const;
 
 	// sets
-	void setXMode(bool);
-	void setYMode(bool);
-	void setColor(SDL_Color);
+	void setXMin(float);
+	void setXMax(float);
+	void setYMin(float);
+	void setYMax(float);
 	virtual void clear();
-
-	// render
-	virtual void draw(gfxpp*) = 0;
-	virtual void updateBackground(gfxpp*);
+};
 };
 
 #endif
