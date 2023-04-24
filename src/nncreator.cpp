@@ -72,6 +72,7 @@ NNCreatorPanel::NNCreatorPanel(const shmea::GString& name, int width, int height
 {
 	serverInstance = NULL;
 	netCount = 0;
+	keepGraping = true;
 	buildPanel();
 }
 
@@ -81,6 +82,7 @@ NNCreatorPanel::NNCreatorPanel(GNet::GServer* newInstance, const shmea::GString&
 {
 	serverInstance = newInstance;
 	netCount = 0;
+	keepGraping = true;
 	buildPanel();
 }
 
@@ -1157,6 +1159,7 @@ void NNCreatorPanel::clickedRun(const shmea::GString& cmpName, int x, int y)
 	cSrvc->set("net" + shmea::GString::intTOstring(netCount), wData);
 	serverInstance->send(cSrvc);
 	++netCount;
+	keepGraping = true;
 }
 
 void NNCreatorPanel::clickedContinue(const shmea::GString& cmpName, int x, int y)
@@ -1313,6 +1316,8 @@ void NNCreatorPanel::clickedKill(const shmea::GString& cmpName, int x, int y)
 	if (!cConnection)
 		return;
 
+	keepGraping = false;
+
 	// Kill a neural network instance
 	shmea::GList wData;
 	wData.addString("KILL");
@@ -1320,6 +1325,8 @@ void NNCreatorPanel::clickedKill(const shmea::GString& cmpName, int x, int y)
 	shmea::ServiceData* cSrvc = new shmea::ServiceData(cConnection, "ML_Train");
 	cSrvc->set("net" + shmea::GString::intTOstring(netCount - 1), wData);
 	serverInstance->send(cSrvc);
+
+	resetSim();
 }
 
 void NNCreatorPanel::clickedDelete(const shmea::GString& cmpName, int x, int y)
@@ -1416,12 +1423,18 @@ void NNCreatorPanel::updateFromQ(const shmea::ServiceData* data)
 	}
 	else if (cName == "UPDATE-GRAPHS")
 	{
+		if(!keepGraping)
+			return;
+
 		// Special case to update the candle graph
 		lcGraph->update();
 		rocCurveGraph->update();
 	}
 	else if (cName == "ACC")
 	{
+		if(!keepGraping)
+			return;
+
 		if (data->getType() != shmea::ServiceData::TYPE_LIST)
 			return;
 
@@ -1439,6 +1452,9 @@ void NNCreatorPanel::updateFromQ(const shmea::ServiceData* data)
 	}
 	else if (cName == "CONF")
 	{
+		if(!keepGraping)
+			return;
+
 		if (data->getType() != shmea::ServiceData::TYPE_TABLE)
 			return;
 
@@ -1455,6 +1471,9 @@ void NNCreatorPanel::updateFromQ(const shmea::ServiceData* data)
 	}
 	else if (cName == "PROGRESSIVE")
 	{
+		if(!keepGraping)
+			return;
+
 		if (data->getType() != shmea::ServiceData::TYPE_LIST)
 			return;
 
@@ -1476,9 +1495,11 @@ void NNCreatorPanel::resetSim()
 {
 	pthread_mutex_lock(lcMutex);
 	lcGraph->clear();
+	lcGraph->update();
 	pthread_mutex_unlock(lcMutex);
 
 	pthread_mutex_lock(rocMutex);
 	rocCurveGraph->clear();
+	rocCurveGraph->update();
 	pthread_mutex_unlock(rocMutex);
 }

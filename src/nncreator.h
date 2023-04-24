@@ -75,6 +75,7 @@ protected:
 	glades::NNInfo* formInfo;
 	int currentHiddenLayerIndex;
 	unsigned int netCount;
+	bool keepGraping;
 
 	int64_t parsePct(const shmea::GType&);
 
