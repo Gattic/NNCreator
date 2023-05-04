@@ -34,6 +34,7 @@ class RUTabContainer : public RUComponent
 
 protected:
 	int orientation;
+	int tabHeight;
 	static const int HORIZONTAL_TABS = 0;
 	static const int VERTICAL_TABS = 1;
 
@@ -57,16 +58,17 @@ public:
 
 	// constructors & destructor
 	RUTabContainer();
-	~RUTabContainer();
+	virtual ~RUTabContainer();
 
 	// gets
+	virtual int getHeight() const;
 	unsigned int getOptionsShown() const;
 	unsigned int getTabSelected();
 	unsigned int size() const;
 
 	// sets
 	void setWidth(int);
-	void setHeight(int);
+	void setTabHeight(int);
 	void setOptionsShown(unsigned int);
 	void addTab(shmea::GString, GItem* = NULL);
 	void clearOptions();

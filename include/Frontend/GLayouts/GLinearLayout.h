@@ -34,6 +34,8 @@ class GLinearLayout : public GLayout
 protected:
 	int orientation;
 
+	virtual void onMouseDown(gfxpp*, GPanel*, int, int);
+
 	// render
 	virtual void updateBackground(gfxpp*);
 

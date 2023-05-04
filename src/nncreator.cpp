@@ -421,7 +421,7 @@ void NNCreatorPanel::buildPanel()
 	// Layer Tab navigation
 	layerTabs = new RUTabContainer();
 	layerTabs->setWidth(90);
-	layerTabs->setHeight(30);
+	layerTabs->setTabHeight(30);
 	layerTabs->setOptionsShown(3);
 	layerTabs->setPadding(10);
 	layerTabs->setName("layerTabs");
@@ -1423,7 +1423,7 @@ void NNCreatorPanel::updateFromQ(const shmea::ServiceData* data)
 	}
 	else if (cName == "UPDATE-GRAPHS")
 	{
-		if(!keepGraping)
+		if (!keepGraping)
 			return;
 
 		// Special case to update the candle graph
@@ -1432,7 +1432,7 @@ void NNCreatorPanel::updateFromQ(const shmea::ServiceData* data)
 	}
 	else if (cName == "ACC")
 	{
-		if(!keepGraping)
+		if (!keepGraping)
 			return;
 
 		if (data->getType() != shmea::ServiceData::TYPE_LIST)
@@ -1447,12 +1447,12 @@ void NNCreatorPanel::updateFromQ(const shmea::ServiceData* data)
 		float accuracy = cList.getFloat(1);
 		char accBuf[64];
 		sprintf(accBuf, "%.2f", accuracy);
-		lblEpochs->setText(shmea::GString::intTOstring(epochs)+"(t)");
-		lblAccuracy->setText(shmea::GString(accBuf)+"% Accuracy");
+		lblEpochs->setText(shmea::GString::intTOstring(epochs) + "(t)");
+		lblAccuracy->setText(shmea::GString(accBuf) + "% Accuracy");
 	}
 	else if (cName == "CONF")
 	{
-		if(!keepGraping)
+		if (!keepGraping)
 			return;
 
 		if (data->getType() != shmea::ServiceData::TYPE_TABLE)
@@ -1471,7 +1471,7 @@ void NNCreatorPanel::updateFromQ(const shmea::ServiceData* data)
 	}
 	else if (cName == "PROGRESSIVE")
 	{
-		if(!keepGraping)
+		if (!keepGraping)
 			return;
 
 		if (data->getType() != shmea::ServiceData::TYPE_LIST)
