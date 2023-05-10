@@ -101,7 +101,7 @@ int main(int argc, char* argv[])
 	}
 
 	// Launch the server server
-	serverInstance->run(localOnly);
+	serverInstance->run("45024", localOnly);
 
 	// Launch the gui
 	if (!noguiMode)
