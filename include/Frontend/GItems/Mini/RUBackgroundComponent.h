@@ -19,6 +19,7 @@
 
 #include "../RUItemArea.h"
 #include "Backend/Database/GString.h"
+#include "Backend/Database/GPointer.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_opengl.h>
@@ -39,8 +40,9 @@ class RUBackgroundComponent : public virtual RUItemArea
 {
 protected:
 	bool bgEnabled;
+	bool bgColorEnabled;
 	SDL_Surface* surfaceTheUSA;
-	shmea::Image* bgImage;
+	shmea::GPointer<shmea::Image> bgImage;
 	SDL_Color bgColor;
 	shmea::GString bgImageLocation;
 	int bgImageType;
@@ -49,7 +51,7 @@ protected:
 	void refreshImage();
 
 	void fromSurface(SDL_Surface*);
-	void fromImage(shmea::Image*);
+	void fromImage(shmea::GPointer<shmea::Image>);
 
 public:
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
@@ -58,10 +60,10 @@ public:
 	static const unsigned int bmask = 0x0000FF00;
 	static const unsigned int amask = 0x000000FF;
 
-	static const int RED_INDEX = 0;
-	static const int GREEN_INDEX = 1;
-	static const int BLUE_INDEX = 2;
-	static const int ALPHA_INDEX = 3;
+	static const int ALPHA_INDEX = 0;
+	static const int BLUE_INDEX = 1;
+	static const int GREEN_INDEX = 2;
+	static const int RED_INDEX = 3;
 
 #else
 	static const unsigned int rmask = 0x000000FF;
@@ -69,10 +71,10 @@ public:
 	static const unsigned int bmask = 0x00FF0000;
 	static const unsigned int amask = 0xFF000000;
 
-	static const int ALPHA_INDEX = 0;
-	static const int BLUE_INDEX = 1;
-	static const int GREEN_INDEX = 2;
-	static const int RED_INDEX = 3;
+	static const int RED_INDEX = 0;
+	static const int GREEN_INDEX = 1;
+	static const int BLUE_INDEX = 2;
+	static const int ALPHA_INDEX = 3;
 #endif
 
 	static const int TYPE_NONE = 0;
@@ -86,14 +88,16 @@ public:
 
 	// gets
 	bool getBGEnabled() const;
+	bool getBGColorEnabled() const;
 	shmea::GString getBGImageLocation() const;
 	SDL_Color getBGColor() const;
 
 	// sets
 	void toggleBG(bool);
+	void toggleBGColor(bool);
 	void setBGImageFromLocation(const shmea::GString&);
 	void setBGImageFromSurface(SDL_Surface*);
-	void setBGImage(shmea::Image*);
+	void setBGImage(shmea::GPointer<shmea::Image>);
 	void setBGColor(SDL_Color);
 
 	// render

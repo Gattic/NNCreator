@@ -32,9 +32,10 @@ class RUImageComponent : public RUComponent
 {
 public:
 	// constructors & destructor
+	RUImageComponent();
 	RUImageComponent(const shmea::GString&);
-	RUImageComponent(shmea::Image*);
-	~RUImageComponent();
+	RUImageComponent(shmea::GPointer<shmea::Image>);
+	virtual ~RUImageComponent();
 
 	// render
 	virtual void updateBackground(gfxpp*);
