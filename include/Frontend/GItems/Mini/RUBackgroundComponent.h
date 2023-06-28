@@ -20,6 +20,7 @@
 #include "../RUItemArea.h"
 #include "Backend/Database/GString.h"
 #include "Backend/Database/GPointer.h"
+#include "Backend/Database/image.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_opengl.h>
@@ -31,10 +32,6 @@
 #define DEFAULT_IMAGE_BG_HIGHLIGHTED "resources/gui/Components/BackgroundHighlighted.bmp"
 
 class gfxpp;
-
-namespace shmea {
-class Image;
-};
 
 class RUBackgroundComponent : public virtual RUItemArea
 {
