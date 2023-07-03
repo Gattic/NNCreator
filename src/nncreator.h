@@ -82,7 +82,7 @@ protected:
 	void buildPanel();
 
 	RUGraph* lcGraph;
-	RUGraph* dartboardGraph;
+	RUImageComponent* outputImage;
 	RUGraph* rocCurveGraph;
 	RUTable* cMatrixTable;
 
@@ -142,6 +142,11 @@ protected:
 
 	RUTextbox* tbBatchSize;
 
+	RUTabContainer* previewTabs;
+	RUTable* previewTable;
+	GLinearLayout* previewImageLayout;
+	RUImageComponent* previewImage;
+
 	RULabel* lblEditOutputLayer;
 
 	RULabel* lblOutputType;
@@ -154,7 +159,8 @@ protected:
 
 	RUButton* sendButton;
 
-	RUTextbox* tbTestDataSourcePath;
+	RUDropdown* ddDatasets;
+	RUDropdown* ddDataType;
 
 	RUCheckbox* chkCrossVal;
 	RULabel* lblttv;
@@ -168,7 +174,7 @@ public:
 
 	NNCreatorPanel(const shmea::GString&, int, int);
 	NNCreatorPanel(GNet::GServer*, const shmea::GString&, int, int);
-	~NNCreatorPanel();
+	virtual ~NNCreatorPanel();
 
 	void loadDDNN();
 	void populateIndexToEdit(int = 0);
@@ -179,8 +185,11 @@ public:
 	void PlotROCCurve(float, float);
 	void updateConfMatrixTable(const shmea::GTable&);
 
+	void loadDatasets();
+
 	void clickedSave(const shmea::GString&, int, int);
 	void clickedEditSwitch(const shmea::GString&, int, int);
+	void clickedDSTypeSwitch(int);
 	void clickedRun(const shmea::GString&, int, int);
 	void clickedCopy(const shmea::GString&, int, int);
 	void clickedRemove(const shmea::GString&, int, int);

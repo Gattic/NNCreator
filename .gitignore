@@ -5,6 +5,7 @@ callgrind.*
 build/*
 unit-tests/build/*
 database/*
+datasets/images/*
 unit-tests/database/*
 *.sublime-workspace
 *.swp

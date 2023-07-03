@@ -164,25 +164,30 @@ void NNCreatorPanel::buildPanel()
 	bottomGraphsLayout->setOrientation(GLinearLayout::HORIZONTAL);
 	graphsLayout->addSubItem(bottomGraphsLayout);
 
-	// Dartboard Graph and Label
-	GLinearLayout* dartGraphLayout = new GLinearLayout("dartGraphLayout");
-	dartGraphLayout->setPadding(5);
-	dartGraphLayout->setOrientation(GLinearLayout::VERTICAL);
-	bottomGraphsLayout->addSubItem(dartGraphLayout);
+	// Output Image and Label
+	GLinearLayout* outputImageLayout = new GLinearLayout("outputImageLayout");
+	outputImageLayout->setPadding(5);
+	outputImageLayout->setOrientation(GLinearLayout::VERTICAL);
+	bottomGraphsLayout->addSubItem(outputImageLayout);
 
-	// Dartboard Label
-	RULabel* lblGraphDart = new RULabel();
-	lblGraphDart->setWidth(310);
-	lblGraphDart->setHeight(24);
-	lblGraphDart->setText("Dartboard (Expected, Predicted)");
-	lblGraphDart->setName("lblGraphDart");
-	dartGraphLayout->addSubItem(lblGraphDart);
+	// Output Image Label
+	RULabel* lblOutputImg = new RULabel();
+	lblOutputImg->setWidth(310);
+	lblOutputImg->setHeight(24);
+	lblOutputImg->setText("Output Image");
+	lblOutputImg->setName("lblOutputImg");
+	outputImageLayout->addSubItem(lblOutputImg);
 
-	// Dartboard graph
-	dartboardGraph = new RUGraph(getWidth() / 4, getHeight() / 4,
-								 RUGraph::QUADRANTS_ONE); // -4 = adjustment to align with table
-	dartboardGraph->setName("dartboardGraph");
-	dartGraphLayout->addSubItem(dartboardGraph);
+	shmea::GPointer<shmea::Image> newImage(new shmea::Image());
+	newImage->LoadPNG("resources/bg.png");
+
+	// NN Output Image
+	outputImage = new RUImageComponent();
+	outputImage->setWidth(getWidth() / 4);
+	outputImage->setHeight(getHeight() / 4);
+	outputImage->setName("outputImage");
+	outputImage->setBGImage(newImage);
+	outputImageLayout->addSubItem(outputImage);
 
 	// Confusion Table and Label
 	GLinearLayout* confTableLayout = new GLinearLayout("confTableLayout");
@@ -322,18 +327,45 @@ void NNCreatorPanel::buildPanel()
 	btnDelete->setName("btnDelete");
 	netNameLayout->addSubItem(btnDelete);
 
-	// Run file/url  layout
+	// Input/Output Data Type Layout
+	GLinearLayout* dataTypeLayout = new GLinearLayout("dataTypeLayout");
+	dataTypeLayout->setOrientation(GLinearLayout::HORIZONTAL);
+	leftSideLayout->addSubItem(dataTypeLayout);
+
+	// Input/Output Data Type label
+	RULabel* lbldatarow = new RULabel();
+	lbldatarow->setWidth(170);
+	lbldatarow->setHeight(30);
+	lbldatarow->setText("Data Type/Path");
+	lbldatarow->setName("lbldatarow");
+	dataTypeLayout->addSubItem(lbldatarow);
+
+	// Input/Output Data Type
+	ddDataType = new RUDropdown();
+	ddDataType->setWidth(160);
+	ddDataType->setHeight(30);
+	ddDataType->setOptionsShown(3);
+	ddDataType->setName("ddDataType");
+	ddDataType->setOptionChangedListener(
+		GeneralListener(this, &NNCreatorPanel::clickedDSTypeSwitch));
+	dataTypeLayout->addSubItem(ddDataType);
+
+	ddDataType->addOption("CSV");
+	ddDataType->addOption("Image");
+	ddDataType->addOption("Text");
+
+	//  sample path textbox
+	ddDatasets = new RUDropdown();
+	ddDatasets->setWidth(220);
+	ddDatasets->setHeight(30);
+	ddDatasets->setOptionsShown(3);
+	ddDatasets->setName("ddDatasets");
+	dataTypeLayout->addSubItem(ddDatasets);
+
+	// Run layout
 	GLinearLayout* runTestLayout = new GLinearLayout("runTestLayout");
 	runTestLayout->setOrientation(GLinearLayout::HORIZONTAL);
 	leftSideLayout->addSubItem(runTestLayout);
-
-	//  sample path textbox
-	tbTestDataSourcePath = new RUTextbox();
-	tbTestDataSourcePath->setWidth(300);
-	tbTestDataSourcePath->setHeight(30);
-	tbTestDataSourcePath->setText("datasets/");
-	tbTestDataSourcePath->setName("tbTestDataSourcePath");
-	runTestLayout->addSubItem(tbTestDataSourcePath);
 
 	// Run Button
 	RUButton* sendButton = new RUButton("green");
@@ -365,7 +397,7 @@ void NNCreatorPanel::buildPanel()
 	// Cross Validation Layout
 	GLinearLayout* crossValLayout = new GLinearLayout("crossValLayout");
 	crossValLayout->setOrientation(GLinearLayout::HORIZONTAL);
-	leftSideLayout->addSubItem(crossValLayout);
+	// leftSideLayout->addSubItem(crossValLayout); // TODO uncomment when cross val is tested
 
 	// Cross Validation checkbox
 	chkCrossVal = new RUCheckbox(" Cross Validate");
@@ -474,13 +506,77 @@ void NNCreatorPanel::buildPanel()
 	lblBatchSize->setName("lblBatchSize");
 	batchUpdateLayout->addSubItem(lblBatchSize);
 
-	// Batch dropdown
+	// Batch
 	tbBatchSize = new RUTextbox();
 	tbBatchSize->setWidth(160);
 	tbBatchSize->setHeight(30);
 	tbBatchSize->setText("1");
 	tbBatchSize->setName("tbBatchSize");
 	batchUpdateLayout->addSubItem(tbBatchSize);
+
+	// Preview Button
+	RUButton* btnPreview = new RUButton("blue");
+	btnPreview->setWidth(150);
+	btnPreview->setHeight(30);
+	btnPreview->setText(" Preview Data");
+	// btnPreview->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedPreview))));
+	btnPreview->setName("btnPreview");
+	inputOverallLayout->addSubItem(btnPreview);
+
+	previewTabs = new RUTabContainer();
+	previewTabs->setWidth(90);
+	previewTabs->setTabHeight(30);
+	previewTabs->setTabsVisible(false);
+	previewTabs->setOptionsShown(3);
+	previewTabs->setPadding(10);
+	previewTabs->setName("previewTabs");
+	inputOverallLayout->addSubItem(previewTabs);
+	previewTabs->setSelectedTab(1);
+
+	// Preview Table
+	previewTable = new RUTable();
+	previewTable->setRowsShown(8);
+	previewTable->setWidth(getWidth() / 4);
+	previewTable->setHeight(getHeight() / 4);
+	previewTable->setName("previewTable");
+	previewTabs->addTab("   CSV", previewTable);
+
+	previewImageLayout = new GLinearLayout("previewImageLayout");
+	previewImageLayout->setOrientation(GLinearLayout::VERTICAL);
+	previewTabs->addTab("   Image", previewImageLayout);
+
+	shmea::GPointer<shmea::Image> prevImage(new shmea::Image());
+	prevImage->LoadPNG("resources/bg.png");
+
+	// Preview Image
+	previewImage = new RUImageComponent();
+	previewImage->setWidth(getWidth() / 4);
+	previewImage->setHeight(getHeight() / 4);
+	previewImage->setName("previewImage");
+	previewImage->setBGImage(prevImage);
+	previewImageLayout->addSubItem(previewImage);
+
+	GLinearLayout* prevImageBtnsLayout = new GLinearLayout("prevImageBtnsLayout");
+	prevImageBtnsLayout->setOrientation(GLinearLayout::HORIZONTAL);
+	previewImageLayout->addSubItem(prevImageBtnsLayout);
+
+	// Previous Button
+	RUButton* btnPrevious = new RUButton("blue");
+	btnPrevious->setWidth(110);
+	btnPrevious->setHeight(30);
+	btnPrevious->setText(" Previious");
+	// btnPrevious->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedPrevious))));
+	btnPrevious->setName("btnPrevious");
+	prevImageBtnsLayout->addSubItem(btnPrevious);
+
+	// Next Button
+	RUButton* btnNext = new RUButton("blue");
+	btnNext->setWidth(80);
+	btnNext->setHeight(30);
+	btnNext->setText(" Next");
+	// btnNext->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedPrevious))));
+	btnNext->setName("btnNext");
+	prevImageBtnsLayout->addSubItem(btnNext);
 
 	hiddenOverallLayout = new GLinearLayout("hiddenOverallLayout");
 	hiddenOverallLayout->setX(getWidth() - 500);
@@ -793,6 +889,8 @@ void NNCreatorPanel::buildPanel()
 	loadDDNN();
 	populateIndexToEdit();
 	populateHLayerForm();
+
+	loadDatasets();
 }
 
 void NNCreatorPanel::onStart()
@@ -1039,6 +1137,73 @@ int64_t NNCreatorPanel::parsePct(const shmea::GType& spct)
 	return pctVal;
 }
 
+void NNCreatorPanel::loadDatasets()
+{
+	if (!ddDataType)
+		return;
+
+	if (!ddDatasets)
+		return;
+
+	ddDatasets->clearOptions();
+
+	int dataType = 0;
+	if (ddDataType->getSelectedText() == "CSV")
+	{
+		dataType = 0;
+		previewTable->setVisible(true);
+		previewImageLayout->setVisible(false);
+	}
+	else if (ddDataType->getSelectedText() == "Image")
+	{
+		dataType = 1;
+		previewTable->setVisible(false);
+		previewImageLayout->setVisible(true);
+	}
+	else if (ddDataType->getSelectedText() == "Text")
+	{
+		dataType = 2;
+		previewTable->setVisible(false);
+		previewImageLayout->setVisible(false);
+	}
+	else
+		return;
+
+	DIR* dir;
+	struct dirent* ent;
+	shmea::GString folderName = "datasets/";
+	if ((dir = opendir(folderName.c_str())) == NULL)
+	{
+		printf("[ML] -%s\n", folderName.c_str());
+		return;
+	}
+
+	// loop through the directory
+	while ((ent = readdir(dir)) != NULL)
+	{
+		// don't want the current directory, parent or hidden files/folders
+		shmea::GString fname(ent->d_name);
+		if (fname[0] == '.')
+			continue;
+
+		if ((ent->d_type == DT_DIR) && (dataType == 1))
+		{
+			// printf("Folder[%d]: %s \n", ent->d_type, fname.c_str());
+			ddDatasets->addOption(fname);
+		}
+		else if ((ent->d_type == DT_REG) && (dataType == 0 || dataType == 2))
+		{
+			// printf("File[%d]: %s \n", ent->d_type, fname.c_str());
+			ddDatasets->addOption(fname);
+		}
+		else
+			continue;
+	}
+
+	closedir(dir);
+	ddDatasets->setOptionsShown(3);
+}
+
 /*!
  * @brief Save NN
  * @details save a neural network using the Save_NN network service
@@ -1105,6 +1270,11 @@ void NNCreatorPanel::clickedEditSwitch(const shmea::GString& cmpName, int x, int
 	populateHLayerForm();
 }
 
+void NNCreatorPanel::clickedDSTypeSwitch(int newIndex)
+{
+	loadDatasets();
+}
+
 /*!
  * @brief event handler 4
  * @details handles a NNCreator event
@@ -1126,7 +1296,7 @@ void NNCreatorPanel::clickedRun(const shmea::GString& cmpName, int x, int y)
 
 	// Get the vars from the components
 	shmea::GString netName = tbNetName->getText();
-	shmea::GString testFName = tbTestDataSourcePath->getText();
+	shmea::GString testFName = "datasets/" + ddDatasets->getSelectedText();
 	int64_t trainPct =
 		parsePct(shmea::GString::Typify(tbTrainPct->getText(), tbTrainPct->getText().size()));
 	int64_t testPct =
@@ -1179,7 +1349,7 @@ void NNCreatorPanel::clickedContinue(const shmea::GString& cmpName, int x, int y
 
 	// Get the vars from the components
 	shmea::GString netName = tbNetName->getText();
-	shmea::GString testFName = tbTestDataSourcePath->getText();
+	shmea::GString testFName = "datasets/" + ddDatasets->getSelectedText();
 	int64_t trainPct =
 		parsePct(shmea::GString::Typify(tbTrainPct->getText(), tbTrainPct->getText().size()));
 	int64_t testPct =

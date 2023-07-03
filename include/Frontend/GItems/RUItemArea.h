@@ -74,6 +74,8 @@ public:
 	void setMarginX(int);
 	void setMarginY(int);
 	void setVisible(bool);
+	void show();
+	void hide();
 	void requireDrawUpdate();
 };
 
