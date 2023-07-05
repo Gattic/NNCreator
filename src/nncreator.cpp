@@ -514,14 +514,38 @@ void NNCreatorPanel::buildPanel()
 	tbBatchSize->setName("tbBatchSize");
 	batchUpdateLayout->addSubItem(tbBatchSize);
 
-	// Preview Button
-	RUButton* btnPreview = new RUButton("blue");
-	btnPreview->setWidth(150);
-	btnPreview->setHeight(30);
-	btnPreview->setText(" Preview Data");
-	// btnPreview->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedPreview))));
-	btnPreview->setName("btnPreview");
-	inputOverallLayout->addSubItem(btnPreview);
+	// Preview label Header
+	RULabel* lblPreview = new RULabel();
+	lblPreview->setWidth(200);
+	lblPreview->setHeight(40);
+	lblPreview->setPadding(10);
+	lblPreview->setText(" Preview");
+	lblPreview->setName("lblPreview");
+	inputOverallLayout->addSubItem(lblPreview);
+
+	GLinearLayout* previewButtonsLayout = new GLinearLayout("previewButtonsLayout");
+	previewButtonsLayout->setOrientation(GLinearLayout::HORIZONTAL);
+	inputOverallLayout->addSubItem(previewButtonsLayout);
+
+	// Preview Train Data Button
+	RUButton* btnPreviewTrain = new RUButton("blue");
+	btnPreviewTrain->setWidth(150);
+	btnPreviewTrain->setHeight(30);
+	btnPreviewTrain->setText(" Training Data");
+	// btnPreviewTrain->setMouseDownListener(GeneralListener(this,
+	// &NNCreatorPanel::clickedPreviewTrain))));
+	btnPreviewTrain->setName("btnPreviewTrain");
+	previewButtonsLayout->addSubItem(btnPreviewTrain);
+
+	// Preview Test Data Button
+	RUButton* tbnPreviewTest = new RUButton("blue");
+	tbnPreviewTest->setWidth(150);
+	tbnPreviewTest->setHeight(30);
+	tbnPreviewTest->setText(" Testing Data");
+	// tbnPreviewTest->setMouseDownListener(GeneralListener(this,
+	// &NNCreatorPanel::clickedPreviewTest))));
+	tbnPreviewTest->setName("tbnPreviewTest");
+	previewButtonsLayout->addSubItem(tbnPreviewTest);
 
 	previewTabs = new RUTabContainer();
 	previewTabs->setWidth(90);
@@ -564,7 +588,7 @@ void NNCreatorPanel::buildPanel()
 	RUButton* btnPrevious = new RUButton("blue");
 	btnPrevious->setWidth(110);
 	btnPrevious->setHeight(30);
-	btnPrevious->setText(" Previious");
+	btnPrevious->setText(" Previous");
 	// btnPrevious->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedPrevious))));
 	btnPrevious->setName("btnPrevious");
 	prevImageBtnsLayout->addSubItem(btnPrevious);
@@ -1148,6 +1172,7 @@ void NNCreatorPanel::loadDatasets()
 	ddDatasets->clearOptions();
 
 	int dataType = 0;
+	shmea::GString folderName = "datasets/";
 	if (ddDataType->getSelectedText() == "CSV")
 	{
 		dataType = 0;
@@ -1157,6 +1182,7 @@ void NNCreatorPanel::loadDatasets()
 	else if (ddDataType->getSelectedText() == "Image")
 	{
 		dataType = 1;
+		folderName += "images/";
 		previewTable->setVisible(false);
 		previewImageLayout->setVisible(true);
 	}
@@ -1171,7 +1197,6 @@ void NNCreatorPanel::loadDatasets()
 
 	DIR* dir;
 	struct dirent* ent;
-	shmea::GString folderName = "datasets/";
 	if ((dir = opendir(folderName.c_str())) == NULL)
 	{
 		printf("[ML] -%s\n", folderName.c_str());
@@ -1287,8 +1312,30 @@ void NNCreatorPanel::clickedRun(const shmea::GString& cmpName, int x, int y)
 	if (!serverInstance)
 		return;
 
-	int importType = shmea::GTable::TYPE_FILE;
+	if (!ddDataType)
+		return;
 
+	if (!ddDatasets)
+		return;
+
+	// Get the import type
+	int importType = glades::NNetwork::TYPE_CSV;
+	if (ddDataType->getSelectedText() == "CSV")
+	{
+		importType = glades::NNetwork::TYPE_CSV;
+	}
+	else if (ddDataType->getSelectedText() == "Image")
+	{
+		importType = glades::NNetwork::TYPE_IMAGE;
+	}
+	else if (ddDataType->getSelectedText() == "Text")
+	{
+		importType = glades::NNetwork::TYPE_TEXT;
+	}
+	else
+		return;
+
+	// Get the connection
 	shmea::GString serverIP = "127.0.0.1";
 	GNet::Connection* cConnection = serverInstance->getConnection(serverIP);
 	if (!cConnection)
@@ -1296,7 +1343,7 @@ void NNCreatorPanel::clickedRun(const shmea::GString& cmpName, int x, int y)
 
 	// Get the vars from the components
 	shmea::GString netName = tbNetName->getText();
-	shmea::GString testFName = "datasets/" + ddDatasets->getSelectedText();
+	shmea::GString testFName = ddDatasets->getSelectedText();
 	int64_t trainPct =
 		parsePct(shmea::GString::Typify(tbTrainPct->getText(), tbTrainPct->getText().size()));
 	int64_t testPct =
@@ -1340,7 +1387,28 @@ void NNCreatorPanel::clickedContinue(const shmea::GString& cmpName, int x, int y
 	if (netCount == 0)
 		return;
 
-	int importType = shmea::GTable::TYPE_FILE;
+	if (!ddDataType)
+		return;
+
+	if (!ddDatasets)
+		return;
+
+	// Get the import type
+	int importType = glades::NNetwork::TYPE_CSV;
+	if (ddDataType->getSelectedText() == "CSV")
+	{
+		importType = glades::NNetwork::TYPE_CSV;
+	}
+	else if (ddDataType->getSelectedText() == "Image")
+	{
+		importType = glades::NNetwork::TYPE_IMAGE;
+	}
+	else if (ddDataType->getSelectedText() == "Text")
+	{
+		importType = glades::NNetwork::TYPE_TEXT;
+	}
+	else
+		return;
 
 	shmea::GString serverIP = "127.0.0.1";
 	GNet::Connection* cConnection = serverInstance->getConnection(serverIP);
@@ -1349,7 +1417,7 @@ void NNCreatorPanel::clickedContinue(const shmea::GString& cmpName, int x, int y
 
 	// Get the vars from the components
 	shmea::GString netName = tbNetName->getText();
-	shmea::GString testFName = "datasets/" + ddDatasets->getSelectedText();
+	shmea::GString testFName = ddDatasets->getSelectedText();
 	int64_t trainPct =
 		parsePct(shmea::GString::Typify(tbTrainPct->getText(), tbTrainPct->getText().size()));
 	int64_t testPct =

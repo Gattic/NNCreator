@@ -61,7 +61,7 @@ public:
 		NNetwork* cNetwork = GQL::getNeuralNetwork(netName);
 
 		// Run the testing and retrieve a metanetwork
-		GTable inputTable(testFName, ',', importType);
+		GTable inputTable(testFName, ',', shmea::GTable::TYPE_FILE);
 		MetaNetwork* newTestNet = GQL::test(cNetwork, inputTable);
 
 		return retList;

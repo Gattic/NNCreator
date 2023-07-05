@@ -13,6 +13,7 @@
 #include "Backend/Database/GList.h"
 #include "Backend/Database/GTable.h"
 #include "Backend/Database/ServiceData.h"
+#include "Backend/Machine Learning/ImageInput.h"
 #include "Backend/Machine Learning/State/Terminator.h"
 #include "Backend/Machine Learning/Structure/hiddenlayerinfo.h"
 #include "Backend/Machine Learning/Structure/inputlayerinfo.h"
@@ -79,6 +80,24 @@ public:
 		// int64_t trainPct = cList.getLong(4), testPct = cList.getLong(5), validationPct =
 		// cList.getLong(6);
 
+		if (importType == glades::NNetwork::TYPE_CSV)
+		{
+			//
+		}
+		else if (importType == glades::NNetwork::TYPE_IMAGE)
+		{
+			// Load the images
+			glades::ImageInput ii;
+			ii.import(testFName.c_str());
+			return NULL; // TODO DELETE THIS LINE
+		}
+		else if (importType == glades::NNetwork::TYPE_TEXT)
+		{
+			//
+		}
+		else
+			return NULL;
+
 		// Load the neural network
 		if ((cNetwork.getEpochs() == 0) && (!cNetwork.load(netName.c_str())))
 		{
@@ -93,7 +112,7 @@ public:
 		Arnold->setAccuracy(maxAccuracy);*/
 
 		// Run the training and retrieve a metanetwork
-		shmea::GTable inputTable(testFName, ',', importType);
+		shmea::GTable inputTable(testFName, ',', shmea::GTable::TYPE_FILE);
 		glades::MetaNetwork* newTrainNet =
 			glades::train(&cNetwork, inputTable, Arnold, serverInstance, destination);
 

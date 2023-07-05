@@ -77,7 +77,7 @@ public:
 		Arnold->setAccuracy(maxAccuracy);
 
 		// Run the training and retrieve a metanetwork
-		GTable inputTable(testFName, ',', importType);
+		GTable inputTable(testFName, ',', shmea::GTable::TYPE_FILE);
 		MetaNetwork* newTrainNet = GQL::train(cNetwork, inputTable, Arnold);
 
 		return retList;
