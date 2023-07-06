@@ -37,6 +37,7 @@
 #include "Backend/Machine Learning/Structure/outputlayerinfo.h"
 #include "Backend/Machine Learning/glades.h"
 #include "Backend/Machine Learning/network.h"
+#include "Backend/Machine Learning/ImageInput.h"
 #include "Backend/Networking/connection.h"
 #include "Backend/Networking/main.h"
 #include "Backend/Networking/service.h"
@@ -532,8 +533,7 @@ void NNCreatorPanel::buildPanel()
 	btnPreviewTrain->setWidth(150);
 	btnPreviewTrain->setHeight(30);
 	btnPreviewTrain->setText(" Training Data");
-	// btnPreviewTrain->setMouseDownListener(GeneralListener(this,
-	// &NNCreatorPanel::clickedPreviewTrain))));
+	btnPreviewTrain->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedPreviewTrain));
 	btnPreviewTrain->setName("btnPreviewTrain");
 	previewButtonsLayout->addSubItem(btnPreviewTrain);
 
@@ -542,8 +542,7 @@ void NNCreatorPanel::buildPanel()
 	tbnPreviewTest->setWidth(150);
 	tbnPreviewTest->setHeight(30);
 	tbnPreviewTest->setText(" Testing Data");
-	// tbnPreviewTest->setMouseDownListener(GeneralListener(this,
-	// &NNCreatorPanel::clickedPreviewTest))));
+	tbnPreviewTest->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedPreviewTest));
 	tbnPreviewTest->setName("tbnPreviewTest");
 	previewButtonsLayout->addSubItem(tbnPreviewTest);
 
@@ -589,7 +588,7 @@ void NNCreatorPanel::buildPanel()
 	btnPrevious->setWidth(110);
 	btnPrevious->setHeight(30);
 	btnPrevious->setText(" Previous");
-	// btnPrevious->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedPrevious))));
+	btnPrevious->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedPrevious));
 	btnPrevious->setName("btnPrevious");
 	prevImageBtnsLayout->addSubItem(btnPrevious);
 
@@ -598,9 +597,10 @@ void NNCreatorPanel::buildPanel()
 	btnNext->setWidth(80);
 	btnNext->setHeight(30);
 	btnNext->setText(" Next");
-	// btnNext->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedPrevious))));
+	btnNext->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedNext));
 	btnNext->setName("btnNext");
 	prevImageBtnsLayout->addSubItem(btnNext);
+
 
 	hiddenOverallLayout = new GLinearLayout("hiddenOverallLayout");
 	hiddenOverallLayout->setX(getWidth() - 500);
@@ -1170,6 +1170,9 @@ void NNCreatorPanel::loadDatasets()
 		return;
 
 	ddDatasets->clearOptions();
+	trainingRowIndex = 0;
+	testingRowIndex = 0;
+	prevImageFlag=0;
 
 	int dataType = 0;
 	shmea::GString folderName = "datasets/";
@@ -1578,6 +1581,68 @@ void NNCreatorPanel::clickedDelete(const shmea::GString& cmpName, int x, int y)
 	char buffer[netName.length()];
 	sprintf(buffer, "Deleted \"%s\"", netName.c_str());
 	MsgBox("Neural Net", buffer, RUMsgBox::MESSAGEBOX);
+}
+
+void NNCreatorPanel::clickedPreviewTrain(const shmea::GString& cmpName, int x, int y)
+{
+	if(!ddDatasets)
+	    return;
+
+	shmea::GString testFName = ddDatasets->getSelectedText();
+
+	if (testFName.length() == 0)
+	    return;
+
+	ii.import(testFName.c_str());
+	prevImageFlag = 0;
+	previewImage->setBGImage(ii.getTrainingImage(trainingRowIndex));
+}
+
+void NNCreatorPanel::clickedPreviewTest(const shmea::GString& cmpName, int x, int y)
+{
+	if(!ddDatasets)
+	    return;
+
+	shmea::GString testFName = ddDatasets->getSelectedText();
+
+	if (testFName.length() == 0)
+	    return;
+
+	ii.import(testFName.c_str());
+	prevImageFlag = 1;
+	previewImage->setBGImage(ii.getTestingImage(testingRowIndex));
+}
+
+void NNCreatorPanel::clickedPrevious(const shmea::GString& cmpName, int x, int y)
+{
+	if(prevImageFlag == 0)
+	{
+	    if(trainingRowIndex > 0)
+		--trainingRowIndex;
+	    previewImage->setBGImage(ii.getTrainingImage(trainingRowIndex));
+	}
+	else if(prevImageFlag == 1)
+	{
+	    if(testingRowIndex > 0)
+		--testingRowIndex;
+	    previewImage->setBGImage(ii.getTestingImage(testingRowIndex));
+	}
+}
+
+void NNCreatorPanel::clickedNext(const shmea::GString& cmpName, int x, int y)
+{
+	if(prevImageFlag == 0)
+	{
+	    if(trainingRowIndex < ii.trainingData.numberOfRows()-1)
+		++trainingRowIndex;
+	    previewImage->setBGImage(ii.getTrainingImage(trainingRowIndex));
+	}
+	else if(prevImageFlag == 1)
+	{
+	    if(testingRowIndex < ii.testingData.numberOfRows()-1)
+		++testingRowIndex;
+	    previewImage->setBGImage(ii.getTestingImage(testingRowIndex));
+	}
 }
 
 void NNCreatorPanel::nnSelectorChanged(int newIndex)

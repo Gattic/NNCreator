@@ -28,6 +28,7 @@
 #define _RUNNCREATORPANEL
 
 #include "Backend/Machine Learning/glades.h"
+#include "Backend/Machine Learning/ImageInput.h"
 #include "Frontend/GItems/GPanel.h"
 #include <map>
 #include <pthread.h>
@@ -73,9 +74,13 @@ protected:
 
 	GNet::GServer* serverInstance;
 	glades::NNInfo* formInfo;
+	glades::ImageInput ii;
 	int currentHiddenLayerIndex;
 	unsigned int netCount;
 	bool keepGraping;
+	unsigned int trainingRowIndex;
+	unsigned int testingRowIndex;
+	int prevImageFlag;
 
 	int64_t parsePct(const shmea::GType&);
 
@@ -199,6 +204,10 @@ public:
 	void clickedKill(const shmea::GString&, int, int);
 	void clickedContinue(const shmea::GString&, int, int);
 	void clickedDelete(const shmea::GString&, int, int);
+	void clickedPreviewTrain(const shmea::GString&, int, int);
+	void clickedPreviewTest(const shmea::GString&, int, int);
+	void clickedPrevious(const shmea::GString&, int, int);
+	void clickedNext(const shmea::GString&, int, int);
 	void nnSelectorChanged(int);
 	void resetSim();
 };
