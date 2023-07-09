@@ -13,15 +13,15 @@
 #include "Backend/Database/GList.h"
 #include "Backend/Database/GTable.h"
 #include "Backend/Database/ServiceData.h"
-#include "Backend/Machine Learning/ImageInput.h"
+#include "Backend/Machine Learning/DataObjects/ImageInput.h"
+#include "Backend/Machine Learning/Networks/metanetwork.h"
+#include "Backend/Machine Learning/Networks/network.h"
 #include "Backend/Machine Learning/State/Terminator.h"
 #include "Backend/Machine Learning/Structure/hiddenlayerinfo.h"
 #include "Backend/Machine Learning/Structure/inputlayerinfo.h"
 #include "Backend/Machine Learning/Structure/nninfo.h"
 #include "Backend/Machine Learning/Structure/outputlayerinfo.h"
 #include "Backend/Machine Learning/glades.h"
-#include "Backend/Machine Learning/metanetwork.h"
-#include "Backend/Machine Learning/network.h"
 #include "Backend/Networking/service.h"
 #include "Frontend/GUI/RUMsgBox.h"
 #include "Frontend/Graphics/graphics.h"
@@ -112,7 +112,7 @@ public:
 		Arnold->setAccuracy(maxAccuracy);*/
 
 		// Run the training and retrieve a metanetwork
-		shmea::GTable inputTable(testFName, ',', shmea::GTable::TYPE_FILE);
+		shmea::GTable inputTable("datasets/" + testFName, ',', shmea::GTable::TYPE_FILE);
 		glades::MetaNetwork* newTrainNet =
 			glades::train(&cNetwork, inputTable, Arnold, serverInstance, destination);
 

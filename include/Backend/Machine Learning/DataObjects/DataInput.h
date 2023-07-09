@@ -14,59 +14,20 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _GUI_CALLBACK_PROG
-#define _GUI_CALLBACK_PROG
+#ifndef _GDATAINPUT
+#define _GDATAINPUT
 
-#include "Backend/Database/ServiceData.h"
-#include "Backend/Networking/service.h"
+#include "Backend/Database/GTable.h"
 
-class GUI_Callback : public GNet::Service
+namespace glades {
+
+class DataInput
 {
-private:
-	GNet::GServer* serverInstance;
-	GPanel* cPanel;
-
 public:
-	GUI_Callback()
-	{
-		serverInstance = NULL;
-		cPanel = NULL;
-	}
 
-	GUI_Callback(GNet::GServer* newInstance, GPanel* newPanel)
-	{
-		serverInstance = newInstance;
-		cPanel = newPanel;
-	}
-
-	~GUI_Callback()
-	{
-		serverInstance = NULL; // Not ours to delete
-		cPanel = NULL;		   // Not ours to delete
-	}
-
-	shmea::ServiceData* execute(const shmea::ServiceData* data)
-	{
-		if (!serverInstance)
-			return NULL;
-
-		if (!cPanel)
-			return NULL;
-
-		cPanel->addToQ(data);
-
-		return NULL;
-	}
-
-	GNet::Service* MakeService(GNet::GServer* newInstance) const
-	{
-		return new GUI_Callback(newInstance, cPanel);
-	}
-
-	shmea::GString getName() const
-	{
-		return "GUI_Callback";
-	}
+	virtual shmea::GTable getTrainingTable() const = 0;
+	virtual shmea::GTable getTestingTable() const = 0;
+};
 };
 
 #endif

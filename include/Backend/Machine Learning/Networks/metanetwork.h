@@ -17,7 +17,7 @@
 #ifndef _GMETANETWORK
 #define _GMETANETWORK
 
-#include "State/Terminator.h"
+#include "../State/Terminator.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

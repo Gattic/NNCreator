@@ -30,14 +30,14 @@
 #include "Backend/Database/GType.h"
 #include "Backend/Database/SaveFolder.h"
 #include "Backend/Database/SaveTable.h"
+#include "Backend/Machine Learning/DataObjects/ImageInput.h"
 #include "Backend/Machine Learning/GMath/gmath.h"
+#include "Backend/Machine Learning/Networks/network.h"
 #include "Backend/Machine Learning/Structure/hiddenlayerinfo.h"
 #include "Backend/Machine Learning/Structure/inputlayerinfo.h"
 #include "Backend/Machine Learning/Structure/nninfo.h"
 #include "Backend/Machine Learning/Structure/outputlayerinfo.h"
 #include "Backend/Machine Learning/glades.h"
-#include "Backend/Machine Learning/network.h"
-#include "Backend/Machine Learning/ImageInput.h"
 #include "Backend/Networking/connection.h"
 #include "Backend/Networking/main.h"
 #include "Backend/Networking/service.h"
@@ -533,7 +533,8 @@ void NNCreatorPanel::buildPanel()
 	btnPreviewTrain->setWidth(150);
 	btnPreviewTrain->setHeight(30);
 	btnPreviewTrain->setText(" Training Data");
-	btnPreviewTrain->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedPreviewTrain));
+	btnPreviewTrain->setMouseDownListener(
+		GeneralListener(this, &NNCreatorPanel::clickedPreviewTrain));
 	btnPreviewTrain->setName("btnPreviewTrain");
 	previewButtonsLayout->addSubItem(btnPreviewTrain);
 
@@ -542,7 +543,8 @@ void NNCreatorPanel::buildPanel()
 	tbnPreviewTest->setWidth(150);
 	tbnPreviewTest->setHeight(30);
 	tbnPreviewTest->setText(" Testing Data");
-	tbnPreviewTest->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedPreviewTest));
+	tbnPreviewTest->setMouseDownListener(
+		GeneralListener(this, &NNCreatorPanel::clickedPreviewTest));
 	tbnPreviewTest->setName("tbnPreviewTest");
 	previewButtonsLayout->addSubItem(tbnPreviewTest);
 
@@ -600,7 +602,6 @@ void NNCreatorPanel::buildPanel()
 	btnNext->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedNext));
 	btnNext->setName("btnNext");
 	prevImageBtnsLayout->addSubItem(btnNext);
-
 
 	hiddenOverallLayout = new GLinearLayout("hiddenOverallLayout");
 	hiddenOverallLayout->setX(getWidth() - 500);
@@ -1172,7 +1173,7 @@ void NNCreatorPanel::loadDatasets()
 	ddDatasets->clearOptions();
 	trainingRowIndex = 0;
 	testingRowIndex = 0;
-	prevImageFlag=0;
+	prevImageFlag = 0;
 
 	int dataType = 0;
 	shmea::GString folderName = "datasets/";
@@ -1585,13 +1586,13 @@ void NNCreatorPanel::clickedDelete(const shmea::GString& cmpName, int x, int y)
 
 void NNCreatorPanel::clickedPreviewTrain(const shmea::GString& cmpName, int x, int y)
 {
-	if(!ddDatasets)
-	    return;
+	if (!ddDatasets)
+		return;
 
 	shmea::GString testFName = ddDatasets->getSelectedText();
 
 	if (testFName.length() == 0)
-	    return;
+		return;
 
 	ii.import(testFName.c_str());
 	prevImageFlag = 0;
@@ -1600,13 +1601,13 @@ void NNCreatorPanel::clickedPreviewTrain(const shmea::GString& cmpName, int x, i
 
 void NNCreatorPanel::clickedPreviewTest(const shmea::GString& cmpName, int x, int y)
 {
-	if(!ddDatasets)
-	    return;
+	if (!ddDatasets)
+		return;
 
 	shmea::GString testFName = ddDatasets->getSelectedText();
 
 	if (testFName.length() == 0)
-	    return;
+		return;
 
 	ii.import(testFName.c_str());
 	prevImageFlag = 1;
@@ -1615,33 +1616,33 @@ void NNCreatorPanel::clickedPreviewTest(const shmea::GString& cmpName, int x, in
 
 void NNCreatorPanel::clickedPrevious(const shmea::GString& cmpName, int x, int y)
 {
-	if(prevImageFlag == 0)
+	if (prevImageFlag == 0)
 	{
-	    if(trainingRowIndex > 0)
-		--trainingRowIndex;
-	    previewImage->setBGImage(ii.getTrainingImage(trainingRowIndex));
+		if (trainingRowIndex > 0)
+			--trainingRowIndex;
+		previewImage->setBGImage(ii.getTrainingImage(trainingRowIndex));
 	}
-	else if(prevImageFlag == 1)
+	else if (prevImageFlag == 1)
 	{
-	    if(testingRowIndex > 0)
-		--testingRowIndex;
-	    previewImage->setBGImage(ii.getTestingImage(testingRowIndex));
+		if (testingRowIndex > 0)
+			--testingRowIndex;
+		previewImage->setBGImage(ii.getTestingImage(testingRowIndex));
 	}
 }
 
 void NNCreatorPanel::clickedNext(const shmea::GString& cmpName, int x, int y)
 {
-	if(prevImageFlag == 0)
+	if (prevImageFlag == 0)
 	{
-	    if(trainingRowIndex < ii.trainingData.numberOfRows()-1)
-		++trainingRowIndex;
-	    previewImage->setBGImage(ii.getTrainingImage(trainingRowIndex));
+		if (trainingRowIndex < ii.trainingData.numberOfRows() - 1)
+			++trainingRowIndex;
+		previewImage->setBGImage(ii.getTrainingImage(trainingRowIndex));
 	}
-	else if(prevImageFlag == 1)
+	else if (prevImageFlag == 1)
 	{
-	    if(testingRowIndex < ii.testingData.numberOfRows()-1)
-		++testingRowIndex;
-	    previewImage->setBGImage(ii.getTestingImage(testingRowIndex));
+		if (testingRowIndex < ii.testingData.numberOfRows() - 1)
+			++testingRowIndex;
+		previewImage->setBGImage(ii.getTestingImage(testingRowIndex));
 	}
 }
 

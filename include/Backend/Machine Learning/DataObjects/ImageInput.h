@@ -17,6 +17,7 @@
 #ifndef _GIMAGEINPUT
 #define _GIMAGEINPUT
 
+#include "DataInput.h"
 #include "Backend/Database/GString.h"
 #include "Backend/Database/GTable.h"
 #include "Backend/Database/image.h"
@@ -26,7 +27,7 @@
 
 namespace glades {
 
-class ImageInput
+class ImageInput : public DataInput
 {
 public:
 
@@ -47,7 +48,7 @@ public:
 		loaded = false;
 	}
 
-	~ImageInput()
+	virtual ~ImageInput()
 	{
 	    name = "";
 	    loaded = false;
@@ -60,6 +61,9 @@ public:
 	void import(shmea::GString);
 	const shmea::GPointer<shmea::Image> getTrainingImage(unsigned int) const;
 	const shmea::GPointer<shmea::Image> getTestingImage(unsigned int) const;
+
+	virtual shmea::GTable getTrainingTable() const;
+	virtual shmea::GTable getTestingTable() const;
 };
 };
 

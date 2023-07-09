@@ -27,8 +27,8 @@
 #ifndef _RUNNCREATORPANEL
 #define _RUNNCREATORPANEL
 
+#include "Backend/Machine Learning/DataObjects/ImageInput.h"
 #include "Backend/Machine Learning/glades.h"
-#include "Backend/Machine Learning/ImageInput.h"
 #include "Frontend/GItems/GPanel.h"
 #include <map>
 #include <pthread.h>
