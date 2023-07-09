@@ -80,16 +80,17 @@ public:
 		// int64_t trainPct = cList.getLong(4), testPct = cList.getLong(5), validationPct =
 		// cList.getLong(6);
 
+		glades::ImageInput ii;
+		shmea::GTable inputTable;
 		if (importType == glades::NNetwork::TYPE_CSV)
 		{
-			//
+			inputTable = shmea::GTable("datasets/" + testFName, ',', shmea::GTable::TYPE_FILE);
 		}
 		else if (importType == glades::NNetwork::TYPE_IMAGE)
 		{
 			// Load the images
-			glades::ImageInput ii;
 			ii.import(testFName.c_str());
-			return NULL; // TODO DELETE THIS LINE
+			inputTable = ii.getTrainingTable(); // TODO: Pass by reference into the train function
 		}
 		else if (importType == glades::NNetwork::TYPE_TEXT)
 		{
@@ -112,7 +113,6 @@ public:
 		Arnold->setAccuracy(maxAccuracy);*/
 
 		// Run the training and retrieve a metanetwork
-		shmea::GTable inputTable("datasets/" + testFName, ',', shmea::GTable::TYPE_FILE);
 		glades::MetaNetwork* newTrainNet =
 			glades::train(&cNetwork, inputTable, Arnold, serverInstance, destination);
 
