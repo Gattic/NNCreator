@@ -27,7 +27,7 @@
 typedef void (*OptionChangedEvent)(int);
 
 class gfxpp;
-class RULabel;
+class RUButton;
 
 class RUTabContainer : public RUComponent
 {
@@ -44,7 +44,7 @@ protected:
 	unsigned int tabSelected;
 	unsigned int prevTabSelected;
 
-	typedef std::pair<RULabel*, GItem*> RUTab;
+	typedef std::pair<RUButton*, GItem*> RUTab;
 	std::vector<RUTab> items;
 
 	bool hoverDraw;

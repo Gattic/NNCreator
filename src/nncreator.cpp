@@ -180,7 +180,7 @@ void NNCreatorPanel::buildPanel()
 	outputImageLayout->addSubItem(lblOutputImg);
 
 	shmea::GPointer<shmea::Image> newImage(new shmea::Image());
-	newImage->LoadPNG("resources/bg.png");
+	//newImage->LoadPNG("resources/bg.png");
 
 	// NN Output Image
 	outputImage = new RUImageComponent();
@@ -571,7 +571,7 @@ void NNCreatorPanel::buildPanel()
 	previewTabs->addTab("   Image", previewImageLayout);
 
 	shmea::GPointer<shmea::Image> prevImage(new shmea::Image());
-	prevImage->LoadPNG("resources/bg.png");
+	//prevImage->LoadPNG("resources/bg.png");
 
 	// Preview Image
 	previewImage = new RUImageComponent();
