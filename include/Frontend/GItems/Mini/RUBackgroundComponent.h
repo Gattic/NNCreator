@@ -99,6 +99,7 @@ public:
 
 	// render
 	void updateBGBackground(gfxpp*);
+	void drawVerticalGradient(SDL_Renderer*, SDL_Rect, SDL_Color, SDL_Color);
 };
 
 #endif
