@@ -180,7 +180,7 @@ void NNCreatorPanel::buildPanel()
 	outputImageLayout->addSubItem(lblOutputImg);
 
 	shmea::GPointer<shmea::Image> newImage(new shmea::Image());
-	//newImage->LoadPNG("resources/bg.png");
+	// newImage->LoadPNG("resources/bg.png");
 
 	// NN Output Image
 	outputImage = new RUImageComponent();
@@ -571,7 +571,7 @@ void NNCreatorPanel::buildPanel()
 	previewTabs->addTab("   Image", previewImageLayout);
 
 	shmea::GPointer<shmea::Image> prevImage(new shmea::Image());
-	//prevImage->LoadPNG("resources/bg.png");
+	// prevImage->LoadPNG("resources/bg.png");
 
 	// Preview Image
 	previewImage = new RUImageComponent();
@@ -1368,6 +1368,10 @@ void NNCreatorPanel::clickedRun(const shmea::GString& cmpName, int x, int y)
 		return;
 	}
 
+	// Get the event listener ready
+	resetSim();
+	keepGraping = true;
+
 	// Run a machine learning service
 	shmea::GList wData;
 	wData.addString(netName);
@@ -1380,7 +1384,6 @@ void NNCreatorPanel::clickedRun(const shmea::GString& cmpName, int x, int y)
 	cSrvc->set("net" + shmea::GString::intTOstring(netCount), wData);
 	serverInstance->send(cSrvc);
 	++netCount;
-	keepGraping = true;
 }
 
 void NNCreatorPanel::clickedContinue(const shmea::GString& cmpName, int x, int y)
@@ -1441,6 +1444,9 @@ void NNCreatorPanel::clickedContinue(const shmea::GString& cmpName, int x, int y
 			   tbValidationPct->getText().c_str());
 		return;
 	}
+
+	// Get the event listener ready
+	keepGraping = true;
 
 	// Run a machine learning service
 	shmea::GList wData;
@@ -1567,8 +1573,6 @@ void NNCreatorPanel::clickedKill(const shmea::GString& cmpName, int x, int y)
 	shmea::ServiceData* cSrvc = new shmea::ServiceData(cConnection, "ML_Train");
 	cSrvc->set("net" + shmea::GString::intTOstring(netCount - 1), wData);
 	serverInstance->send(cSrvc);
-
-	resetSim();
 }
 
 void NNCreatorPanel::clickedDelete(const shmea::GString& cmpName, int x, int y)
@@ -1806,4 +1810,13 @@ void NNCreatorPanel::resetSim()
 	rocCurveGraph->clear();
 	rocCurveGraph->update();
 	pthread_mutex_unlock(rocMutex);
+
+	// Reset the NN updates
+	pthread_mutex_lock(qMutex);
+	std::queue<const shmea::ServiceData*> emptyQ;
+	std::swap(updateQueue, emptyQ);
+	pthread_mutex_unlock(qMutex);
+
+	lblEpochs->setText("0(t)");
+	lblAccuracy->setText("N/A Accuracy");
 }

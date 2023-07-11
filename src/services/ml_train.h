@@ -65,7 +65,7 @@ public:
 				return NULL;
 
 			cNetwork.stop();
-			printf("!!---KILLING NET---!!\n");
+			printf("\n!!---KILLING NET---!!\n");
 		}
 
 		if (cList.size() < 3)
