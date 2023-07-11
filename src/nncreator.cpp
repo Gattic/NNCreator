@@ -843,14 +843,6 @@ void NNCreatorPanel::buildPanel()
 	btnRemove->setName("btnRemove");
 	bCopyLayout->addSubItem(btnRemove);
 
-	// Empty label for padding
-	lblEditOutputLayer = new RULabel();
-	lblEditOutputLayer->setWidth(200);
-	lblEditOutputLayer->setHeight(5);
-	lblEditOutputLayer->setText("");
-	lblEditOutputLayer->setName("lblEmpty");
-	hiddenOverallLayout->addSubItem(lblEditOutputLayer);
-
 	outputOverallLayout = new GLinearLayout("outputOverallLayout");
 	outputOverallLayout->setX(getWidth() - 500);
 	outputOverallLayout->setY(90);
