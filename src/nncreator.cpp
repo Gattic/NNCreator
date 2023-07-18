@@ -1315,18 +1315,18 @@ void NNCreatorPanel::clickedRun(const shmea::GString& cmpName, int x, int y)
 		return;
 
 	// Get the import type
-	int importType = glades::NNetwork::TYPE_CSV;
+	int importType = glades::DataInput::CSV;
 	if (ddDataType->getSelectedText() == "CSV")
 	{
-		importType = glades::NNetwork::TYPE_CSV;
+		importType = glades::DataInput::CSV;
 	}
 	else if (ddDataType->getSelectedText() == "Image")
 	{
-		importType = glades::NNetwork::TYPE_IMAGE;
+		importType = glades::DataInput::IMAGE;
 	}
 	else if (ddDataType->getSelectedText() == "Text")
 	{
-		importType = glades::NNetwork::TYPE_TEXT;
+		importType = glades::DataInput::TEXT;
 	}
 	else
 		return;
@@ -1393,18 +1393,18 @@ void NNCreatorPanel::clickedContinue(const shmea::GString& cmpName, int x, int y
 		return;
 
 	// Get the import type
-	int importType = glades::NNetwork::TYPE_CSV;
+	int importType = glades::DataInput::CSV;
 	if (ddDataType->getSelectedText() == "CSV")
 	{
-		importType = glades::NNetwork::TYPE_CSV;
+		importType = glades::DataInput::CSV;
 	}
 	else if (ddDataType->getSelectedText() == "Image")
 	{
-		importType = glades::NNetwork::TYPE_IMAGE;
+		importType = glades::DataInput::IMAGE;
 	}
 	else if (ddDataType->getSelectedText() == "Text")
 	{
-		importType = glades::NNetwork::TYPE_TEXT;
+		importType = glades::DataInput::TEXT;
 	}
 	else
 		return;
@@ -1592,7 +1592,7 @@ void NNCreatorPanel::clickedPreviewTrain(const shmea::GString& cmpName, int x, i
 
 	ii.import(testFName.c_str());
 	prevImageFlag = 0;
-	previewImage->setBGImage(ii.getTrainingImage(trainingRowIndex));
+	previewImage->setBGImage(ii.getTrainImage(trainingRowIndex));
 }
 
 void NNCreatorPanel::clickedPreviewTest(const shmea::GString& cmpName, int x, int y)
@@ -1607,7 +1607,7 @@ void NNCreatorPanel::clickedPreviewTest(const shmea::GString& cmpName, int x, in
 
 	ii.import(testFName.c_str());
 	prevImageFlag = 1;
-	previewImage->setBGImage(ii.getTestingImage(testingRowIndex));
+	previewImage->setBGImage(ii.getTestImage(testingRowIndex));
 }
 
 void NNCreatorPanel::clickedPrevious(const shmea::GString& cmpName, int x, int y)
@@ -1616,13 +1616,13 @@ void NNCreatorPanel::clickedPrevious(const shmea::GString& cmpName, int x, int y
 	{
 		if (trainingRowIndex > 0)
 			--trainingRowIndex;
-		previewImage->setBGImage(ii.getTrainingImage(trainingRowIndex));
+		previewImage->setBGImage(ii.getTrainImage(trainingRowIndex));
 	}
 	else if (prevImageFlag == 1)
 	{
 		if (testingRowIndex > 0)
 			--testingRowIndex;
-		previewImage->setBGImage(ii.getTestingImage(testingRowIndex));
+		previewImage->setBGImage(ii.getTestImage(testingRowIndex));
 	}
 }
 
@@ -1630,15 +1630,15 @@ void NNCreatorPanel::clickedNext(const shmea::GString& cmpName, int x, int y)
 {
 	if (prevImageFlag == 0)
 	{
-		if (trainingRowIndex < ii.trainingData.numberOfRows() - 1)
+		if (trainingRowIndex < ii.getTrainSize() - 1)
 			++trainingRowIndex;
-		previewImage->setBGImage(ii.getTrainingImage(trainingRowIndex));
+		previewImage->setBGImage(ii.getTrainImage(trainingRowIndex));
 	}
 	else if (prevImageFlag == 1)
 	{
-		if (testingRowIndex < ii.testingData.numberOfRows() - 1)
+		if (testingRowIndex < ii.getTestSize() - 1)
 			++testingRowIndex;
-		previewImage->setBGImage(ii.getTestingImage(testingRowIndex));
+		previewImage->setBGImage(ii.getTestImage(testingRowIndex));
 	}
 }
 

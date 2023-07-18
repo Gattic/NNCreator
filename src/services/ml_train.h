@@ -13,6 +13,7 @@
 #include "Backend/Database/GList.h"
 #include "Backend/Database/GTable.h"
 #include "Backend/Database/ServiceData.h"
+#include "Backend/Machine Learning/DataObjects/NumberInput.h"
 #include "Backend/Machine Learning/DataObjects/ImageInput.h"
 #include "Backend/Machine Learning/Networks/metanetwork.h"
 #include "Backend/Machine Learning/Networks/network.h"
@@ -72,35 +73,42 @@ public:
 			return NULL;
 
 		shmea::GString netName = cList.getString(0);
-		shmea::GString testFName = cList.getString(1);
-		int importType = cList.getInt(2);
+		shmea::GString inputFName = cList.getString(1);
+		int inputType = cList.getInt(2);
 		/*int64_t maxTimeStamp = cList.getLong(3);
 		int64_t maxEpoch = cList.getLong(4);
 		float maxAccuracy = cList.getFloat(5);*/
 		// int64_t trainPct = cList.getLong(4), testPct = cList.getLong(5), validationPct =
 		// cList.getLong(6);
 
-		glades::ImageInput ii;
-		shmea::GTable inputTable;
-		if (importType == glades::NNetwork::TYPE_CSV)
+		// Modify the paths to properly load the data later
+		glades::DataInput* di = NULL;
+		if (inputType == glades::DataInput::CSV)
 		{
-			inputTable = shmea::GTable("datasets/" + testFName, ',', shmea::GTable::TYPE_FILE);
+			inputFName = "datasets/" + inputFName;
+			di = new glades::NumberInput();
 		}
-		else if (importType == glades::NNetwork::TYPE_IMAGE)
+		else if (inputType == glades::DataInput::IMAGE)
 		{
-			// Load the images
-			ii.import(testFName.c_str());
-			inputTable = ii.getTrainingTable(); // TODO: Pass by reference into the train function
+			inputFName = "datasets/images/" + inputFName + "/";
+			di = new glades::ImageInput();
 		}
-		else if (importType == glades::NNetwork::TYPE_TEXT)
+		else if (inputType == glades::DataInput::TEXT)
 		{
-			//
+			//TODO
+			return NULL;
 		}
 		else
 			return NULL;
 
+		if(!di)
+		    return NULL;
+
+		// Load the input data
+		di->import(inputFName);
+
 		// Load the neural network
-		if ((cNetwork.getEpochs() == 0) && (!cNetwork.load(netName.c_str())))
+		if ((cNetwork.getEpochs() == 0) && (!cNetwork.load(netName)))
 		{
 			printf("[NN] Unable to load \"%s\"", netName.c_str());
 			return NULL;
@@ -114,7 +122,7 @@ public:
 
 		// Run the training and retrieve a metanetwork
 		glades::MetaNetwork* newTrainNet =
-			glades::train(&cNetwork, inputTable, Arnold, serverInstance, destination);
+			glades::train(&cNetwork, di, Arnold, serverInstance, destination);
 
 		return NULL;
 	}
