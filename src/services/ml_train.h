@@ -90,7 +90,7 @@ public:
 		}
 		else if (inputType == glades::DataInput::IMAGE)
 		{
-			inputFName = "datasets/images/" + inputFName + "/";
+			//inputFName = "datasets/images/" + inputFName + "/";
 			di = new glades::ImageInput();
 		}
 		else if (inputType == glades::DataInput::TEXT)
