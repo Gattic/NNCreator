@@ -14,59 +14,46 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _GUI_CALLBACK_PROG
-#define _GUI_CALLBACK_PROG
+#ifndef _GML_RNN
+#define _GML_RNN
 
-#include "Backend/Database/ServiceData.h"
-#include "Backend/Networking/service.h"
+#include "network.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <string>
+#include <vector>
 
-class GUI_Callback : public GNet::Service
+namespace glades {
+
+class NNInfo;
+class NetworkState;
+
+class RNN : public NNetwork
 {
 private:
-	GNet::GServer* serverInstance;
-	GPanel* cPanel;
+	void beforeFwdEdge(const NetworkState*);
+	void beforeFwdNode(const NetworkState*);
+	void beforeFwdLayer(const NetworkState*);
+	void beforeFwd();
+	void beforeBackEdge(const NetworkState*);
+	void beforeBackNode(const NetworkState*);
+	void beforeBackLayer(const NetworkState*);
+	void beforeBack();
+
+	void afterFwdEdge(const NetworkState*);
+	void afterFwdNode(const NetworkState*, float = 0.0f);
+	void afterFwdLayer(const NetworkState*, float = 0.0f);
+	void afterFwd();
+	void afterBackEdge(const NetworkState*);
+	void afterBackNode(const NetworkState*);
+	void afterBackLayer(const NetworkState*);
+	void afterBack();
 
 public:
-	GUI_Callback()
-	{
-		serverInstance = NULL;
-		cPanel = NULL;
-	}
-
-	GUI_Callback(GNet::GServer* newInstance, GPanel* newPanel)
-	{
-		serverInstance = newInstance;
-		cPanel = newPanel;
-	}
-
-	~GUI_Callback()
-	{
-		serverInstance = NULL; // Not ours to delete
-		cPanel = NULL;		   // Not ours to delete
-	}
-
-	shmea::ServiceData* execute(const shmea::ServiceData* data)
-	{
-		if (!serverInstance)
-			return NULL;
-
-		if (!cPanel)
-			return NULL;
-
-		cPanel->addToQ(data);
-
-		return NULL;
-	}
-
-	GNet::Service* MakeService(GNet::GServer* newInstance) const
-	{
-		return new GUI_Callback(newInstance, cPanel);
-	}
-
-	shmea::GString getName() const
-	{
-		return "GUI_Callback";
-	}
+	RNN();
+	~RNN();
+};
 };
 
 #endif

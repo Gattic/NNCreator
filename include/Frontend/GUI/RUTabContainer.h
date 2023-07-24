@@ -27,7 +27,7 @@
 typedef void (*OptionChangedEvent)(int);
 
 class gfxpp;
-class RULabel;
+class RUButton;
 
 class RUTabContainer : public RUComponent
 {
@@ -35,6 +35,7 @@ class RUTabContainer : public RUComponent
 protected:
 	int orientation;
 	int tabHeight;
+	bool tabsVisible;
 	static const int HORIZONTAL_TABS = 0;
 	static const int VERTICAL_TABS = 1;
 
@@ -43,7 +44,7 @@ protected:
 	unsigned int tabSelected;
 	unsigned int prevTabSelected;
 
-	typedef std::pair<RULabel*, GItem*> RUTab;
+	typedef std::pair<RUButton*, GItem*> RUTab;
 	std::vector<RUTab> items;
 
 	bool hoverDraw;
@@ -62,6 +63,7 @@ public:
 
 	// gets
 	virtual int getHeight() const;
+	bool getTabsVisible() const;
 	unsigned int getOptionsShown() const;
 	unsigned int getTabSelected();
 	unsigned int size() const;
@@ -69,6 +71,7 @@ public:
 	// sets
 	void setWidth(int);
 	void setTabHeight(int);
+	void setTabsVisible(bool);
 	void setOptionsShown(unsigned int);
 	void addTab(shmea::GString, GItem* = NULL);
 	void clearOptions();
