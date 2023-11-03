@@ -100,7 +100,7 @@ void NNCreatorPanel::buildPanel()
 	serverInstance->addService(gui_cb_srvc);
 
 	currentHiddenLayerIndex = 0;
-	InputLayerInfo* newInputLayer = new InputLayerInfo(0.0f, 1);
+	InputLayerInfo* newInputLayer = new InputLayerInfo(1);
 	std::vector<HiddenLayerInfo*> newHiddenLayers;
 	newHiddenLayers.push_back(new HiddenLayerInfo(2, 0.01f, 0.0f, 0.0f, 0.0f, 0, 0.0f));
 	OutputLayerInfo* newOutputLayer = new OutputLayerInfo(1, OutputLayerInfo::REGRESSION);
@@ -978,10 +978,10 @@ void NNCreatorPanel::populateHLayerForm()
 	else
 		tbWeightDecay->setText(shmea::GString::floatTOstring(currentLayer->getWeightDecay()));
 
-	if (currentLayer->getPHidden())
-		tbPHidden->setText(shmea::GString::floatTOstring(currentLayer->getPHidden()));
+	if (currentLayer->getPDropout())
+		tbPHidden->setText(shmea::GString::floatTOstring(currentLayer->getPDropout()));
 	else
-		tbPHidden->setText(shmea::GString::floatTOstring(currentLayer->getPHidden()));
+		tbPHidden->setText(shmea::GString::floatTOstring(currentLayer->getPDropout()));
 
 	if (currentLayer->getActivationParam())
 		tbActivationParam->setText(
@@ -1025,7 +1025,7 @@ void NNCreatorPanel::syncFormVar()
 
 	shmea::GType pHidden =
 		shmea::GString::Typify(tbPHidden->getText(), tbPHidden->getText().size());
-	currentLayer->setPHidden(pHidden.getFloat());
+	currentLayer->setPDropout(pHidden.getFloat());
 
 	shmea::GType hLayerSize =
 		shmea::GString::Typify(tbHiddenLayerSize->getText(), tbHiddenLayerSize->getText().size());

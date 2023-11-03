@@ -13,8 +13,8 @@
 #include "Backend/Database/GList.h"
 #include "Backend/Database/GTable.h"
 #include "Backend/Database/ServiceData.h"
-#include "Backend/Machine Learning/DataObjects/NumberInput.h"
 #include "Backend/Machine Learning/DataObjects/ImageInput.h"
+#include "Backend/Machine Learning/DataObjects/NumberInput.h"
 #include "Backend/Machine Learning/Networks/metanetwork.h"
 #include "Backend/Machine Learning/Networks/network.h"
 #include "Backend/Machine Learning/State/Terminator.h"
@@ -90,19 +90,19 @@ public:
 		}
 		else if (inputType == glades::DataInput::IMAGE)
 		{
-			//inputFName = "datasets/images/" + inputFName + "/";
+			// inputFName = "datasets/images/" + inputFName + "/";
 			di = new glades::ImageInput();
 		}
 		else if (inputType == glades::DataInput::TEXT)
 		{
-			//TODO
+			// TODO
 			return NULL;
 		}
 		else
 			return NULL;
 
-		if(!di)
-		    return NULL;
+		if (!di)
+			return NULL;
 
 		// Load the input data
 		di->import(inputFName);
