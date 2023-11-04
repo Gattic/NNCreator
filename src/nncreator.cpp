@@ -475,26 +475,6 @@ void NNCreatorPanel::buildPanel()
 	lblEditInputLayer->setName("lblEditInputLayer");
 	inputOverallLayout->addSubItem(lblEditInputLayer);
 
-	GLinearLayout* pInputEditLayout = new GLinearLayout("pInputEditLayout");
-	pInputEditLayout->setOrientation(GLinearLayout::HORIZONTAL);
-	inputOverallLayout->addSubItem(pInputEditLayout);
-
-	// pInput label
-	lblPInput = new RULabel();
-	lblPInput->setWidth(250);
-	lblPInput->setHeight(30);
-	lblPInput->setText("Input Layer p ");
-	lblPInput->setName("lblPInput");
-	pInputEditLayout->addSubItem(lblPInput);
-
-	// pInput textbox
-	tbPInput = new RUTextbox();
-	tbPInput->setWidth(160);
-	tbPInput->setHeight(30);
-	tbPInput->setText("0.0");
-	tbPInput->setName("tbPInput");
-	pInputEditLayout->addSubItem(tbPInput);
-
 	GLinearLayout* batchUpdateLayout = new GLinearLayout("batchUpdateLayout");
 	batchUpdateLayout->setOrientation(GLinearLayout::HORIZONTAL);
 	inputOverallLayout->addSubItem(batchUpdateLayout);
@@ -514,6 +494,132 @@ void NNCreatorPanel::buildPanel()
 	tbBatchSize->setText("1");
 	tbBatchSize->setName("tbBatchSize");
 	batchUpdateLayout->addSubItem(tbBatchSize);
+
+	GLinearLayout* inputLCLayout = new GLinearLayout("inputLCLayout");
+	inputLCLayout->setOrientation(GLinearLayout::HORIZONTAL);
+	inputOverallLayout->addSubItem(inputLCLayout);
+
+	// learning rate label
+	lblinputLR = new RULabel();
+	lblinputLR->setWidth(250);
+	lblinputLR->setHeight(30);
+	lblinputLR->setText("Learning Rate");
+	lblinputLR->setName("lblinputLR");
+	inputLCLayout->addSubItem(lblinputLR);
+
+	// learning rate textbox
+	tbinputLR = new RUTextbox();
+	tbinputLR->setWidth(160);
+	tbinputLR->setHeight(30);
+	tbinputLR->setName("tbinputLR");
+	inputLCLayout->addSubItem(tbinputLR);
+
+	GLinearLayout* inputMFLayout = new GLinearLayout("inputMFLayout");
+	inputMFLayout->setOrientation(GLinearLayout::HORIZONTAL);
+	inputOverallLayout->addSubItem(inputMFLayout);
+
+	// momentum factor label
+	lblinputMF = new RULabel();
+	lblinputMF->setWidth(250);
+	lblinputMF->setHeight(30);
+	lblinputMF->setText("Momentum Factor");
+	lblinputMF->setName("lblinputMF");
+	inputMFLayout->addSubItem(lblinputMF);
+
+	// momentum factor textbox
+	tbinputMF = new RUTextbox();
+	tbinputMF->setWidth(160);
+	tbinputMF->setHeight(30);
+	tbinputMF->setName("tbinputMF");
+	inputMFLayout->addSubItem(tbinputMF);
+
+	GLinearLayout* inputWDLayout = new GLinearLayout("inputWDLayout");
+	inputWDLayout->setOrientation(GLinearLayout::HORIZONTAL);
+	inputOverallLayout->addSubItem(inputWDLayout);
+
+	// weight decay label
+	lblinputWD = new RULabel();
+	lblinputWD->setWidth(250);
+	lblinputWD->setHeight(30);
+	lblinputWD->setText("Weight Decay");
+	lblinputWD->setName("lblinputWD");
+	inputWDLayout->addSubItem(lblinputWD);
+
+	// weight decay textbox
+	tbinputWD = new RUTextbox();
+	tbinputWD->setWidth(160);
+	tbinputWD->setHeight(30);
+	tbinputWD->setName("tbinputWD");
+	inputWDLayout->addSubItem(tbinputWD);
+
+	GLinearLayout* inputDropoutLayout = new GLinearLayout("inputDropoutLayout");
+	inputDropoutLayout->setOrientation(GLinearLayout::HORIZONTAL);
+	inputOverallLayout->addSubItem(inputDropoutLayout);
+
+	// pHidden label
+	lblinputDropout = new RULabel();
+	lblinputDropout->setWidth(250);
+	lblinputDropout->setHeight(30);
+	lblinputDropout->setText("Dropout p: ");
+	lblinputDropout->setName("lblinputDropout");
+	inputDropoutLayout->addSubItem(lblinputDropout);
+
+	// pHidden textbox
+	tbinputDropout = new RUTextbox();
+	tbinputDropout->setWidth(160);
+	tbinputDropout->setHeight(30);
+	tbinputDropout->setText("0.0");
+	tbinputDropout->setName("tbinputDropout");
+	inputDropoutLayout->addSubItem(tbinputDropout);
+
+	GLinearLayout* inputATLayout = new GLinearLayout("inputATLayout");
+	inputATLayout->setOrientation(GLinearLayout::HORIZONTAL);
+	inputOverallLayout->addSubItem(inputATLayout);
+
+	// activation functions label
+	lblinputAF = new RULabel();
+	lblinputAF->setWidth(250);
+	lblinputAF->setHeight(30);
+	lblinputAF->setText("Activation Type");
+	lblinputAF->setName("lblinputAF");
+	inputATLayout->addSubItem(lblinputAF);
+
+	// activation functions textbox
+	ddinputAF = new RUDropdown();
+	ddinputAF->setWidth(160);
+	ddinputAF->setHeight(30);
+	ddinputAF->setOptionsShown(3);
+	ddinputAF->setName("ddinputAF");
+	inputATLayout->addSubItem(ddinputAF);
+
+	ddinputAF->addOption("Tanh");
+	ddinputAF->addOption("PWise Tanh");
+	ddinputAF->addOption("Sigmoid");
+	ddinputAF->addOption("PWise Sigmoid");
+	ddinputAF->addOption("Linear");
+	ddinputAF->addOption("ReLu");
+	ddinputAF->addOption("Leaky ReLu");
+
+	GLinearLayout* inputAPLayout = new GLinearLayout("inputAPLayout");
+	inputAPLayout->setOrientation(GLinearLayout::HORIZONTAL);
+	inputOverallLayout->addSubItem(inputAPLayout);
+
+	// Activation param label
+	RULabel* lblinputAP = new RULabel();
+	lblinputAP->setWidth(250);
+	lblinputAP->setHeight(30);
+	lblinputAP->setText("Activation Param");
+	lblinputAP->setName("lblinputAP");
+	inputAPLayout->addSubItem(lblinputAP);
+
+	// Activation param textbox
+	tbinputAP = new RUTextbox();
+	tbinputAP->setWidth(160);
+	tbinputAP->setHeight(30);
+	tbinputAP->setName("tbinputAP");
+	inputAPLayout->addSubItem(tbinputAP);
+
+	//-----------
 
 	// Preview label Header
 	RULabel* lblPreview = new RULabel();
@@ -905,6 +1011,7 @@ void NNCreatorPanel::buildPanel()
 
 	loadDDNN();
 	populateIndexToEdit();
+	populateInputLayerForm();
 	populateHLayerForm();
 
 	loadDatasets();
@@ -946,6 +1053,46 @@ void NNCreatorPanel::loadDDNN()
 
 		ddNeuralNet->addOption(cItem->getName());
 	}
+}
+
+/*!
+ * @brief input layer textbox populator
+ * @details fills in the Input Layer variable textboxes and dropdowns
+ */
+void NNCreatorPanel::populateInputLayerForm()
+{
+	InputLayerInfo* inputLayer = formInfo->getInputLayer();
+	ddIndexToEdit->setSelectedIndex(currentHiddenLayerIndex);
+	tbHiddenLayerSize->setText(shmea::GString::intTOstring(inputLayer->size()));
+
+	if (inputLayer->getLearningRate())
+		tbinputLR->setText(shmea::GString::floatTOstring(inputLayer->getLearningRate()));
+	else
+		tbinputLR->setText(shmea::GString::floatTOstring(inputLayer->getLearningRate()));
+
+	if (inputLayer->getMomentumFactor())
+		tbinputMF->setText(shmea::GString::floatTOstring(inputLayer->getMomentumFactor()));
+	else
+		tbinputMF->setText(shmea::GString::floatTOstring(inputLayer->getMomentumFactor()));
+
+	if (inputLayer->getWeightDecay())
+		tbinputWD->setText(shmea::GString::floatTOstring(inputLayer->getWeightDecay()));
+	else
+		tbinputWD->setText(shmea::GString::floatTOstring(inputLayer->getWeightDecay()));
+
+	if (inputLayer->getPDropout())
+		tbinputDropout->setText(shmea::GString::floatTOstring(inputLayer->getPDropout()));
+	else
+		tbinputDropout->setText(shmea::GString::floatTOstring(inputLayer->getPDropout()));
+
+	if (inputLayer->getActivationParam())
+		tbinputAP->setText(
+			shmea::GString::floatTOstring(inputLayer->getActivationParam()));
+	else
+		tbinputAP->setText(
+			shmea::GString::floatTOstring(inputLayer->getActivationParam()));
+
+	ddinputAF->setSelectedIndex(inputLayer->getActivationType());
 }
 
 /*!
@@ -1001,13 +1148,68 @@ void NNCreatorPanel::populateHLayerForm()
 void NNCreatorPanel::syncFormVar()
 {
 	// Input Stuff
-
-	shmea::GType pInput = shmea::GString::Typify(tbPInput->getText(), tbPInput->getText().length());
-	formInfo->setPInput(pInput.getFloat());
+	InputLayerInfo* inputLayer = formInfo->getInputLayer();
 
 	shmea::GType batchSize =
 		shmea::GString::Typify(tbBatchSize->getText(), tbBatchSize->getText().size());
 	formInfo->setBatchSize(batchSize.getLong());
+
+	shmea::GType inputLR =
+		shmea::GString::Typify(tbinputLR->getText(), tbinputLR->getText().size());
+	inputLayer->setLearningRate(inputLR.getFloat());
+
+	shmea::GType inputMF =
+		shmea::GString::Typify(tbinputMF->getText(), tbinputMF->getText().size());
+	inputLayer->setMomentumFactor(inputMF.getFloat());
+
+	shmea::GType inputWD =
+		shmea::GString::Typify(tbinputWD->getText(), tbinputWD->getText().size());
+	inputLayer->setWeightDecay(inputWD.getFloat());
+
+	shmea::GType inputDropout =
+		shmea::GString::Typify(tbinputDropout->getText(), tbinputDropout->getText().size());
+	inputLayer->setPDropout(inputDropout.getFloat());
+
+	int inputAT = ddinputAF->getSelectedIndex();
+	switch (inputAT)
+	{
+	case 0: {
+		inputLayer->setActivationType(GMath::TANH);
+		break;
+	}
+	case 1: {
+		inputLayer->setActivationType(GMath::TANHP);
+		break;
+	}
+	case 2: {
+		inputLayer->setActivationType(GMath::SIGMOID);
+		break;
+	}
+	case 3: {
+		inputLayer->setActivationType(GMath::SIGMOIDP);
+		break;
+	}
+	case 4: {
+		inputLayer->setActivationType(GMath::LINEAR);
+		break;
+	}
+	case 5: {
+		inputLayer->setActivationType(GMath::RELU);
+		break;
+	}
+	case 6: {
+		inputLayer->setActivationType(GMath::LEAKY);
+		break;
+	}
+	default: {
+		inputLayer->setActivationType(GMath::TANH);
+		break;
+	}
+	}
+
+	shmea::GType inputAP =
+		shmea::GString::Typify(tbinputAP->getText(), tbinputAP->getText().size());
+	inputLayer->setActivationParam(inputAP.getFloat());
 
 	// Output Stuff
 
@@ -1114,7 +1316,7 @@ void NNCreatorPanel::loadNNet(glades::NNInfo* info)
 	tbNetName->setText(netName);
 
 	float pInput = formInfo->getPInput();
-	tbPInput->setText(shmea::GString::floatTOstring(pInput));
+	tbinputDropout->setText(shmea::GString::floatTOstring(pInput));
 
 	int batchSize = formInfo->getBatchSize();
 	tbBatchSize->setText(shmea::GString::intTOstring(batchSize));
@@ -1127,6 +1329,7 @@ void NNCreatorPanel::loadNNet(glades::NNInfo* info)
 	tbOutputLayerSize->setText(shmea::GString::intTOstring(outputSize));
 	ddOutputType->setSelectedIndex(outputType);
 
+	populateInputLayerForm();
 	populateHLayerForm();
 	populateIndexToEdit(currentHiddenLayerIndex);
 
@@ -1234,6 +1437,12 @@ void NNCreatorPanel::loadDatasets()
  */
 void NNCreatorPanel::clickedSave(const shmea::GString& cmpName, int x, int y)
 {
+	if(!tbNetName)
+		return;
+	
+	if(tbNetName->getText().length() == 0)
+		return;
+
 	shmea::GString serverIP = "127.0.0.1";
 
 	// make sure the layers are up to date
@@ -1242,13 +1451,29 @@ void NNCreatorPanel::clickedSave(const shmea::GString& cmpName, int x, int y)
 	shmea::GString netName = tbNetName->getText();
 	formInfo->setName(netName.c_str());
 
-	shmea::GType pInput = shmea::GString::Typify(tbPInput->getText(), tbPInput->getText().size());
-	if (pInput.getType() != shmea::GType::FLOAT_TYPE)
-		return;
-
 	shmea::GType batchSize =
 		shmea::GString::Typify(tbBatchSize->getText(), tbBatchSize->getText().size());
 	if (batchSize.getType() != shmea::GType::LONG_TYPE)
+		return;
+
+	shmea::GType inputLR = shmea::GString::Typify(tbinputLR->getText(), tbinputLR->getText().size());
+	if (inputLR.getType() != shmea::GType::FLOAT_TYPE)
+		return;
+
+	shmea::GType inputMF = shmea::GString::Typify(tbinputMF->getText(), tbinputMF->getText().size());
+	if (inputMF.getType() != shmea::GType::FLOAT_TYPE)
+		return;
+
+	shmea::GType inputWD = shmea::GString::Typify(tbinputWD->getText(), tbinputWD->getText().size());
+	if (inputWD.getType() != shmea::GType::FLOAT_TYPE)
+		return;
+
+	shmea::GType inputDropout = shmea::GString::Typify(tbinputDropout->getText(), tbinputDropout->getText().size());
+	if (inputDropout.getType() != shmea::GType::FLOAT_TYPE)
+		return;
+
+	shmea::GType inputAP = shmea::GString::Typify(tbinputAP->getText(), tbinputAP->getText().size());
+	if (inputAP.getType() != shmea::GType::FLOAT_TYPE)
 		return;
 
 	shmea::GType outputSize =
@@ -1267,6 +1492,7 @@ void NNCreatorPanel::clickedSave(const shmea::GString& cmpName, int x, int y)
 		return;
 
 	// Save the neural network
+	populateInputLayerForm();
 	populateHLayerForm();
 	NNetwork* network = new NNetwork(formInfo);
 	glades::saveNeuralNetwork(network);
@@ -1288,6 +1514,7 @@ void NNCreatorPanel::clickedEditSwitch(const shmea::GString& cmpName, int x, int
 
 	syncFormVar();
 	currentHiddenLayerIndex = indexToEdit;
+	populateInputLayerForm();
 	populateHLayerForm();
 }
 
@@ -1492,6 +1719,7 @@ void NNCreatorPanel::clickedRemove(const shmea::GString& cmpName, int x, int y)
 		--currentHiddenLayerIndex;
 
 	printf("[GUI] Layer %d deleted\n", currentHiddenLayerIndex);
+	populateInputLayerForm();
 	populateHLayerForm();
 	tbHiddenLayerCount->setText(shmea::GString::intTOstring(formInfo->numHiddenLayers()));
 	populateIndexToEdit(currentHiddenLayerIndex);
@@ -1519,6 +1747,7 @@ void NNCreatorPanel::tbHLLoseFocus()
 	if (currentHiddenLayerIndex >= newCount)
 	{
 		currentHiddenLayerIndex = formInfo->numHiddenLayers() - 1;
+		populateInputLayerForm();
 		populateHLayerForm();
 	}
 

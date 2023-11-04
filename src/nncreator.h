@@ -142,10 +142,25 @@ protected:
 
 	RULabel* lblEditInputLayer;
 
-	RULabel* lblPInput;
-	RUTextbox* tbPInput;
-
 	RUTextbox* tbBatchSize;
+
+	RULabel* lblinputLR;
+	RUTextbox* tbinputLR;
+
+	RULabel* lblinputWD;
+	RUTextbox* tbinputWD;
+
+	RULabel* lblinputMF;
+	RUTextbox* tbinputMF;
+
+	RULabel* lblinputDropout;
+	RUTextbox* tbinputDropout;
+
+	RULabel* lblinputAF;
+	RUDropdown* ddinputAF;
+
+	RULabel* lblinputAP;
+	RUTextbox* tbinputAP;
 
 	RUTabContainer* previewTabs;
 	RUTable* previewTable;
@@ -183,6 +198,7 @@ public:
 
 	void loadDDNN();
 	void populateIndexToEdit(int = 0);
+	void populateInputLayerForm();
 	void populateHLayerForm();
 	void syncFormVar();
 	void loadNNet(glades::NNInfo*);
