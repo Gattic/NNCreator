@@ -100,7 +100,7 @@ void NNCreatorPanel::buildPanel()
 	serverInstance->addService(gui_cb_srvc);
 
 	currentHiddenLayerIndex = 0;
-	InputLayerInfo* newInputLayer = new InputLayerInfo(1);
+	InputLayerInfo* newInputLayer = new InputLayerInfo(1, 0.01f, 0.0f, 0.0f, 0.0f, 0, 0.0f);
 	std::vector<HiddenLayerInfo*> newHiddenLayers;
 	newHiddenLayers.push_back(new HiddenLayerInfo(2, 0.01f, 0.0f, 0.0f, 0.0f, 0, 0.0f));
 	OutputLayerInfo* newOutputLayer = new OutputLayerInfo(1, OutputLayerInfo::REGRESSION);
@@ -1062,36 +1062,12 @@ void NNCreatorPanel::loadDDNN()
 void NNCreatorPanel::populateInputLayerForm()
 {
 	InputLayerInfo* inputLayer = formInfo->getInputLayer();
-	ddIndexToEdit->setSelectedIndex(currentHiddenLayerIndex);
-	tbHiddenLayerSize->setText(shmea::GString::intTOstring(inputLayer->size()));
 
-	if (inputLayer->getLearningRate())
-		tbinputLR->setText(shmea::GString::floatTOstring(inputLayer->getLearningRate()));
-	else
-		tbinputLR->setText(shmea::GString::floatTOstring(inputLayer->getLearningRate()));
-
-	if (inputLayer->getMomentumFactor())
-		tbinputMF->setText(shmea::GString::floatTOstring(inputLayer->getMomentumFactor()));
-	else
-		tbinputMF->setText(shmea::GString::floatTOstring(inputLayer->getMomentumFactor()));
-
-	if (inputLayer->getWeightDecay())
-		tbinputWD->setText(shmea::GString::floatTOstring(inputLayer->getWeightDecay()));
-	else
-		tbinputWD->setText(shmea::GString::floatTOstring(inputLayer->getWeightDecay()));
-
-	if (inputLayer->getPDropout())
-		tbinputDropout->setText(shmea::GString::floatTOstring(inputLayer->getPDropout()));
-	else
-		tbinputDropout->setText(shmea::GString::floatTOstring(inputLayer->getPDropout()));
-
-	if (inputLayer->getActivationParam())
-		tbinputAP->setText(
-			shmea::GString::floatTOstring(inputLayer->getActivationParam()));
-	else
-		tbinputAP->setText(
-			shmea::GString::floatTOstring(inputLayer->getActivationParam()));
-
+	tbinputLR->setText(shmea::GString::floatTOstring(inputLayer->getLearningRate()));
+	tbinputMF->setText(shmea::GString::floatTOstring(inputLayer->getMomentumFactor()));
+	tbinputWD->setText(shmea::GString::floatTOstring(inputLayer->getWeightDecay()));
+	tbinputDropout->setText(shmea::GString::floatTOstring(inputLayer->getPDropout()));
+	tbinputAP->setText(shmea::GString::floatTOstring(inputLayer->getActivationParam()));
 	ddinputAF->setSelectedIndex(inputLayer->getActivationType());
 }
 
