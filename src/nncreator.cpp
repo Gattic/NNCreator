@@ -1086,33 +1086,11 @@ void NNCreatorPanel::populateHLayerForm()
 	ddIndexToEdit->setSelectedIndex(currentHiddenLayerIndex);
 	tbHiddenLayerSize->setText(shmea::GString::intTOstring(currentLayer->size()));
 
-	if (currentLayer->getLearningRate())
-		tbLearningRate->setText(shmea::GString::floatTOstring(currentLayer->getLearningRate()));
-	else
-		tbLearningRate->setText(shmea::GString::floatTOstring(currentLayer->getLearningRate()));
-
-	if (currentLayer->getMomentumFactor())
-		tbMomentumFactor->setText(shmea::GString::floatTOstring(currentLayer->getMomentumFactor()));
-	else
-		tbMomentumFactor->setText(shmea::GString::floatTOstring(currentLayer->getMomentumFactor()));
-
-	if (currentLayer->getWeightDecay())
-		tbWeightDecay->setText(shmea::GString::floatTOstring(currentLayer->getWeightDecay()));
-	else
-		tbWeightDecay->setText(shmea::GString::floatTOstring(currentLayer->getWeightDecay()));
-
-	if (currentLayer->getPDropout())
-		tbPHidden->setText(shmea::GString::floatTOstring(currentLayer->getPDropout()));
-	else
-		tbPHidden->setText(shmea::GString::floatTOstring(currentLayer->getPDropout()));
-
-	if (currentLayer->getActivationParam())
-		tbActivationParam->setText(
-			shmea::GString::floatTOstring(currentLayer->getActivationParam()));
-	else
-		tbActivationParam->setText(
-			shmea::GString::floatTOstring(currentLayer->getActivationParam()));
-
+	tbLearningRate->setText(shmea::GString::floatTOstring(currentLayer->getLearningRate()));
+	tbMomentumFactor->setText(shmea::GString::floatTOstring(currentLayer->getMomentumFactor()));
+	tbWeightDecay->setText(shmea::GString::floatTOstring(currentLayer->getWeightDecay()));
+	tbPHidden->setText(shmea::GString::floatTOstring(currentLayer->getPDropout()));
+	tbActivationParam->setText(shmea::GString::floatTOstring(currentLayer->getActivationParam()));
 	ddActivationFunctions->setSelectedIndex(currentLayer->getActivationType());
 }
 
@@ -1413,10 +1391,10 @@ void NNCreatorPanel::loadDatasets()
  */
 void NNCreatorPanel::clickedSave(const shmea::GString& cmpName, int x, int y)
 {
-	if(!tbNetName)
+	if (!tbNetName)
 		return;
-	
-	if(tbNetName->getText().length() == 0)
+
+	if (tbNetName->getText().length() == 0)
 		return;
 
 	shmea::GString serverIP = "127.0.0.1";
@@ -1432,23 +1410,28 @@ void NNCreatorPanel::clickedSave(const shmea::GString& cmpName, int x, int y)
 	if (batchSize.getType() != shmea::GType::LONG_TYPE)
 		return;
 
-	shmea::GType inputLR = shmea::GString::Typify(tbinputLR->getText(), tbinputLR->getText().size());
+	shmea::GType inputLR =
+		shmea::GString::Typify(tbinputLR->getText(), tbinputLR->getText().size());
 	if (inputLR.getType() != shmea::GType::FLOAT_TYPE)
 		return;
 
-	shmea::GType inputMF = shmea::GString::Typify(tbinputMF->getText(), tbinputMF->getText().size());
+	shmea::GType inputMF =
+		shmea::GString::Typify(tbinputMF->getText(), tbinputMF->getText().size());
 	if (inputMF.getType() != shmea::GType::FLOAT_TYPE)
 		return;
 
-	shmea::GType inputWD = shmea::GString::Typify(tbinputWD->getText(), tbinputWD->getText().size());
+	shmea::GType inputWD =
+		shmea::GString::Typify(tbinputWD->getText(), tbinputWD->getText().size());
 	if (inputWD.getType() != shmea::GType::FLOAT_TYPE)
 		return;
 
-	shmea::GType inputDropout = shmea::GString::Typify(tbinputDropout->getText(), tbinputDropout->getText().size());
+	shmea::GType inputDropout =
+		shmea::GString::Typify(tbinputDropout->getText(), tbinputDropout->getText().size());
 	if (inputDropout.getType() != shmea::GType::FLOAT_TYPE)
 		return;
 
-	shmea::GType inputAP = shmea::GString::Typify(tbinputAP->getText(), tbinputAP->getText().size());
+	shmea::GType inputAP =
+		shmea::GString::Typify(tbinputAP->getText(), tbinputAP->getText().size());
 	if (inputAP.getType() != shmea::GType::FLOAT_TYPE)
 		return;
 
