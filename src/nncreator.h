@@ -125,8 +125,11 @@ protected:
 	RULabel* lblLearningRate;
 	RUTextbox* tbLearningRate;
 
-	RULabel* lblWeightDecay;
-	RUTextbox* tbWeightDecay;
+	RULabel* lblWeightDecay1;
+	RUTextbox* tbWeightDecay1;
+
+	RULabel* lblWeightDecay2;
+	RUTextbox* tbWeightDecay2;
 
 	RULabel* lblMomentumFactor;
 	RUTextbox* tbMomentumFactor;
@@ -142,10 +145,28 @@ protected:
 
 	RULabel* lblEditInputLayer;
 
-	RULabel* lblPInput;
-	RUTextbox* tbPInput;
-
 	RUTextbox* tbBatchSize;
+
+	RULabel* lblinputLR;
+	RUTextbox* tbinputLR;
+
+	RULabel* lblinputWD1;
+	RUTextbox* tbinputWD1;
+
+	RULabel* lblinputWD2;
+	RUTextbox* tbinputWD2;
+
+	RULabel* lblinputMF;
+	RUTextbox* tbinputMF;
+
+	RULabel* lblinputDropout;
+	RUTextbox* tbinputDropout;
+
+	RULabel* lblinputAF;
+	RUDropdown* ddinputAF;
+
+	RULabel* lblinputAP;
+	RUTextbox* tbinputAP;
 
 	RUTabContainer* previewTabs;
 	RUTable* previewTable;
@@ -183,6 +204,7 @@ public:
 
 	void loadDDNN();
 	void populateIndexToEdit(int = 0);
+	void populateInputLayerForm();
 	void populateHLayerForm();
 	void syncFormVar();
 	void loadNNet(glades::NNInfo*);
