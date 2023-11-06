@@ -100,9 +100,9 @@ void NNCreatorPanel::buildPanel()
 	serverInstance->addService(gui_cb_srvc);
 
 	currentHiddenLayerIndex = 0;
-	InputLayerInfo* newInputLayer = new InputLayerInfo(1, 0.01f, 0.0f, 0.0f, 0.0f, 0, 0.0f);
+	InputLayerInfo* newInputLayer = new InputLayerInfo(1, 0.01f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0.0f);
 	std::vector<HiddenLayerInfo*> newHiddenLayers;
-	newHiddenLayers.push_back(new HiddenLayerInfo(2, 0.01f, 0.0f, 0.0f, 0.0f, 0, 0.0f));
+	newHiddenLayers.push_back(new HiddenLayerInfo(2, 0.01f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0.0f));
 	OutputLayerInfo* newOutputLayer = new OutputLayerInfo(1, OutputLayerInfo::REGRESSION);
 	formInfo = new glades::NNInfo("", newInputLayer, newHiddenLayers, newOutputLayer);
 
@@ -533,24 +533,43 @@ void NNCreatorPanel::buildPanel()
 	tbinputMF->setName("tbinputMF");
 	inputMFLayout->addSubItem(tbinputMF);
 
-	GLinearLayout* inputWDLayout = new GLinearLayout("inputWDLayout");
-	inputWDLayout->setOrientation(GLinearLayout::HORIZONTAL);
-	inputOverallLayout->addSubItem(inputWDLayout);
+	GLinearLayout* inputWDLayout1 = new GLinearLayout("inputWDLayout1");
+	inputWDLayout1->setOrientation(GLinearLayout::HORIZONTAL);
+	inputOverallLayout->addSubItem(inputWDLayout1);
 
 	// weight decay label
-	lblinputWD = new RULabel();
-	lblinputWD->setWidth(250);
-	lblinputWD->setHeight(30);
-	lblinputWD->setText("Weight Decay");
-	lblinputWD->setName("lblinputWD");
-	inputWDLayout->addSubItem(lblinputWD);
+	lblinputWD1 = new RULabel();
+	lblinputWD1->setWidth(250);
+	lblinputWD1->setHeight(30);
+	lblinputWD1->setText("L1 Regularization");
+	lblinputWD1->setName("lblinputWD1");
+	inputWDLayout1->addSubItem(lblinputWD1);
 
 	// weight decay textbox
-	tbinputWD = new RUTextbox();
-	tbinputWD->setWidth(160);
-	tbinputWD->setHeight(30);
-	tbinputWD->setName("tbinputWD");
-	inputWDLayout->addSubItem(tbinputWD);
+	tbinputWD1 = new RUTextbox();
+	tbinputWD1->setWidth(160);
+	tbinputWD1->setHeight(30);
+	tbinputWD1->setName("tbinputWD1");
+	inputWDLayout1->addSubItem(tbinputWD1);
+
+	GLinearLayout* inputWDLayout2 = new GLinearLayout("inputWDLayout2");
+	inputWDLayout2->setOrientation(GLinearLayout::HORIZONTAL);
+	inputOverallLayout->addSubItem(inputWDLayout2);
+
+	// weight decay label
+	lblinputWD2 = new RULabel();
+	lblinputWD2->setWidth(250);
+	lblinputWD2->setHeight(30);
+	lblinputWD2->setText("L2 Regularization");
+	lblinputWD2->setName("lblinputWD2");
+	inputWDLayout2->addSubItem(lblinputWD2);
+
+	// weight decay textbox
+	tbinputWD2 = new RUTextbox();
+	tbinputWD2->setWidth(160);
+	tbinputWD2->setHeight(30);
+	tbinputWD2->setName("tbinputWD2");
+	inputWDLayout2->addSubItem(tbinputWD2);
 
 	GLinearLayout* inputDropoutLayout = new GLinearLayout("inputDropoutLayout");
 	inputDropoutLayout->setOrientation(GLinearLayout::HORIZONTAL);
@@ -823,24 +842,43 @@ void NNCreatorPanel::buildPanel()
 	tbMomentumFactor->setName("tbMomentumFactor");
 	mfLayout->addSubItem(tbMomentumFactor);
 
-	GLinearLayout* wdLayout = new GLinearLayout("wdLayout");
-	wdLayout->setOrientation(GLinearLayout::HORIZONTAL);
-	hiddenOverallLayout->addSubItem(wdLayout);
+	GLinearLayout* wdLayout1 = new GLinearLayout("wdLayout1");
+	wdLayout1->setOrientation(GLinearLayout::HORIZONTAL);
+	hiddenOverallLayout->addSubItem(wdLayout1);
 
 	// weight decay label
-	lblWeightDecay = new RULabel();
-	lblWeightDecay->setWidth(250);
-	lblWeightDecay->setHeight(30);
-	lblWeightDecay->setText("Weight Decay");
-	lblWeightDecay->setName("lblWeightDecay");
-	wdLayout->addSubItem(lblWeightDecay);
+	lblWeightDecay1 = new RULabel();
+	lblWeightDecay1->setWidth(250);
+	lblWeightDecay1->setHeight(30);
+	lblWeightDecay1->setText("L1 Regularization");
+	lblWeightDecay1->setName("lblWeightDecay1");
+	wdLayout1->addSubItem(lblWeightDecay1);
 
 	// weight decay textbox
-	tbWeightDecay = new RUTextbox();
-	tbWeightDecay->setWidth(160);
-	tbWeightDecay->setHeight(30);
-	tbWeightDecay->setName("tbWeightDecay");
-	wdLayout->addSubItem(tbWeightDecay);
+	tbWeightDecay1 = new RUTextbox();
+	tbWeightDecay1->setWidth(160);
+	tbWeightDecay1->setHeight(30);
+	tbWeightDecay1->setName("tbWeightDecay1");
+	wdLayout1->addSubItem(tbWeightDecay1);
+
+	GLinearLayout* wdLayout2 = new GLinearLayout("wdLayout2");
+	wdLayout2->setOrientation(GLinearLayout::HORIZONTAL);
+	hiddenOverallLayout->addSubItem(wdLayout2);
+
+	// weight decay label
+	lblWeightDecay2 = new RULabel();
+	lblWeightDecay2->setWidth(250);
+	lblWeightDecay2->setHeight(30);
+	lblWeightDecay2->setText("L2 Regularization");
+	lblWeightDecay2->setName("lblWeightDecay2");
+	wdLayout2->addSubItem(lblWeightDecay2);
+
+	// weight decay textbox
+	tbWeightDecay2 = new RUTextbox();
+	tbWeightDecay2->setWidth(160);
+	tbWeightDecay2->setHeight(30);
+	tbWeightDecay2->setName("tbWeightDecay2");
+	wdLayout2->addSubItem(tbWeightDecay2);
 
 	GLinearLayout* pHiddenLayout = new GLinearLayout("pHiddenLayout");
 	pHiddenLayout->setOrientation(GLinearLayout::HORIZONTAL);
@@ -1065,7 +1103,8 @@ void NNCreatorPanel::populateInputLayerForm()
 
 	tbinputLR->setText(shmea::GString::floatTOstring(inputLayer->getLearningRate()));
 	tbinputMF->setText(shmea::GString::floatTOstring(inputLayer->getMomentumFactor()));
-	tbinputWD->setText(shmea::GString::floatTOstring(inputLayer->getWeightDecay()));
+	tbinputWD1->setText(shmea::GString::floatTOstring(inputLayer->getWeightDecay1()));
+	tbinputWD2->setText(shmea::GString::floatTOstring(inputLayer->getWeightDecay2()));
 	tbinputDropout->setText(shmea::GString::floatTOstring(inputLayer->getPDropout()));
 	tbinputAP->setText(shmea::GString::floatTOstring(inputLayer->getActivationParam()));
 	ddinputAF->setSelectedIndex(inputLayer->getActivationType());
@@ -1088,7 +1127,8 @@ void NNCreatorPanel::populateHLayerForm()
 
 	tbLearningRate->setText(shmea::GString::floatTOstring(currentLayer->getLearningRate()));
 	tbMomentumFactor->setText(shmea::GString::floatTOstring(currentLayer->getMomentumFactor()));
-	tbWeightDecay->setText(shmea::GString::floatTOstring(currentLayer->getWeightDecay()));
+	tbWeightDecay1->setText(shmea::GString::floatTOstring(currentLayer->getWeightDecay1()));
+	tbWeightDecay2->setText(shmea::GString::floatTOstring(currentLayer->getWeightDecay2()));
 	tbPHidden->setText(shmea::GString::floatTOstring(currentLayer->getPDropout()));
 	tbActivationParam->setText(shmea::GString::floatTOstring(currentLayer->getActivationParam()));
 	ddActivationFunctions->setSelectedIndex(currentLayer->getActivationType());
@@ -1116,9 +1156,13 @@ void NNCreatorPanel::syncFormVar()
 		shmea::GString::Typify(tbinputMF->getText(), tbinputMF->getText().size());
 	inputLayer->setMomentumFactor(inputMF.getFloat());
 
-	shmea::GType inputWD =
-		shmea::GString::Typify(tbinputWD->getText(), tbinputWD->getText().size());
-	inputLayer->setWeightDecay(inputWD.getFloat());
+	shmea::GType inputWD1 =
+		shmea::GString::Typify(tbinputWD1->getText(), tbinputWD1->getText().size());
+	inputLayer->setWeightDecay1(inputWD1.getFloat());
+
+	shmea::GType inputWD2 =
+		shmea::GString::Typify(tbinputWD2->getText(), tbinputWD2->getText().size());
+	inputLayer->setWeightDecay2(inputWD2.getFloat());
 
 	shmea::GType inputDropout =
 		shmea::GString::Typify(tbinputDropout->getText(), tbinputDropout->getText().size());
@@ -1195,9 +1239,13 @@ void NNCreatorPanel::syncFormVar()
 		shmea::GString::Typify(tbMomentumFactor->getText(), tbMomentumFactor->getText().size());
 	currentLayer->setMomentumFactor(momentumFactor.getFloat());
 
-	shmea::GType weightDecay =
-		shmea::GString::Typify(tbWeightDecay->getText(), tbWeightDecay->getText().size());
-	currentLayer->setWeightDecay(weightDecay.getFloat());
+	shmea::GType weightDecay1 =
+		shmea::GString::Typify(tbWeightDecay1->getText(), tbWeightDecay1->getText().size());
+	currentLayer->setWeightDecay1(weightDecay1.getFloat());
+
+	shmea::GType weightDecay2 =
+		shmea::GString::Typify(tbWeightDecay2->getText(), tbWeightDecay2->getText().size());
+	currentLayer->setWeightDecay2(weightDecay2.getFloat());
 
 	int activationType = ddActivationFunctions->getSelectedIndex();
 	switch (activationType)
@@ -1420,9 +1468,14 @@ void NNCreatorPanel::clickedSave(const shmea::GString& cmpName, int x, int y)
 	if (inputMF.getType() != shmea::GType::FLOAT_TYPE)
 		return;
 
-	shmea::GType inputWD =
-		shmea::GString::Typify(tbinputWD->getText(), tbinputWD->getText().size());
-	if (inputWD.getType() != shmea::GType::FLOAT_TYPE)
+	shmea::GType inputWD1 =
+		shmea::GString::Typify(tbinputWD1->getText(), tbinputWD1->getText().size());
+	if (inputWD1.getType() != shmea::GType::FLOAT_TYPE)
+		return;
+
+	shmea::GType inputWD2 =
+		shmea::GString::Typify(tbinputWD2->getText(), tbinputWD2->getText().size());
+	if (inputWD2.getType() != shmea::GType::FLOAT_TYPE)
 		return;
 
 	shmea::GType inputDropout =

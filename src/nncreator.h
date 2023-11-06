@@ -125,8 +125,11 @@ protected:
 	RULabel* lblLearningRate;
 	RUTextbox* tbLearningRate;
 
-	RULabel* lblWeightDecay;
-	RUTextbox* tbWeightDecay;
+	RULabel* lblWeightDecay1;
+	RUTextbox* tbWeightDecay1;
+
+	RULabel* lblWeightDecay2;
+	RUTextbox* tbWeightDecay2;
 
 	RULabel* lblMomentumFactor;
 	RUTextbox* tbMomentumFactor;
@@ -147,8 +150,11 @@ protected:
 	RULabel* lblinputLR;
 	RUTextbox* tbinputLR;
 
-	RULabel* lblinputWD;
-	RUTextbox* tbinputWD;
+	RULabel* lblinputWD1;
+	RUTextbox* tbinputWD1;
+
+	RULabel* lblinputWD2;
+	RUTextbox* tbinputWD2;
 
 	RULabel* lblinputMF;
 	RUTextbox* tbinputMF;
