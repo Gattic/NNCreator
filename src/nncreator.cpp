@@ -2053,7 +2053,6 @@ void NNCreatorPanel::updateFromQ(const shmea::ServiceData* data)
 			{
 			    nn = new NeuralNet(activations.size());
 			    nn->setInputLayer(activations.getInt(i));
-			    nn->setInputLayerActivation();
 			}
 			else if(i == activations.size() - 1)
 			{

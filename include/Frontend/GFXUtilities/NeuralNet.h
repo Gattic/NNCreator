@@ -31,7 +31,6 @@ public:
     void setOutputLayer(int);
 
     void setActivation(shmea::GList);
-    void setInputLayerActivation();
     void setWeights(shmea::GList);
 
     int getLayersCount();
