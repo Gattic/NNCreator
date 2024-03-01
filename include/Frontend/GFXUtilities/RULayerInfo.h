@@ -27,6 +27,7 @@ public:
     ~RULayerInfo();
  
     int getNeurons() const;
+    std::vector<shmea::GPointer<Neuron> > getNeuronList() const;
 
     void setNeurons(int newNeuronSize, int newPrevLayer=0);
     void setActivation(int, float);

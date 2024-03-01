@@ -22,7 +22,7 @@ protected:
     int neuronRadius;
 
 public:
-    
+    NeuralNet();    
     NeuralNet(int);
     virtual ~NeuralNet();
 
@@ -31,7 +31,14 @@ public:
     void setOutputLayer(int);
 
     void setActivation(shmea::GList);
+    void setInputLayerActivation();
     void setWeights(shmea::GList);
+
+    int getLayersCount();
+    std::vector<shmea::GPointer<Neuron> > getLayerNeurons(int);
+    int getLayerNeuronsCount(int);
+
+
 
     void displayNeuralNet();
 

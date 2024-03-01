@@ -94,6 +94,8 @@ protected:
 	RUGraph* rocCurveGraph;
 	RUTable* cMatrixTable;
 
+	RUGraph* neuralNetGraph;
+
 	RULabel* lblSettings;
 
 	RULabel* lblEpochs;

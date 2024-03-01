@@ -184,12 +184,15 @@ void NNCreatorPanel::buildPanel()
 	// newImage->LoadPNG("resources/bg.png");
 
 	// NN Output Image
-	outputImage = new RUImageComponent();
-	outputImage->setWidth(getWidth() / 4);
-	outputImage->setHeight(getHeight() / 4);
-	outputImage->setName("outputImage");
-	outputImage->setBGImage(newImage);
-	outputImageLayout->addSubItem(outputImage);
+//	outputImage = new RUImageComponent();
+//	outputImage->setWidth(getWidth() / 4);
+//	outputImage->setHeight(getHeight() / 4);
+//	outputImage->setName("outputImage");
+//	outputImage->setBGImage(newImage);
+//	outputImageLayout->addSubItem(outputImage);
+	neuralNetGraph = new RUGraph(getWidth() / 4, getHeight() / 4, RUGraph::QUADRANTS_ONE);
+	neuralNetGraph->setName("neuralNetGraph");
+	outputImageLayout->addSubItem(neuralNetGraph);
 
 	// Confusion Table and Label
 	GLinearLayout* confTableLayout = new GLinearLayout("confTableLayout");
@@ -1055,25 +1058,6 @@ void NNCreatorPanel::buildPanel()
 
 	loadDatasets();
 
-	//TODO: Create neural net function here so you can declare the object that will be used for the neural net visualization
-/*	nn = new NeuralNet(2 + formInfo->numHiddenLayers());
-
-	nn->displayNeuralNet();
-
-	std::cout << "EDIT TEST" << std::endl;
-    
-	nn->setInputLayer(5);
-	nn->setHiddenLayer(1, 4);
-
-	nn->displayNeuralNet();
-
-	std::cout<< "Edit Test 2" << std::endl;
-
-	nn->setInputLayer(10);
-	nn->setHiddenLayer(1, 6);
-	nn->setOutputLayer(5);
-
-	nn->displayNeuralNet();*/
 }
 
 void NNCreatorPanel::onStart()
@@ -2069,6 +2053,7 @@ void NNCreatorPanel::updateFromQ(const shmea::ServiceData* data)
 			{
 			    nn = new NeuralNet(activations.size());
 			    nn->setInputLayer(activations.getInt(i));
+			    nn->setInputLayerActivation();
 			}
 			else if(i == activations.size() - 1)
 			{
@@ -2097,7 +2082,9 @@ void NNCreatorPanel::updateFromQ(const shmea::ServiceData* data)
 	        return;
 
 	   nn->setWeights(weights);
-	    nn->displayNeuralNet();
+	   //nn->displayNeuralNet();
+	   neuralNetGraph->clear();
+	   neuralNetGraph->add("nn", nn);
 	}
 }
 
