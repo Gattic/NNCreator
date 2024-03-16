@@ -43,6 +43,7 @@ private:
 	int axisOriginX;
 	int axisOriginY;
 	int axisWidth;
+	bool dotMatrixEnabled;
 	bool gridEnabled;
 	int gridLineWidth;
 	int quadrants;
@@ -113,6 +114,7 @@ public:
 	int getAxisOriginX() const;
 	int getAxisOriginY() const;
 	int getAxisWidth() const;
+	bool getDotMatrixEnabled() const;
 	bool getGridEnabled() const;
 	int getGridLineWidth() const;
 	int getQuadrants() const;
@@ -127,6 +129,7 @@ public:
 	// sets
 	void setGraphSize(int);
 	void setAxisWidth(int);
+	void setDotMatrixEnabled(bool);
 	void setGridEnabled(bool);
 	void setGridLineWidth(int);
 	void setQuadrants(int);

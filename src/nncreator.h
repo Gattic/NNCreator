@@ -52,6 +52,7 @@ class RUTable;
 class RUProgressBar;
 class RUTabContainer;
 class PlotType;
+class NeuralNet;
 
 namespace shmea {
 class GTable;
@@ -86,10 +87,14 @@ protected:
 
 	void buildPanel();
 
+	NeuralNet* nn;
+
 	RUGraph* lcGraph;
 	RUImageComponent* outputImage;
 	RUGraph* rocCurveGraph;
 	RUTable* cMatrixTable;
+
+	RUGraph* neuralNetGraph;
 
 	RULabel* lblSettings;
 
