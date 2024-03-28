@@ -1,5 +1,5 @@
-#ifndef _RULAERINFO
-#define _RULAERINFO
+#ifndef _RULAYERINFO
+#define _RULAYERINFO
 
 #include <float.h>
 #include <stdio.h>
@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 #include "Backend/Database/GPointer.h"
-#include "neuron.h"
+#include "DrawNeuron.h"
 
 class RULayerInfo
 {
@@ -16,7 +16,7 @@ protected:
     int layerType;
     int neuronQty;
 //    double* weights;
-    std::vector<shmea::GPointer<Neuron> > neuronList;
+    std::vector<shmea::GPointer<DrawNeuron> > neuronList;
 
 public:
     static const int INPUT = 0;
@@ -27,7 +27,7 @@ public:
     ~RULayerInfo();
  
     int getNeurons() const;
-    std::vector<shmea::GPointer<Neuron> > getNeuronList() const;
+    std::vector<shmea::GPointer<DrawNeuron> > getNeuronList() const;
 
     void setNeurons(int newNeuronSize, int newPrevLayer=0);
     void setActivation(int, float);
@@ -39,4 +39,4 @@ public:
 
 
 
-#endif // _RULAERINFO
+#endif // _RULAYERINFO

@@ -54,7 +54,7 @@
 #include "Frontend/GUI/Text/RUTextbox.h"
 #include "Frontend/Graphics/graphics.h"
 #include "Frontend/RUGraph/RUGraph.h"
-#include "Frontend/GFXUtilities/NeuralNet.h"
+#include "Frontend/GFXUtilities/DrawNeuralNet.h"
 #include "crt0.h"
 #include "main.h"
 #include "services/gui_callback.h"
@@ -2051,7 +2051,7 @@ void NNCreatorPanel::updateFromQ(const shmea::ServiceData* data)
 		    {
 			if(i == 0)
 			{
-			    nn = new NeuralNet(activations.size());
+			    nn = new DrawNeuralNet(activations.size());
 			    nn->setInputLayer(activations.getInt(i));
 			}
 			else if(i == activations.size() - 1)
@@ -2064,8 +2064,11 @@ void NNCreatorPanel::updateFromQ(const shmea::ServiceData* data)
 			}
 		    }
 		}
-	    } else {
+	    }
+	    else 
+	    {
 		nn->setActivation(activations);
+		neuralNetGraph->set("nn", nn);
 	    }
 
 	   // nn->displayNeuralNet();
@@ -2073,7 +2076,6 @@ void NNCreatorPanel::updateFromQ(const shmea::ServiceData* data)
 	else if(cName == "WEIGHTS")
 	{
 	    
-//	    printf("\n\n\nWeights are printing\n\n\n");
 	    //Update weights
 	    shmea::GList weights = data->getList();
 	    
@@ -2081,9 +2083,8 @@ void NNCreatorPanel::updateFromQ(const shmea::ServiceData* data)
 	        return;
 
 	   nn->setWeights(weights);
-	   //nn->displayNeuralNet();
-	   neuralNetGraph->clear();
-	   neuralNetGraph->add("nn", nn);
+	   nn->displayNeuralNet();
+	   neuralNetGraph->set("nn", nn);
 	}
 }
 

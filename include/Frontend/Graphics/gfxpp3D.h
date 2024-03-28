@@ -1,20 +1,6 @@
-// Copyright 2020 Robert Carneiro, Derek Meer, Matthew Tabak, Eric Lujan
-//
-// associated documentation files (the "Software"), to deal in the Software without restriction,
-// including without limitation the rights to use, copy, modify, merge, publish, distribute,
-// sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all copies or
-// substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
-// NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _GRAPHICS
-#define _GRAPHICS
+
+#ifndef _GFXPP3D
+#define _GFXPP3D
 
 #include "../GFXUtilities/quaternion.h"
 #include "../GItems/GItem.h"
@@ -38,7 +24,7 @@ class GPanel;
 class Object;
 class GFont;
 
-class gfxpp
+class gfxpp3D
 {
 	friend class RUComponent;
 	friend class RUTextComponent;
@@ -60,6 +46,7 @@ private:
 	int width;
 	int height;
 	float hunterZolomon; // zoom
+	int renderStatus;
 
 	int32_t frames;
 	bool rotate;
@@ -101,14 +88,12 @@ private:
 	std::vector<Object*> objects;
 	unsigned int cObjIndex;
 
-	// default gui
-	RULabel* fpsLabel;
 
 	// main
 	void display();
 	int initHelper(bool, shmea::GString, bool);
-	int init2D(bool);
-	void clean2D();
+	void init3D();
+	void clean3D();
 
 public:
 	static const float MAX_FRAMES_PER_SECOND = 30.0f;
@@ -117,11 +102,8 @@ public:
 	static const int Y_AXIS = 1;
 	static const int Z_AXIS = 2;
 
-	//TODO: Remove this in future since we decoupled the 2D and 3D rendering
-	static const int _2D = 0;
-
-	gfxpp();
-	gfxpp(shmea::GString, int = _2D, bool = true, bool = true, int = 800, int = 600);
+	gfxpp3D();
+	gfxpp3D(shmea::GString, bool = true, bool = true, int = 800, int = 600);
 	int getErrorFlag() const;
 	SDL_Renderer* getRenderer();
 
@@ -130,23 +112,13 @@ public:
 	bool contains(const Object*) const;
 	bool contains(const Object) const;
 
-	// 2D
-	GFont* cFont;
-	std::map<int, GFont*> graphicsFonts;
 
-	GPanel* focusedPanel;
-	SDL_Cursor* getSystemCursor();
 	void addGradient(int, int, int);
-	void addItem(GItem*);
-	void removeItem(int); // id
-	GItem* getItemByID(int);
-	void setFocus(GItem*);
 	int getWidth() const;
 	int getHeight() const;
 
-	// 3D
-	void addCube();
 	void addBasis();
+	void addCube();
 
 	// main
 	void run();
