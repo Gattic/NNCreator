@@ -74,7 +74,9 @@ public:
 
 	// constructors & destructor
 	RUMsgBox(GPanel*, shmea::GString, shmea::GString, int, GeneralListener = GeneralListener());
-	~RUMsgBox();
+	virtual ~RUMsgBox();
+
+	static void MsgBox(GPanel*, shmea::GString, shmea::GString, int, GeneralListener);
 
 	// events
 	void msgButtonOKClicked(gfxpp*);

@@ -1337,7 +1337,7 @@ void NNCreatorPanel::loadNNet(glades::NNInfo* info)
 
 	// Display a popup alert
 	shmea::GString msgBoxText = "Loaded \"" + netName + "\"";
-	MsgBox("Neural Net", msgBoxText, RUMsgBox::MESSAGEBOX);
+	RUMsgBox(this, "Neural Net", msgBoxText, RUMsgBox::MESSAGEBOX);
 }
 
 /*!
@@ -1818,7 +1818,7 @@ void NNCreatorPanel::clickedDelete(const shmea::GString& cmpName, int x, int y)
 	// Display a popup alert
 	char buffer[netName.length()];
 	sprintf(buffer, "Deleted \"%s\"", netName.c_str());
-	MsgBox("Neural Net", buffer, RUMsgBox::MESSAGEBOX);
+	RUMsgBox(this, "Neural Net", buffer, RUMsgBox::MESSAGEBOX);
 }
 
 void NNCreatorPanel::clickedPreviewTrain(const shmea::GString& cmpName, int x, int y)
