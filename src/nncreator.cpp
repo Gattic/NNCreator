@@ -54,6 +54,7 @@
 #include "Frontend/GUI/Text/RUTextbox.h"
 #include "Frontend/Graphics/graphics.h"
 #include "Frontend/RUGraph/RUGraph.h"
+#include "Frontend/GFXUtilities/DrawNeuralNet.h"
 #include "crt0.h"
 #include "main.h"
 #include "services/gui_callback.h"
@@ -183,12 +184,15 @@ void NNCreatorPanel::buildPanel()
 	// newImage->LoadPNG("resources/bg.png");
 
 	// NN Output Image
-	outputImage = new RUImageComponent();
-	outputImage->setWidth(getWidth() / 4);
-	outputImage->setHeight(getHeight() / 4);
-	outputImage->setName("outputImage");
-	outputImage->setBGImage(newImage);
-	outputImageLayout->addSubItem(outputImage);
+//	outputImage = new RUImageComponent();
+//	outputImage->setWidth(getWidth() / 4);
+//	outputImage->setHeight(getHeight() / 4);
+//	outputImage->setName("outputImage");
+//	outputImage->setBGImage(newImage);
+//	outputImageLayout->addSubItem(outputImage);
+	neuralNetGraph = new RUGraph(getWidth() / 4, getHeight() / 4, RUGraph::QUADRANTS_ONE);
+	neuralNetGraph->setName("neuralNetGraph");
+	outputImageLayout->addSubItem(neuralNetGraph);
 
 	// Confusion Table and Label
 	GLinearLayout* confTableLayout = new GLinearLayout("confTableLayout");
@@ -1053,6 +1057,7 @@ void NNCreatorPanel::buildPanel()
 	populateHLayerForm();
 
 	loadDatasets();
+
 }
 
 void NNCreatorPanel::onStart()
@@ -1615,6 +1620,8 @@ void NNCreatorPanel::clickedRun(const shmea::GString& cmpName, int x, int y)
 	cSrvc->set("net" + shmea::GString::intTOstring(netCount), wData);
 	serverInstance->send(cSrvc);
 	++netCount;
+	
+
 }
 
 void NNCreatorPanel::clickedContinue(const shmea::GString& cmpName, int x, int y)
@@ -1957,6 +1964,7 @@ void NNCreatorPanel::updateFromQ(const shmea::ServiceData* data)
 		return;
 
 	shmea::GString cName = argList.getString(0);
+
 	if (cName == "RESET")
 	{
 		// Special case to reset the sim GUI
@@ -2029,6 +2037,54 @@ void NNCreatorPanel::updateFromQ(const shmea::ServiceData* data)
 
 		// Graphs
 		PlotLearningCurve(newXVal, lcPoint);
+	}
+	else if(cName == "ACTIVATIONS")
+	{
+
+	    shmea::GList activations = data->getList();
+	    if(activations[0].getType() == shmea::GType::INT_TYPE)
+	    {
+		for(unsigned int i = 0; i < activations.size(); i++)
+		{
+		    //Initialize the neural network visualizer
+		    if(activations[i].getType() == shmea::GType::INT_TYPE)
+		    {
+			if(i == 0)
+			{
+			    nn = new DrawNeuralNet(activations.size());
+			    nn->setInputLayer(activations.getInt(i));
+			}
+			else if(i == activations.size() - 1)
+			{
+			    nn->setOutputLayer(activations.getInt(i));
+			}
+			else
+			{
+			    nn->setHiddenLayer(i, activations.getInt(i));
+			}
+		    }
+		}
+	    }
+	    else 
+	    {
+		nn->setActivation(activations);
+		neuralNetGraph->set("nn", nn);
+	    }
+
+	   // nn->displayNeuralNet(); // DEBUGGING ONLY
+	}
+	else if(cName == "WEIGHTS")
+	{
+	    
+	    //Update weights
+	    shmea::GList weights = data->getList();
+	    
+	    if(weights.size() < 1 && nn == NULL)
+	        return;
+
+	   nn->setWeights(weights);
+	   //nn->displayNeuralNet(); // DEBUGGING ONLY
+	   neuralNetGraph->set("nn", nn);
 	}
 }
 
