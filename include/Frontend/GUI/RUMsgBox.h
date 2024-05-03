@@ -32,8 +32,6 @@ class RUMsgBox : public RUComponent
 {
 protected:
 	GPanel* panel;
-	shmea::GString title;
-	shmea::GString message;
 	int type;
 
 	static shmea::GString OK_BUTTON;
@@ -73,8 +71,13 @@ public:
 	static const int INPUTBOX = 2;
 
 	// constructors & destructor
-	RUMsgBox(GPanel*, shmea::GString, shmea::GString, int, GeneralListener = GeneralListener());
-	~RUMsgBox();
+	RUMsgBox(GPanel*, int, GeneralListener = GeneralListener());
+	virtual ~RUMsgBox();
+
+	static void MsgBox(GPanel*, const char*, const char*, int, GeneralListener = GeneralListener());
+	static void MsgBox(GPanel*, shmea::GString, const char*, int, GeneralListener = GeneralListener());
+	static void MsgBox(GPanel*, const char*, shmea::GString, int, GeneralListener = GeneralListener());
+	static void MsgBox(GPanel*, shmea::GString, shmea::GString, int, GeneralListener = GeneralListener());
 
 	// events
 	void msgButtonOKClicked(gfxpp*);

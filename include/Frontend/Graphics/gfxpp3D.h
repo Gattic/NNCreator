@@ -1,15 +1,10 @@
-
 #ifndef _GFXPP3D
 #define _GFXPP3D
 
 #include "../GFXUtilities/quaternion.h"
-#include "../GItems/GItem.h"
-#include "../GItems/GLayout.h"
-#include "../GItems/GPanel.h"
+#include "Backend/Database/GString.h"
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
 #include <SDL2/SDL_opengl.h>
-#include <SDL2/SDL_ttf.h>
 #include <iostream>
 #include <math.h>
 #include <stdio.h>
@@ -17,29 +12,10 @@
 #include <vector>
 #include <string>
 
-class GItem;
-class RUComponent;
-class RULabel;
-class GPanel;
 class Object;
-class GFont;
 
 class gfxpp3D
 {
-	friend class RUComponent;
-	friend class RUTextComponent;
-	friend class RUImageComponent;
-	friend class RUButton;
-	friend class RULabel;
-	friend class RUTextbox;
-	friend class RUGraph;
-	friend class RUProgressBar;
-	friend class RUScrollbar;
-	friend class RUListbox;
-	friend class RUDropdown;
-	friend class RUKeyDown;
-	friend class RUKeyUp;
-
 private:
 	int errorFlag;
 	bool running;
@@ -79,12 +55,7 @@ private:
 
 	SDL_Window* window;
 	SDL_GLContext context;
-	SDL_Renderer* renderer;
 
-	std::vector<GItem*> guiElements; // < RUComponent* || GLayout* >
-
-	SDL_Cursor* systemCursor;
-	GItem* focusedItem;
 	std::vector<Object*> objects;
 	unsigned int cObjIndex;
 
@@ -105,15 +76,12 @@ public:
 	gfxpp3D();
 	gfxpp3D(shmea::GString, bool = true, bool = true, int = 800, int = 600);
 	int getErrorFlag() const;
-	SDL_Renderer* getRenderer();
 
 	// GFX Utils
-	static unsigned int RGBfromHue(double, int8_t*, int8_t*, int8_t*);
 	bool contains(const Object*) const;
 	bool contains(const Object) const;
 
 
-	void addGradient(int, int, int);
 	int getWidth() const;
 	int getHeight() const;
 

@@ -16,10 +16,7 @@
 #ifndef _GRAPHICS
 #define _GRAPHICS
 
-#include "../GFXUtilities/quaternion.h"
-#include "../GItems/GItem.h"
-#include "../GItems/GLayout.h"
-#include "../GItems/GPanel.h"
+#include "Backend/Database/GString.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_opengl.h>
@@ -29,6 +26,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <vector>
+#include <map>
 #include <string>
 
 class GItem;
@@ -62,6 +60,7 @@ private:
 	float hunterZolomon; // zoom
 
 	int32_t frames;
+	float fps;
 	bool rotate;
 	bool move;
 	int32_t now;
@@ -86,10 +85,6 @@ private:
 	bool leftPressed;
 	bool rightPressed;
 
-	Quaternion roll;
-	Quaternion pitch;
-	Quaternion yaw;
-
 	SDL_Window* window;
 	SDL_GLContext context;
 	SDL_Renderer* renderer;
@@ -98,11 +93,6 @@ private:
 
 	SDL_Cursor* systemCursor;
 	GItem* focusedItem;
-	std::vector<Object*> objects;
-	unsigned int cObjIndex;
-
-	// default gui
-	RULabel* fpsLabel;
 
 	// main
 	void display();
@@ -127,26 +117,20 @@ public:
 
 	// GFX Utils
 	static unsigned int RGBfromHue(double, int8_t*, int8_t*, int8_t*);
-	bool contains(const Object*) const;
-	bool contains(const Object) const;
 
 	// 2D
 	GFont* cFont;
 	std::map<int, GFont*> graphicsFonts;
 
 	GPanel* focusedPanel;
-	SDL_Cursor* getSystemCursor();
 	void addGradient(int, int, int);
 	void addItem(GItem*);
 	void removeItem(int); // id
 	GItem* getItemByID(int);
 	void setFocus(GItem*);
+	SDL_Cursor* getSystemCursor();
 	int getWidth() const;
 	int getHeight() const;
-
-	// 3D
-	void addCube();
-	void addBasis();
 
 	// main
 	void run();

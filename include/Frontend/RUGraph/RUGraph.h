@@ -106,6 +106,11 @@ public:
 
 	template< typename T>
 	void set(const shmea::GString&, const std::vector<T*>&, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
+
+
+	template< typename T>
+	void set(shmea::GString, const T*, SDL_Color = RUColors::DEFAULT_COLOR_LINE, bool = true);
+
 	std::vector<shmea::GString> getNames() const;
 	void remove(const shmea::GString&);
 
@@ -192,6 +197,13 @@ void RUGraph::set(const shmea::GString& label, const std::vector<T*>& graphPoint
 
 	// trigger the draw update
 	drawUpdate = true;
+}
+
+template< typename T>
+void RUGraph::set(shmea::GString label, const T* newPoint, SDL_Color lineColor, bool recompute)
+{
+    clear();
+    add(label, newPoint, lineColor, recompute);
 }
 
 
