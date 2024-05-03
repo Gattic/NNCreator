@@ -2071,7 +2071,7 @@ void NNCreatorPanel::updateFromQ(const shmea::ServiceData* data)
 		neuralNetGraph->set("nn", nn);
 	    }
 
-	   // nn->displayNeuralNet();
+	   // nn->displayNeuralNet(); // DEBUGGING ONLY
 	}
 	else if(cName == "WEIGHTS")
 	{
@@ -2083,7 +2083,7 @@ void NNCreatorPanel::updateFromQ(const shmea::ServiceData* data)
 	        return;
 
 	   nn->setWeights(weights);
-	   nn->displayNeuralNet();
+	   //nn->displayNeuralNet(); // DEBUGGING ONLY
 	   neuralNetGraph->set("nn", nn);
 	}
 }
