@@ -37,8 +37,8 @@
  */
 void Frontend::run(GNet::GServer* serverInstance, bool fullscreenMode, bool compatMode)
 {
-	int newWidth = 1200;
-	int newHeight = 800;
+	int newWidth = 1920;
+	int newHeight = 1080;
 
 	// Setup the gfx env
 	gfxpp cGfx("NNCreator", gfxpp::_2D, fullscreenMode, compatMode, newWidth, newHeight);
