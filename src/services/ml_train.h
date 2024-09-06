@@ -22,7 +22,7 @@
 #include "Backend/Machine Learning/Structure/inputlayerinfo.h"
 #include "Backend/Machine Learning/Structure/nninfo.h"
 #include "Backend/Machine Learning/Structure/outputlayerinfo.h"
-#include "Backend/Machine Learning/glades.h"
+#include "Backend/Machine Learning/main.h"
 #include "Backend/Networking/service.h"
 #include "Frontend/GUI/RUMsgBox.h"
 #include "Frontend/Graphics/graphics.h"
@@ -115,14 +115,13 @@ public:
 		}
 
 		// Termination Conditions
-		glades::Terminator* Arnold = new glades::Terminator();
-		/*Arnold->setTimestamp(maxTimeStamp);
-		Arnold->setEpoch(maxEpoch);
-		Arnold->setAccuracy(maxAccuracy);*/
+		/*cNetwork.terminator.setTimestamp(maxTimeStamp);
+		cNetwork.terminator.setEpoch(maxEpoch);
+		cNetwork.terminator.setAccuracy(maxAccuracy);*/
 
 		// Run the training and retrieve a metanetwork
 		glades::MetaNetwork* newTrainNet =
-			glades::train(&cNetwork, di, Arnold, serverInstance, destination);
+			glades::train(&cNetwork, di, serverInstance, destination);
 
 		return NULL;
 	}
