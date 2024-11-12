@@ -36,6 +36,8 @@ protected:
 	virtual void updateBackground(gfxpp*) = 0;
 
 public:
+	RUComponent();
+
 	virtual void calculateSubItemPositions(std::pair<int, int>);
 
 	// events

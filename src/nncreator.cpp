@@ -30,16 +30,18 @@
 #include "Backend/Database/GType.h"
 #include "Backend/Database/SaveFolder.h"
 #include "Backend/Database/SaveTable.h"
+#include "Backend/Machine Learning/DataObjects/ImageInput.h"
 #include "Backend/Machine Learning/GMath/gmath.h"
+#include "Backend/Machine Learning/Networks/network.h"
 #include "Backend/Machine Learning/Structure/hiddenlayerinfo.h"
 #include "Backend/Machine Learning/Structure/inputlayerinfo.h"
 #include "Backend/Machine Learning/Structure/nninfo.h"
 #include "Backend/Machine Learning/Structure/outputlayerinfo.h"
-#include "Backend/Machine Learning/glades.h"
-#include "Backend/Machine Learning/network.h"
+#include "Backend/Machine Learning/main.h"
 #include "Backend/Networking/connection.h"
 #include "Backend/Networking/main.h"
 #include "Backend/Networking/service.h"
+#include "Frontend/GFXUtilities/DrawNeuralNet.h"
 #include "Frontend/GItems/GItem.h"
 #include "Frontend/GLayouts/GLinearLayout.h"
 #include "Frontend/GUI/RUCheckbox.h"
@@ -72,6 +74,7 @@ NNCreatorPanel::NNCreatorPanel(const shmea::GString& name, int width, int height
 {
 	serverInstance = NULL;
 	netCount = 0;
+	keepGraping = true;
 	buildPanel();
 }
 
@@ -81,6 +84,7 @@ NNCreatorPanel::NNCreatorPanel(GNet::GServer* newInstance, const shmea::GString&
 {
 	serverInstance = newInstance;
 	netCount = 0;
+	keepGraping = true;
 	buildPanel();
 }
 
@@ -97,16 +101,16 @@ void NNCreatorPanel::buildPanel()
 	serverInstance->addService(gui_cb_srvc);
 
 	currentHiddenLayerIndex = 0;
-	InputLayerInfo* newInputLayer = new InputLayerInfo(0.0f, 1);
+	InputLayerInfo* newInputLayer = new InputLayerInfo(1, 0.01f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0.0f);
 	std::vector<HiddenLayerInfo*> newHiddenLayers;
-	newHiddenLayers.push_back(new HiddenLayerInfo(2, 0.01f, 0.0f, 0.0f, 0.0f, 0, 0.0f));
+	newHiddenLayers.push_back(new HiddenLayerInfo(2, 0.01f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0.0f));
 	OutputLayerInfo* newOutputLayer = new OutputLayerInfo(1, OutputLayerInfo::REGRESSION);
 	formInfo = new glades::NNInfo("", newInputLayer, newHiddenLayers, newOutputLayer);
 
 	// Stores all the graphs
 	GLinearLayout* graphsLayout = new GLinearLayout("graphsLayout");
 	graphsLayout->setX(15);
-	graphsLayout->setY(60);
+	graphsLayout->setY(10);
 	graphsLayout->setPadding(5);
 	graphsLayout->setOrientation(GLinearLayout::VERTICAL);
 	addSubItem(graphsLayout);
@@ -162,25 +166,33 @@ void NNCreatorPanel::buildPanel()
 	bottomGraphsLayout->setOrientation(GLinearLayout::HORIZONTAL);
 	graphsLayout->addSubItem(bottomGraphsLayout);
 
-	// Dartboard Graph and Label
-	GLinearLayout* dartGraphLayout = new GLinearLayout("dartGraphLayout");
-	dartGraphLayout->setPadding(5);
-	dartGraphLayout->setOrientation(GLinearLayout::VERTICAL);
-	bottomGraphsLayout->addSubItem(dartGraphLayout);
+	// Output Image and Label
+	GLinearLayout* outputImageLayout = new GLinearLayout("outputImageLayout");
+	outputImageLayout->setPadding(5);
+	outputImageLayout->setOrientation(GLinearLayout::VERTICAL);
+	bottomGraphsLayout->addSubItem(outputImageLayout);
 
-	// Dartboard Label
-	RULabel* lblGraphDart = new RULabel();
-	lblGraphDart->setWidth(310);
-	lblGraphDart->setHeight(24);
-	lblGraphDart->setText("Dartboard (Expected, Predicted)");
-	lblGraphDart->setName("lblGraphDart");
-	dartGraphLayout->addSubItem(lblGraphDart);
+	// Output Image Label
+	RULabel* lblOutputImg = new RULabel();
+	lblOutputImg->setWidth(310);
+	lblOutputImg->setHeight(24);
+	lblOutputImg->setText("Output Image");
+	lblOutputImg->setName("lblOutputImg");
+	outputImageLayout->addSubItem(lblOutputImg);
 
-	// Dartboard graph
-	dartboardGraph = new RUGraph(getWidth() / 4, getHeight() / 4,
-								 RUGraph::QUADRANTS_ONE); // -4 = adjustment to align with table
-	dartboardGraph->setName("dartboardGraph");
-	dartGraphLayout->addSubItem(dartboardGraph);
+	shmea::GPointer<shmea::Image> newImage(new shmea::Image());
+	// newImage->LoadPNG("resources/bg.png");
+
+	// NN Output Image
+	//	outputImage = new RUImageComponent();
+	//	outputImage->setWidth(getWidth() / 4);
+	//	outputImage->setHeight(getHeight() / 4);
+	//	outputImage->setName("outputImage");
+	//	outputImage->setBGImage(newImage);
+	//	outputImageLayout->addSubItem(outputImage);
+	neuralNetGraph = new RUGraph(getWidth() / 4, getHeight() / 4, RUGraph::QUADRANTS_ONE);
+	neuralNetGraph->setName("neuralNetGraph");
+	outputImageLayout->addSubItem(neuralNetGraph);
 
 	// Confusion Table and Label
 	GLinearLayout* confTableLayout = new GLinearLayout("confTableLayout");
@@ -213,6 +225,30 @@ void NNCreatorPanel::buildPanel()
 	leftSideLayout->setPadding(10);
 	leftSideLayout->setOrientation(GLinearLayout::VERTICAL);
 	addSubItem(leftSideLayout);
+
+	//============STATS============
+
+	GLinearLayout* statsLayout = new GLinearLayout("statsLayout");
+	statsLayout->setOrientation(GLinearLayout::HORIZONTAL);
+	leftSideLayout->addSubItem(statsLayout);
+
+	// Epochs Label
+	lblEpochs = new RULabel();
+	lblEpochs->setWidth(100);
+	lblEpochs->setHeight(26);
+	lblEpochs->setText("");
+	lblEpochs->setName("lblEpochs");
+	statsLayout->addSubItem(lblEpochs);
+
+	// Accuracy Label
+	lblAccuracy = new RULabel();
+	lblAccuracy->setWidth(200);
+	lblAccuracy->setHeight(26);
+	lblAccuracy->setText("");
+	lblAccuracy->setName("lblAccuracy");
+	statsLayout->addSubItem(lblAccuracy);
+
+	//============FORM============
 
 	// Neural Network Settings header
 	lblSettings = new RULabel();
@@ -296,18 +332,45 @@ void NNCreatorPanel::buildPanel()
 	btnDelete->setName("btnDelete");
 	netNameLayout->addSubItem(btnDelete);
 
-	// Run file/url  layout
+	// Input/Output Data Type Layout
+	GLinearLayout* dataTypeLayout = new GLinearLayout("dataTypeLayout");
+	dataTypeLayout->setOrientation(GLinearLayout::HORIZONTAL);
+	leftSideLayout->addSubItem(dataTypeLayout);
+
+	// Input/Output Data Type label
+	RULabel* lbldatarow = new RULabel();
+	lbldatarow->setWidth(170);
+	lbldatarow->setHeight(30);
+	lbldatarow->setText("Data Type/Path");
+	lbldatarow->setName("lbldatarow");
+	dataTypeLayout->addSubItem(lbldatarow);
+
+	// Input/Output Data Type
+	ddDataType = new RUDropdown();
+	ddDataType->setWidth(160);
+	ddDataType->setHeight(30);
+	ddDataType->setOptionsShown(3);
+	ddDataType->setName("ddDataType");
+	ddDataType->setOptionChangedListener(
+		GeneralListener(this, &NNCreatorPanel::clickedDSTypeSwitch));
+	dataTypeLayout->addSubItem(ddDataType);
+
+	ddDataType->addOption("CSV");
+	ddDataType->addOption("Image");
+	ddDataType->addOption("Text");
+
+	//  sample path textbox
+	ddDatasets = new RUDropdown();
+	ddDatasets->setWidth(220);
+	ddDatasets->setHeight(30);
+	ddDatasets->setOptionsShown(3);
+	ddDatasets->setName("ddDatasets");
+	dataTypeLayout->addSubItem(ddDatasets);
+
+	// Run layout
 	GLinearLayout* runTestLayout = new GLinearLayout("runTestLayout");
 	runTestLayout->setOrientation(GLinearLayout::HORIZONTAL);
 	leftSideLayout->addSubItem(runTestLayout);
-
-	//  sample path textbox
-	tbTestDataSourcePath = new RUTextbox();
-	tbTestDataSourcePath->setWidth(300);
-	tbTestDataSourcePath->setHeight(30);
-	tbTestDataSourcePath->setText("datasets/");
-	tbTestDataSourcePath->setName("tbTestDataSourcePath");
-	runTestLayout->addSubItem(tbTestDataSourcePath);
 
 	// Run Button
 	RUButton* sendButton = new RUButton("green");
@@ -339,7 +402,7 @@ void NNCreatorPanel::buildPanel()
 	// Cross Validation Layout
 	GLinearLayout* crossValLayout = new GLinearLayout("crossValLayout");
 	crossValLayout->setOrientation(GLinearLayout::HORIZONTAL);
-	leftSideLayout->addSubItem(crossValLayout);
+	// leftSideLayout->addSubItem(crossValLayout); // TODO uncomment when cross val is tested
 
 	// Cross Validation checkbox
 	chkCrossVal = new RUCheckbox(" Cross Validate");
@@ -395,7 +458,7 @@ void NNCreatorPanel::buildPanel()
 	// Layer Tab navigation
 	layerTabs = new RUTabContainer();
 	layerTabs->setWidth(90);
-	layerTabs->setHeight(30);
+	layerTabs->setTabHeight(30);
 	layerTabs->setOptionsShown(3);
 	layerTabs->setPadding(10);
 	layerTabs->setName("layerTabs");
@@ -416,26 +479,6 @@ void NNCreatorPanel::buildPanel()
 	lblEditInputLayer->setName("lblEditInputLayer");
 	inputOverallLayout->addSubItem(lblEditInputLayer);
 
-	GLinearLayout* pInputEditLayout = new GLinearLayout("pInputEditLayout");
-	pInputEditLayout->setOrientation(GLinearLayout::HORIZONTAL);
-	inputOverallLayout->addSubItem(pInputEditLayout);
-
-	// pInput label
-	lblPInput = new RULabel();
-	lblPInput->setWidth(250);
-	lblPInput->setHeight(30);
-	lblPInput->setText("Input Layer p ");
-	lblPInput->setName("lblPInput");
-	pInputEditLayout->addSubItem(lblPInput);
-
-	// pInput textbox
-	tbPInput = new RUTextbox();
-	tbPInput->setWidth(160);
-	tbPInput->setHeight(30);
-	tbPInput->setText("0.0");
-	tbPInput->setName("tbPInput");
-	pInputEditLayout->addSubItem(tbPInput);
-
 	GLinearLayout* batchUpdateLayout = new GLinearLayout("batchUpdateLayout");
 	batchUpdateLayout->setOrientation(GLinearLayout::HORIZONTAL);
 	inputOverallLayout->addSubItem(batchUpdateLayout);
@@ -448,13 +491,246 @@ void NNCreatorPanel::buildPanel()
 	lblBatchSize->setName("lblBatchSize");
 	batchUpdateLayout->addSubItem(lblBatchSize);
 
-	// Batch dropdown
+	// Batch
 	tbBatchSize = new RUTextbox();
 	tbBatchSize->setWidth(160);
 	tbBatchSize->setHeight(30);
 	tbBatchSize->setText("1");
 	tbBatchSize->setName("tbBatchSize");
 	batchUpdateLayout->addSubItem(tbBatchSize);
+
+	GLinearLayout* inputLCLayout = new GLinearLayout("inputLCLayout");
+	inputLCLayout->setOrientation(GLinearLayout::HORIZONTAL);
+	inputOverallLayout->addSubItem(inputLCLayout);
+
+	// learning rate label
+	lblinputLR = new RULabel();
+	lblinputLR->setWidth(250);
+	lblinputLR->setHeight(30);
+	lblinputLR->setText("Learning Rate");
+	lblinputLR->setName("lblinputLR");
+	inputLCLayout->addSubItem(lblinputLR);
+
+	// learning rate textbox
+	tbinputLR = new RUTextbox();
+	tbinputLR->setWidth(160);
+	tbinputLR->setHeight(30);
+	tbinputLR->setName("tbinputLR");
+	inputLCLayout->addSubItem(tbinputLR);
+
+	GLinearLayout* inputMFLayout = new GLinearLayout("inputMFLayout");
+	inputMFLayout->setOrientation(GLinearLayout::HORIZONTAL);
+	inputOverallLayout->addSubItem(inputMFLayout);
+
+	// momentum factor label
+	lblinputMF = new RULabel();
+	lblinputMF->setWidth(250);
+	lblinputMF->setHeight(30);
+	lblinputMF->setText("Momentum Factor");
+	lblinputMF->setName("lblinputMF");
+	inputMFLayout->addSubItem(lblinputMF);
+
+	// momentum factor textbox
+	tbinputMF = new RUTextbox();
+	tbinputMF->setWidth(160);
+	tbinputMF->setHeight(30);
+	tbinputMF->setName("tbinputMF");
+	inputMFLayout->addSubItem(tbinputMF);
+
+	GLinearLayout* inputWDLayout1 = new GLinearLayout("inputWDLayout1");
+	inputWDLayout1->setOrientation(GLinearLayout::HORIZONTAL);
+	inputOverallLayout->addSubItem(inputWDLayout1);
+
+	// weight decay label
+	lblinputWD1 = new RULabel();
+	lblinputWD1->setWidth(250);
+	lblinputWD1->setHeight(30);
+	lblinputWD1->setText("L1 Regularization");
+	lblinputWD1->setName("lblinputWD1");
+	inputWDLayout1->addSubItem(lblinputWD1);
+
+	// weight decay textbox
+	tbinputWD1 = new RUTextbox();
+	tbinputWD1->setWidth(160);
+	tbinputWD1->setHeight(30);
+	tbinputWD1->setName("tbinputWD1");
+	inputWDLayout1->addSubItem(tbinputWD1);
+
+	GLinearLayout* inputWDLayout2 = new GLinearLayout("inputWDLayout2");
+	inputWDLayout2->setOrientation(GLinearLayout::HORIZONTAL);
+	inputOverallLayout->addSubItem(inputWDLayout2);
+
+	// weight decay label
+	lblinputWD2 = new RULabel();
+	lblinputWD2->setWidth(250);
+	lblinputWD2->setHeight(30);
+	lblinputWD2->setText("L2 Regularization");
+	lblinputWD2->setName("lblinputWD2");
+	inputWDLayout2->addSubItem(lblinputWD2);
+
+	// weight decay textbox
+	tbinputWD2 = new RUTextbox();
+	tbinputWD2->setWidth(160);
+	tbinputWD2->setHeight(30);
+	tbinputWD2->setName("tbinputWD2");
+	inputWDLayout2->addSubItem(tbinputWD2);
+
+	GLinearLayout* inputDropoutLayout = new GLinearLayout("inputDropoutLayout");
+	inputDropoutLayout->setOrientation(GLinearLayout::HORIZONTAL);
+	inputOverallLayout->addSubItem(inputDropoutLayout);
+
+	// pHidden label
+	lblinputDropout = new RULabel();
+	lblinputDropout->setWidth(250);
+	lblinputDropout->setHeight(30);
+	lblinputDropout->setText("Dropout p: ");
+	lblinputDropout->setName("lblinputDropout");
+	inputDropoutLayout->addSubItem(lblinputDropout);
+
+	// pHidden textbox
+	tbinputDropout = new RUTextbox();
+	tbinputDropout->setWidth(160);
+	tbinputDropout->setHeight(30);
+	tbinputDropout->setText("0.0");
+	tbinputDropout->setName("tbinputDropout");
+	inputDropoutLayout->addSubItem(tbinputDropout);
+
+	GLinearLayout* inputATLayout = new GLinearLayout("inputATLayout");
+	inputATLayout->setOrientation(GLinearLayout::HORIZONTAL);
+	inputOverallLayout->addSubItem(inputATLayout);
+
+	// activation functions label
+	lblinputAF = new RULabel();
+	lblinputAF->setWidth(250);
+	lblinputAF->setHeight(30);
+	lblinputAF->setText("Activation Type");
+	lblinputAF->setName("lblinputAF");
+	inputATLayout->addSubItem(lblinputAF);
+
+	// activation functions textbox
+	ddinputAF = new RUDropdown();
+	ddinputAF->setWidth(160);
+	ddinputAF->setHeight(30);
+	ddinputAF->setOptionsShown(3);
+	ddinputAF->setName("ddinputAF");
+	inputATLayout->addSubItem(ddinputAF);
+
+	ddinputAF->addOption("Tanh");
+	ddinputAF->addOption("PWise Tanh");
+	ddinputAF->addOption("Sigmoid");
+	ddinputAF->addOption("PWise Sigmoid");
+	ddinputAF->addOption("Linear");
+	ddinputAF->addOption("ReLu");
+	ddinputAF->addOption("Leaky ReLu");
+
+	GLinearLayout* inputAPLayout = new GLinearLayout("inputAPLayout");
+	inputAPLayout->setOrientation(GLinearLayout::HORIZONTAL);
+	inputOverallLayout->addSubItem(inputAPLayout);
+
+	// Activation param label
+	RULabel* lblinputAP = new RULabel();
+	lblinputAP->setWidth(250);
+	lblinputAP->setHeight(30);
+	lblinputAP->setText("Activation Param");
+	lblinputAP->setName("lblinputAP");
+	inputAPLayout->addSubItem(lblinputAP);
+
+	// Activation param textbox
+	tbinputAP = new RUTextbox();
+	tbinputAP->setWidth(160);
+	tbinputAP->setHeight(30);
+	tbinputAP->setName("tbinputAP");
+	inputAPLayout->addSubItem(tbinputAP);
+
+	//-----------
+
+	// Preview label Header
+	RULabel* lblPreview = new RULabel();
+	lblPreview->setWidth(200);
+	lblPreview->setHeight(40);
+	lblPreview->setPadding(10);
+	lblPreview->setText(" Preview");
+	lblPreview->setName("lblPreview");
+	inputOverallLayout->addSubItem(lblPreview);
+
+	GLinearLayout* previewButtonsLayout = new GLinearLayout("previewButtonsLayout");
+	previewButtonsLayout->setOrientation(GLinearLayout::HORIZONTAL);
+	inputOverallLayout->addSubItem(previewButtonsLayout);
+
+	// Preview Train Data Button
+	RUButton* btnPreviewTrain = new RUButton("blue");
+	btnPreviewTrain->setWidth(150);
+	btnPreviewTrain->setHeight(30);
+	btnPreviewTrain->setText(" Training Data");
+	btnPreviewTrain->setMouseDownListener(
+		GeneralListener(this, &NNCreatorPanel::clickedPreviewTrain));
+	btnPreviewTrain->setName("btnPreviewTrain");
+	previewButtonsLayout->addSubItem(btnPreviewTrain);
+
+	// Preview Test Data Button
+	RUButton* tbnPreviewTest = new RUButton("blue");
+	tbnPreviewTest->setWidth(150);
+	tbnPreviewTest->setHeight(30);
+	tbnPreviewTest->setText(" Testing Data");
+	tbnPreviewTest->setMouseDownListener(
+		GeneralListener(this, &NNCreatorPanel::clickedPreviewTest));
+	tbnPreviewTest->setName("tbnPreviewTest");
+	previewButtonsLayout->addSubItem(tbnPreviewTest);
+
+	previewTabs = new RUTabContainer();
+	previewTabs->setWidth(90);
+	previewTabs->setTabHeight(30);
+	previewTabs->setTabsVisible(false);
+	previewTabs->setOptionsShown(3);
+	previewTabs->setPadding(10);
+	previewTabs->setName("previewTabs");
+	inputOverallLayout->addSubItem(previewTabs);
+	previewTabs->setSelectedTab(1);
+
+	// Preview Table
+	previewTable = new RUTable();
+	previewTable->setRowsShown(8);
+	previewTable->setWidth(getWidth() / 4);
+	previewTable->setHeight(getHeight() / 4);
+	previewTable->setName("previewTable");
+	previewTabs->addTab("   CSV", previewTable);
+
+	previewImageLayout = new GLinearLayout("previewImageLayout");
+	previewImageLayout->setOrientation(GLinearLayout::VERTICAL);
+	previewTabs->addTab("   Image", previewImageLayout);
+
+	shmea::GPointer<shmea::Image> prevImage(new shmea::Image());
+	// prevImage->LoadPNG("resources/bg.png");
+
+	// Preview Image
+	previewImage = new RUImageComponent();
+	previewImage->setWidth(getWidth() / 4);
+	previewImage->setHeight(getHeight() / 4);
+	previewImage->setName("previewImage");
+	previewImage->setBGImage(prevImage);
+	previewImageLayout->addSubItem(previewImage);
+
+	GLinearLayout* prevImageBtnsLayout = new GLinearLayout("prevImageBtnsLayout");
+	prevImageBtnsLayout->setOrientation(GLinearLayout::HORIZONTAL);
+	previewImageLayout->addSubItem(prevImageBtnsLayout);
+
+	// Previous Button
+	RUButton* btnPrevious = new RUButton("blue");
+	btnPrevious->setWidth(110);
+	btnPrevious->setHeight(30);
+	btnPrevious->setText(" Previous");
+	btnPrevious->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedPrevious));
+	btnPrevious->setName("btnPrevious");
+	prevImageBtnsLayout->addSubItem(btnPrevious);
+
+	// Next Button
+	RUButton* btnNext = new RUButton("blue");
+	btnNext->setWidth(80);
+	btnNext->setHeight(30);
+	btnNext->setText(" Next");
+	btnNext->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedNext));
+	btnNext->setName("btnNext");
+	prevImageBtnsLayout->addSubItem(btnNext);
 
 	hiddenOverallLayout = new GLinearLayout("hiddenOverallLayout");
 	hiddenOverallLayout->setX(getWidth() - 500);
@@ -570,24 +846,43 @@ void NNCreatorPanel::buildPanel()
 	tbMomentumFactor->setName("tbMomentumFactor");
 	mfLayout->addSubItem(tbMomentumFactor);
 
-	GLinearLayout* wdLayout = new GLinearLayout("wdLayout");
-	wdLayout->setOrientation(GLinearLayout::HORIZONTAL);
-	hiddenOverallLayout->addSubItem(wdLayout);
+	GLinearLayout* wdLayout1 = new GLinearLayout("wdLayout1");
+	wdLayout1->setOrientation(GLinearLayout::HORIZONTAL);
+	hiddenOverallLayout->addSubItem(wdLayout1);
 
 	// weight decay label
-	lblWeightDecay = new RULabel();
-	lblWeightDecay->setWidth(250);
-	lblWeightDecay->setHeight(30);
-	lblWeightDecay->setText("Weight Decay");
-	lblWeightDecay->setName("lblWeightDecay");
-	wdLayout->addSubItem(lblWeightDecay);
+	lblWeightDecay1 = new RULabel();
+	lblWeightDecay1->setWidth(250);
+	lblWeightDecay1->setHeight(30);
+	lblWeightDecay1->setText("L1 Regularization");
+	lblWeightDecay1->setName("lblWeightDecay1");
+	wdLayout1->addSubItem(lblWeightDecay1);
 
 	// weight decay textbox
-	tbWeightDecay = new RUTextbox();
-	tbWeightDecay->setWidth(160);
-	tbWeightDecay->setHeight(30);
-	tbWeightDecay->setName("tbWeightDecay");
-	wdLayout->addSubItem(tbWeightDecay);
+	tbWeightDecay1 = new RUTextbox();
+	tbWeightDecay1->setWidth(160);
+	tbWeightDecay1->setHeight(30);
+	tbWeightDecay1->setName("tbWeightDecay1");
+	wdLayout1->addSubItem(tbWeightDecay1);
+
+	GLinearLayout* wdLayout2 = new GLinearLayout("wdLayout2");
+	wdLayout2->setOrientation(GLinearLayout::HORIZONTAL);
+	hiddenOverallLayout->addSubItem(wdLayout2);
+
+	// weight decay label
+	lblWeightDecay2 = new RULabel();
+	lblWeightDecay2->setWidth(250);
+	lblWeightDecay2->setHeight(30);
+	lblWeightDecay2->setText("L2 Regularization");
+	lblWeightDecay2->setName("lblWeightDecay2");
+	wdLayout2->addSubItem(lblWeightDecay2);
+
+	// weight decay textbox
+	tbWeightDecay2 = new RUTextbox();
+	tbWeightDecay2->setWidth(160);
+	tbWeightDecay2->setHeight(30);
+	tbWeightDecay2->setName("tbWeightDecay2");
+	wdLayout2->addSubItem(tbWeightDecay2);
 
 	GLinearLayout* pHiddenLayout = new GLinearLayout("pHiddenLayout");
 	pHiddenLayout->setOrientation(GLinearLayout::HORIZONTAL);
@@ -696,14 +991,6 @@ void NNCreatorPanel::buildPanel()
 	btnRemove->setName("btnRemove");
 	bCopyLayout->addSubItem(btnRemove);
 
-	// Empty label for padding
-	lblEditOutputLayer = new RULabel();
-	lblEditOutputLayer->setWidth(200);
-	lblEditOutputLayer->setHeight(5);
-	lblEditOutputLayer->setText("");
-	lblEditOutputLayer->setName("lblEmpty");
-	hiddenOverallLayout->addSubItem(lblEditOutputLayer);
-
 	outputOverallLayout = new GLinearLayout("outputOverallLayout");
 	outputOverallLayout->setX(getWidth() - 500);
 	outputOverallLayout->setY(90);
@@ -766,7 +1053,10 @@ void NNCreatorPanel::buildPanel()
 
 	loadDDNN();
 	populateIndexToEdit();
+	populateInputLayerForm();
 	populateHLayerForm();
+
+	loadDatasets();
 }
 
 void NNCreatorPanel::onStart()
@@ -808,6 +1098,23 @@ void NNCreatorPanel::loadDDNN()
 }
 
 /*!
+ * @brief input layer textbox populator
+ * @details fills in the Input Layer variable textboxes and dropdowns
+ */
+void NNCreatorPanel::populateInputLayerForm()
+{
+	InputLayerInfo* inputLayer = formInfo->getInputLayer();
+
+	tbinputLR->setText(shmea::GString::floatTOstring(inputLayer->getLearningRate()));
+	tbinputMF->setText(shmea::GString::floatTOstring(inputLayer->getMomentumFactor()));
+	tbinputWD1->setText(shmea::GString::floatTOstring(inputLayer->getWeightDecay1()));
+	tbinputWD2->setText(shmea::GString::floatTOstring(inputLayer->getWeightDecay2()));
+	tbinputDropout->setText(shmea::GString::floatTOstring(inputLayer->getPDropout()));
+	tbinputAP->setText(shmea::GString::floatTOstring(inputLayer->getActivationParam()));
+	ddinputAF->setSelectedIndex(inputLayer->getActivationType());
+}
+
+/*!
  * @brief hidden layer textbox populator
  * @details fills in the Hidden Layer variable textboxes and dropdowns based on
  * the
@@ -822,33 +1129,12 @@ void NNCreatorPanel::populateHLayerForm()
 	ddIndexToEdit->setSelectedIndex(currentHiddenLayerIndex);
 	tbHiddenLayerSize->setText(shmea::GString::intTOstring(currentLayer->size()));
 
-	if (currentLayer->getLearningRate())
-		tbLearningRate->setText(shmea::GString::floatTOstring(currentLayer->getLearningRate()));
-	else
-		tbLearningRate->setText(shmea::GString::floatTOstring(currentLayer->getLearningRate()));
-
-	if (currentLayer->getMomentumFactor())
-		tbMomentumFactor->setText(shmea::GString::floatTOstring(currentLayer->getMomentumFactor()));
-	else
-		tbMomentumFactor->setText(shmea::GString::floatTOstring(currentLayer->getMomentumFactor()));
-
-	if (currentLayer->getWeightDecay())
-		tbWeightDecay->setText(shmea::GString::floatTOstring(currentLayer->getWeightDecay()));
-	else
-		tbWeightDecay->setText(shmea::GString::floatTOstring(currentLayer->getWeightDecay()));
-
-	if (currentLayer->getPHidden())
-		tbPHidden->setText(shmea::GString::floatTOstring(currentLayer->getPHidden()));
-	else
-		tbPHidden->setText(shmea::GString::floatTOstring(currentLayer->getPHidden()));
-
-	if (currentLayer->getActivationParam())
-		tbActivationParam->setText(
-			shmea::GString::floatTOstring(currentLayer->getActivationParam()));
-	else
-		tbActivationParam->setText(
-			shmea::GString::floatTOstring(currentLayer->getActivationParam()));
-
+	tbLearningRate->setText(shmea::GString::floatTOstring(currentLayer->getLearningRate()));
+	tbMomentumFactor->setText(shmea::GString::floatTOstring(currentLayer->getMomentumFactor()));
+	tbWeightDecay1->setText(shmea::GString::floatTOstring(currentLayer->getWeightDecay1()));
+	tbWeightDecay2->setText(shmea::GString::floatTOstring(currentLayer->getWeightDecay2()));
+	tbPHidden->setText(shmea::GString::floatTOstring(currentLayer->getPDropout()));
+	tbActivationParam->setText(shmea::GString::floatTOstring(currentLayer->getActivationParam()));
 	ddActivationFunctions->setSelectedIndex(currentLayer->getActivationType());
 }
 
@@ -860,13 +1146,72 @@ void NNCreatorPanel::populateHLayerForm()
 void NNCreatorPanel::syncFormVar()
 {
 	// Input Stuff
-
-	shmea::GType pInput = shmea::GString::Typify(tbPInput->getText(), tbPInput->getText().length());
-	formInfo->setPInput(pInput.getFloat());
+	InputLayerInfo* inputLayer = formInfo->getInputLayer();
 
 	shmea::GType batchSize =
 		shmea::GString::Typify(tbBatchSize->getText(), tbBatchSize->getText().size());
 	formInfo->setBatchSize(batchSize.getLong());
+
+	shmea::GType inputLR =
+		shmea::GString::Typify(tbinputLR->getText(), tbinputLR->getText().size());
+	inputLayer->setLearningRate(inputLR.getFloat());
+
+	shmea::GType inputMF =
+		shmea::GString::Typify(tbinputMF->getText(), tbinputMF->getText().size());
+	inputLayer->setMomentumFactor(inputMF.getFloat());
+
+	shmea::GType inputWD1 =
+		shmea::GString::Typify(tbinputWD1->getText(), tbinputWD1->getText().size());
+	inputLayer->setWeightDecay1(inputWD1.getFloat());
+
+	shmea::GType inputWD2 =
+		shmea::GString::Typify(tbinputWD2->getText(), tbinputWD2->getText().size());
+	inputLayer->setWeightDecay2(inputWD2.getFloat());
+
+	shmea::GType inputDropout =
+		shmea::GString::Typify(tbinputDropout->getText(), tbinputDropout->getText().size());
+	inputLayer->setPDropout(inputDropout.getFloat());
+
+	int inputAT = ddinputAF->getSelectedIndex();
+	switch (inputAT)
+	{
+	case 0: {
+		inputLayer->setActivationType(GMath::TANH);
+		break;
+	}
+	case 1: {
+		inputLayer->setActivationType(GMath::TANHP);
+		break;
+	}
+	case 2: {
+		inputLayer->setActivationType(GMath::SIGMOID);
+		break;
+	}
+	case 3: {
+		inputLayer->setActivationType(GMath::SIGMOIDP);
+		break;
+	}
+	case 4: {
+		inputLayer->setActivationType(GMath::LINEAR);
+		break;
+	}
+	case 5: {
+		inputLayer->setActivationType(GMath::RELU);
+		break;
+	}
+	case 6: {
+		inputLayer->setActivationType(GMath::LEAKY);
+		break;
+	}
+	default: {
+		inputLayer->setActivationType(GMath::TANH);
+		break;
+	}
+	}
+
+	shmea::GType inputAP =
+		shmea::GString::Typify(tbinputAP->getText(), tbinputAP->getText().size());
+	inputLayer->setActivationParam(inputAP.getFloat());
 
 	// Output Stuff
 
@@ -884,7 +1229,7 @@ void NNCreatorPanel::syncFormVar()
 
 	shmea::GType pHidden =
 		shmea::GString::Typify(tbPHidden->getText(), tbPHidden->getText().size());
-	currentLayer->setPHidden(pHidden.getFloat());
+	currentLayer->setPDropout(pHidden.getFloat());
 
 	shmea::GType hLayerSize =
 		shmea::GString::Typify(tbHiddenLayerSize->getText(), tbHiddenLayerSize->getText().size());
@@ -898,9 +1243,13 @@ void NNCreatorPanel::syncFormVar()
 		shmea::GString::Typify(tbMomentumFactor->getText(), tbMomentumFactor->getText().size());
 	currentLayer->setMomentumFactor(momentumFactor.getFloat());
 
-	shmea::GType weightDecay =
-		shmea::GString::Typify(tbWeightDecay->getText(), tbWeightDecay->getText().size());
-	currentLayer->setWeightDecay(weightDecay.getFloat());
+	shmea::GType weightDecay1 =
+		shmea::GString::Typify(tbWeightDecay1->getText(), tbWeightDecay1->getText().size());
+	currentLayer->setWeightDecay1(weightDecay1.getFloat());
+
+	shmea::GType weightDecay2 =
+		shmea::GString::Typify(tbWeightDecay2->getText(), tbWeightDecay2->getText().size());
+	currentLayer->setWeightDecay2(weightDecay2.getFloat());
 
 	int activationType = ddActivationFunctions->getSelectedIndex();
 	switch (activationType)
@@ -973,7 +1322,7 @@ void NNCreatorPanel::loadNNet(glades::NNInfo* info)
 	tbNetName->setText(netName);
 
 	float pInput = formInfo->getPInput();
-	tbPInput->setText(shmea::GString::floatTOstring(pInput));
+	tbinputDropout->setText(shmea::GString::floatTOstring(pInput));
 
 	int batchSize = formInfo->getBatchSize();
 	tbBatchSize->setText(shmea::GString::intTOstring(batchSize));
@@ -986,12 +1335,13 @@ void NNCreatorPanel::loadNNet(glades::NNInfo* info)
 	tbOutputLayerSize->setText(shmea::GString::intTOstring(outputSize));
 	ddOutputType->setSelectedIndex(outputType);
 
+	populateInputLayerForm();
 	populateHLayerForm();
 	populateIndexToEdit(currentHiddenLayerIndex);
 
 	// Display a popup alert
 	shmea::GString msgBoxText = "Loaded \"" + netName + "\"";
-	MsgBox("Neural Net", msgBoxText, RUMsgBox::MESSAGEBOX);
+	RUMsgBox::MsgBox(this, "Neural Net", msgBoxText, RUMsgBox::MESSAGEBOX);
 }
 
 /*!
@@ -1013,6 +1363,77 @@ int64_t NNCreatorPanel::parsePct(const shmea::GType& spct)
 	return pctVal;
 }
 
+void NNCreatorPanel::loadDatasets()
+{
+	if (!ddDataType)
+		return;
+
+	if (!ddDatasets)
+		return;
+
+	ddDatasets->clearOptions();
+	trainingRowIndex = 0;
+	testingRowIndex = 0;
+	prevImageFlag = 0;
+
+	int dataType = 0;
+	shmea::GString folderName = "datasets/";
+	if (ddDataType->getSelectedText() == "CSV")
+	{
+		dataType = 0;
+		previewTable->setVisible(true);
+		previewImageLayout->setVisible(false);
+	}
+	else if (ddDataType->getSelectedText() == "Image")
+	{
+		dataType = 1;
+		folderName += "images/";
+		previewTable->setVisible(false);
+		previewImageLayout->setVisible(true);
+	}
+	else if (ddDataType->getSelectedText() == "Text")
+	{
+		dataType = 2;
+		previewTable->setVisible(false);
+		previewImageLayout->setVisible(false);
+	}
+	else
+		return;
+
+	DIR* dir;
+	struct dirent* ent;
+	if ((dir = opendir(folderName.c_str())) == NULL)
+	{
+		printf("[ML] -%s\n", folderName.c_str());
+		return;
+	}
+
+	// loop through the directory
+	while ((ent = readdir(dir)) != NULL)
+	{
+		// don't want the current directory, parent or hidden files/folders
+		shmea::GString fname(ent->d_name);
+		if (fname[0] == '.')
+			continue;
+
+		if ((ent->d_type == DT_DIR) && (dataType == 1))
+		{
+			// printf("Folder[%d]: %s \n", ent->d_type, fname.c_str());
+			ddDatasets->addOption(fname);
+		}
+		else if ((ent->d_type == DT_REG) && (dataType == 0 || dataType == 2))
+		{
+			// printf("File[%d]: %s \n", ent->d_type, fname.c_str());
+			ddDatasets->addOption(fname);
+		}
+		else
+			continue;
+	}
+
+	closedir(dir);
+	ddDatasets->setOptionsShown(3);
+}
+
 /*!
  * @brief Save NN
  * @details save a neural network using the Save_NN network service
@@ -1022,6 +1443,12 @@ int64_t NNCreatorPanel::parsePct(const shmea::GType& spct)
  */
 void NNCreatorPanel::clickedSave(const shmea::GString& cmpName, int x, int y)
 {
+	if (!tbNetName)
+		return;
+
+	if (tbNetName->getText().length() == 0)
+		return;
+
 	shmea::GString serverIP = "127.0.0.1";
 
 	// make sure the layers are up to date
@@ -1030,13 +1457,39 @@ void NNCreatorPanel::clickedSave(const shmea::GString& cmpName, int x, int y)
 	shmea::GString netName = tbNetName->getText();
 	formInfo->setName(netName.c_str());
 
-	shmea::GType pInput = shmea::GString::Typify(tbPInput->getText(), tbPInput->getText().size());
-	if (pInput.getType() != shmea::GType::FLOAT_TYPE)
-		return;
-
 	shmea::GType batchSize =
 		shmea::GString::Typify(tbBatchSize->getText(), tbBatchSize->getText().size());
 	if (batchSize.getType() != shmea::GType::LONG_TYPE)
+		return;
+
+	shmea::GType inputLR =
+		shmea::GString::Typify(tbinputLR->getText(), tbinputLR->getText().size());
+	if (inputLR.getType() != shmea::GType::FLOAT_TYPE)
+		return;
+
+	shmea::GType inputMF =
+		shmea::GString::Typify(tbinputMF->getText(), tbinputMF->getText().size());
+	if (inputMF.getType() != shmea::GType::FLOAT_TYPE)
+		return;
+
+	shmea::GType inputWD1 =
+		shmea::GString::Typify(tbinputWD1->getText(), tbinputWD1->getText().size());
+	if (inputWD1.getType() != shmea::GType::FLOAT_TYPE)
+		return;
+
+	shmea::GType inputWD2 =
+		shmea::GString::Typify(tbinputWD2->getText(), tbinputWD2->getText().size());
+	if (inputWD2.getType() != shmea::GType::FLOAT_TYPE)
+		return;
+
+	shmea::GType inputDropout =
+		shmea::GString::Typify(tbinputDropout->getText(), tbinputDropout->getText().size());
+	if (inputDropout.getType() != shmea::GType::FLOAT_TYPE)
+		return;
+
+	shmea::GType inputAP =
+		shmea::GString::Typify(tbinputAP->getText(), tbinputAP->getText().size());
+	if (inputAP.getType() != shmea::GType::FLOAT_TYPE)
 		return;
 
 	shmea::GType outputSize =
@@ -1055,6 +1508,7 @@ void NNCreatorPanel::clickedSave(const shmea::GString& cmpName, int x, int y)
 		return;
 
 	// Save the neural network
+	populateInputLayerForm();
 	populateHLayerForm();
 	NNetwork* network = new NNetwork(formInfo);
 	glades::saveNeuralNetwork(network);
@@ -1076,7 +1530,13 @@ void NNCreatorPanel::clickedEditSwitch(const shmea::GString& cmpName, int x, int
 
 	syncFormVar();
 	currentHiddenLayerIndex = indexToEdit;
+	populateInputLayerForm();
 	populateHLayerForm();
+}
+
+void NNCreatorPanel::clickedDSTypeSwitch(int newIndex)
+{
+	loadDatasets();
 }
 
 /*!
@@ -1091,8 +1551,30 @@ void NNCreatorPanel::clickedRun(const shmea::GString& cmpName, int x, int y)
 	if (!serverInstance)
 		return;
 
-	int importType = shmea::GTable::TYPE_FILE;
+	if (!ddDataType)
+		return;
 
+	if (!ddDatasets)
+		return;
+
+	// Get the import type
+	int importType = glades::DataInput::CSV;
+	if (ddDataType->getSelectedText() == "CSV")
+	{
+		importType = glades::DataInput::CSV;
+	}
+	else if (ddDataType->getSelectedText() == "Image")
+	{
+		importType = glades::DataInput::IMAGE;
+	}
+	else if (ddDataType->getSelectedText() == "Text")
+	{
+		importType = glades::DataInput::TEXT;
+	}
+	else
+		return;
+
+	// Get the connection
 	shmea::GString serverIP = "127.0.0.1";
 	GNet::Connection* cConnection = serverInstance->getConnection(serverIP);
 	if (!cConnection)
@@ -1100,7 +1582,7 @@ void NNCreatorPanel::clickedRun(const shmea::GString& cmpName, int x, int y)
 
 	// Get the vars from the components
 	shmea::GString netName = tbNetName->getText();
-	shmea::GString testFName = tbTestDataSourcePath->getText();
+	shmea::GString testFName = ddDatasets->getSelectedText();
 	int64_t trainPct =
 		parsePct(shmea::GString::Typify(tbTrainPct->getText(), tbTrainPct->getText().size()));
 	int64_t testPct =
@@ -1120,6 +1602,10 @@ void NNCreatorPanel::clickedRun(const shmea::GString& cmpName, int x, int y)
 			   tbValidationPct->getText().c_str());
 		return;
 	}
+
+	// Get the event listener ready
+	resetSim();
+	keepGraping = true;
 
 	// Run a machine learning service
 	shmea::GList wData;
@@ -1143,7 +1629,28 @@ void NNCreatorPanel::clickedContinue(const shmea::GString& cmpName, int x, int y
 	if (netCount == 0)
 		return;
 
-	int importType = shmea::GTable::TYPE_FILE;
+	if (!ddDataType)
+		return;
+
+	if (!ddDatasets)
+		return;
+
+	// Get the import type
+	int importType = glades::DataInput::CSV;
+	if (ddDataType->getSelectedText() == "CSV")
+	{
+		importType = glades::DataInput::CSV;
+	}
+	else if (ddDataType->getSelectedText() == "Image")
+	{
+		importType = glades::DataInput::IMAGE;
+	}
+	else if (ddDataType->getSelectedText() == "Text")
+	{
+		importType = glades::DataInput::TEXT;
+	}
+	else
+		return;
 
 	shmea::GString serverIP = "127.0.0.1";
 	GNet::Connection* cConnection = serverInstance->getConnection(serverIP);
@@ -1152,7 +1659,7 @@ void NNCreatorPanel::clickedContinue(const shmea::GString& cmpName, int x, int y
 
 	// Get the vars from the components
 	shmea::GString netName = tbNetName->getText();
-	shmea::GString testFName = tbTestDataSourcePath->getText();
+	shmea::GString testFName = ddDatasets->getSelectedText();
 	int64_t trainPct =
 		parsePct(shmea::GString::Typify(tbTrainPct->getText(), tbTrainPct->getText().size()));
 	int64_t testPct =
@@ -1172,6 +1679,9 @@ void NNCreatorPanel::clickedContinue(const shmea::GString& cmpName, int x, int y
 			   tbValidationPct->getText().c_str());
 		return;
 	}
+
+	// Get the event listener ready
+	keepGraping = true;
 
 	// Run a machine learning service
 	shmea::GList wData;
@@ -1225,6 +1735,7 @@ void NNCreatorPanel::clickedRemove(const shmea::GString& cmpName, int x, int y)
 		--currentHiddenLayerIndex;
 
 	printf("[GUI] Layer %d deleted\n", currentHiddenLayerIndex);
+	populateInputLayerForm();
 	populateHLayerForm();
 	tbHiddenLayerCount->setText(shmea::GString::intTOstring(formInfo->numHiddenLayers()));
 	populateIndexToEdit(currentHiddenLayerIndex);
@@ -1252,6 +1763,7 @@ void NNCreatorPanel::tbHLLoseFocus()
 	if (currentHiddenLayerIndex >= newCount)
 	{
 		currentHiddenLayerIndex = formInfo->numHiddenLayers() - 1;
+		populateInputLayerForm();
 		populateHLayerForm();
 	}
 
@@ -1289,6 +1801,8 @@ void NNCreatorPanel::clickedKill(const shmea::GString& cmpName, int x, int y)
 	if (!cConnection)
 		return;
 
+	keepGraping = false;
+
 	// Kill a neural network instance
 	shmea::GList wData;
 	wData.addString("KILL");
@@ -1308,7 +1822,69 @@ void NNCreatorPanel::clickedDelete(const shmea::GString& cmpName, int x, int y)
 	// Display a popup alert
 	char buffer[netName.length()];
 	sprintf(buffer, "Deleted \"%s\"", netName.c_str());
-	MsgBox("Neural Net", buffer, RUMsgBox::MESSAGEBOX);
+	RUMsgBox::MsgBox(this, "Neural Net", buffer, RUMsgBox::MESSAGEBOX);
+}
+
+void NNCreatorPanel::clickedPreviewTrain(const shmea::GString& cmpName, int x, int y)
+{
+	if (!ddDatasets)
+		return;
+
+	shmea::GString testFName = ddDatasets->getSelectedText();
+
+	if (testFName.length() == 0)
+		return;
+
+	ii.import(testFName.c_str());
+	prevImageFlag = 0;
+	previewImage->setBGImage(ii.getTrainImage(trainingRowIndex));
+}
+
+void NNCreatorPanel::clickedPreviewTest(const shmea::GString& cmpName, int x, int y)
+{
+	if (!ddDatasets)
+		return;
+
+	shmea::GString testFName = ddDatasets->getSelectedText();
+
+	if (testFName.length() == 0)
+		return;
+
+	ii.import(testFName.c_str());
+	prevImageFlag = 1;
+	previewImage->setBGImage(ii.getTestImage(testingRowIndex));
+}
+
+void NNCreatorPanel::clickedPrevious(const shmea::GString& cmpName, int x, int y)
+{
+	if (prevImageFlag == 0)
+	{
+		if (trainingRowIndex > 0)
+			--trainingRowIndex;
+		previewImage->setBGImage(ii.getTrainImage(trainingRowIndex));
+	}
+	else if (prevImageFlag == 1)
+	{
+		if (testingRowIndex > 0)
+			--testingRowIndex;
+		previewImage->setBGImage(ii.getTestImage(testingRowIndex));
+	}
+}
+
+void NNCreatorPanel::clickedNext(const shmea::GString& cmpName, int x, int y)
+{
+	if (prevImageFlag == 0)
+	{
+		if (trainingRowIndex < ii.getTrainSize() - 1)
+			++trainingRowIndex;
+		previewImage->setBGImage(ii.getTrainImage(trainingRowIndex));
+	}
+	else if (prevImageFlag == 1)
+	{
+		if (testingRowIndex < ii.getTestSize() - 1)
+			++testingRowIndex;
+		previewImage->setBGImage(ii.getTestImage(testingRowIndex));
+	}
 }
 
 void NNCreatorPanel::nnSelectorChanged(int newIndex)
@@ -1385,6 +1961,7 @@ void NNCreatorPanel::updateFromQ(const shmea::ServiceData* data)
 		return;
 
 	shmea::GString cName = argList.getString(0);
+
 	if (cName == "RESET")
 	{
 		// Special case to reset the sim GUI
@@ -1392,12 +1969,38 @@ void NNCreatorPanel::updateFromQ(const shmea::ServiceData* data)
 	}
 	else if (cName == "UPDATE-GRAPHS")
 	{
+		if (!keepGraping)
+			return;
+
 		// Special case to update the candle graph
 		lcGraph->update();
 		rocCurveGraph->update();
 	}
+	else if (cName == "ACC")
+	{
+		if (!keepGraping)
+			return;
+
+		if (data->getType() != shmea::ServiceData::TYPE_LIST)
+			return;
+
+		// Update components by tick
+		shmea::GList cList = data->getList();
+		if (cList.size() < 2)
+			return;
+
+		int epochs = cList.getInt(0);
+		float accuracy = cList.getFloat(1);
+		char accBuf[64];
+		sprintf(accBuf, "%.2f", accuracy);
+		lblEpochs->setText(shmea::GString::intTOstring(epochs) + "(t)");
+		lblAccuracy->setText(shmea::GString(accBuf) + "% Accuracy");
+	}
 	else if (cName == "CONF")
 	{
+		if (!keepGraping)
+			return;
+
 		if (data->getType() != shmea::ServiceData::TYPE_TABLE)
 			return;
 
@@ -1414,6 +2017,9 @@ void NNCreatorPanel::updateFromQ(const shmea::ServiceData* data)
 	}
 	else if (cName == "PROGRESSIVE")
 	{
+		if (!keepGraping)
+			return;
+
 		if (data->getType() != shmea::ServiceData::TYPE_LIST)
 			return;
 
@@ -1429,15 +2035,74 @@ void NNCreatorPanel::updateFromQ(const shmea::ServiceData* data)
 		// Graphs
 		PlotLearningCurve(newXVal, lcPoint);
 	}
+	else if (cName == "ACTIVATIONS")
+	{
+
+		shmea::GList activations = data->getList();
+		if (activations[0].getType() == shmea::GType::INT_TYPE)
+		{
+			for (unsigned int i = 0; i < activations.size(); i++)
+			{
+				// Initialize the neural network visualizer
+				if (activations[i].getType() == shmea::GType::INT_TYPE)
+				{
+					if (i == 0)
+					{
+						nn = new DrawNeuralNet(activations.size());
+						nn->setInputLayer(activations.getInt(i));
+					}
+					else if (i == activations.size() - 1)
+					{
+						nn->setOutputLayer(activations.getInt(i));
+					}
+					else
+					{
+						nn->setHiddenLayer(i, activations.getInt(i));
+					}
+				}
+			}
+		}
+		else
+		{
+			nn->setActivation(activations);
+			neuralNetGraph->set("nn", nn);
+		}
+
+		// nn->displayNeuralNet(); // DEBUGGING ONLY
+	}
+	else if (cName == "WEIGHTS")
+	{
+
+		// Update weights
+		shmea::GList weights = data->getList();
+
+		if (weights.size() < 1 && nn == NULL)
+			return;
+
+		nn->setWeights(weights);
+		// nn->displayNeuralNet(); // DEBUGGING ONLY
+		neuralNetGraph->set("nn", nn);
+	}
 }
 
 void NNCreatorPanel::resetSim()
 {
 	pthread_mutex_lock(lcMutex);
 	lcGraph->clear();
+	lcGraph->update();
 	pthread_mutex_unlock(lcMutex);
 
 	pthread_mutex_lock(rocMutex);
 	rocCurveGraph->clear();
+	rocCurveGraph->update();
 	pthread_mutex_unlock(rocMutex);
+
+	// Reset the NN updates
+	pthread_mutex_lock(qMutex);
+	std::queue<const shmea::ServiceData*> emptyQ;
+	std::swap(updateQueue, emptyQ);
+	pthread_mutex_unlock(qMutex);
+
+	lblEpochs->setText("0(t)");
+	lblAccuracy->setText("N/A Accuracy");
 }

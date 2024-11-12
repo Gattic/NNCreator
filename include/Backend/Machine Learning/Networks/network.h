@@ -18,6 +18,11 @@
 #define _NNETWORK
 
 #include "Backend/Database/GList.h"
+#include "Backend/Database/GTable.h"
+#include "../State/Terminator.h"
+#include "../GMath/cmatrix.h"
+#include "../State/LayerBuilder.h"
+#include "bayes.h"
 #include <algorithm>
 #include <map>
 #include <stdio.h>
@@ -39,12 +44,12 @@ class Connection;
 
 namespace glades {
 
+class DataInput;
 class NNInfo;
 class Layer;
 class Node;
 class NetworkState;
 class LayerBuilder;
-class Terminator;
 class CMatrix;
 class MetaNetwork;
 class RNN;
@@ -55,11 +60,13 @@ private:
 	friend RNN;
 	friend MetaNetwork;
 
+	DataInput* di;
 	NNInfo* skeleton;
-	LayerBuilder* meat;
-	CMatrix* confusionMatrix;
+	LayerBuilder meat;
+	CMatrix confusionMatrix;
 	GNet::GServer* serverInstance;
 	GNet::Connection* cConnection;
+	glades::NaiveBayes bModel;
 
 	bool running;
 	int netType;
@@ -75,32 +82,20 @@ private:
 	int minibatchSize;
 	int64_t id;
 
+	bool firstRunActivation;
+
 	// for tables & graphs
 	shmea::GList learningCurve;
 	std::vector<Point2*> rocCurve;
 	shmea::GList results;
+	shmea::GTable nbRecord;
+	//Only for sending on the network
+	shmea::GList cNodeActivations;
 
-	void SGDHelper(unsigned int, int, int); // Stochastic Gradient Descent
+	void run(DataInput*, int);
+	void SGDHelper(unsigned int, int); // Stochastic Gradient Descent
 
-	virtual void beforeFwdEdge(const NetworkState*);
-	virtual void beforeFwdNode(const NetworkState*);
-	virtual void beforeFwdLayer(const NetworkState*);
-	virtual void beforeFwd();
-	virtual void beforeBackEdge(const NetworkState*);
-	virtual void beforeBackNode(const NetworkState*);
-	virtual void beforeBackLayer(const NetworkState*);
-	virtual void beforeBack();
-
-	virtual void afterFwdEdge(const NetworkState*);
-	virtual void afterFwdNode(const NetworkState*, float = 0.0f);
-	virtual void afterFwdLayer(const NetworkState*, float = 0.0f);
-	virtual void afterFwd();
-	virtual void afterBackEdge(const NetworkState*);
-	virtual void afterBackNode(const NetworkState*);
-	virtual void afterBackLayer(const NetworkState*);
-	virtual void afterBack();
-
-	void ForwardPass(unsigned int, int, int, int, unsigned int, unsigned int);
+	void ForwardPass(unsigned int, int, int, unsigned int, unsigned int);
 	void BackPropagation(unsigned int, int, int, unsigned int, unsigned int);
 
 public:
@@ -111,6 +106,8 @@ public:
 	static const int RUN_TEST = 1;
 	static const int RUN_VALIDATE = 2;
 
+	Terminator terminator;
+
 	NNetwork();
 	NNetwork(NNInfo*);
 	virtual ~NNetwork();
@@ -119,15 +116,16 @@ public:
 	void stop();
 
 	// Database
-	bool load(const std::string&);
+	bool load(const shmea::GString&);
 	bool save() const;
 	void setServer(GNet::GServer*, GNet::Connection*);
 
 	// Stochastic Gradient Descent
-	void run(const shmea::GTable&, const Terminator*, int);
+	void train(DataInput*);
+	void test(DataInput*);
 
 	int64_t getID() const;
-	std::string getName() const;
+	shmea::GString getName() const;
 	NNInfo* getNNInfo();
 	float getAccuracy() const;
 

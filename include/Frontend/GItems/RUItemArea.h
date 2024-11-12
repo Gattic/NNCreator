@@ -52,8 +52,8 @@ public:
 	// gets
 	int getX() const;
 	int getY() const;
-	int getWidth() const;
-	int getHeight() const;
+	virtual int getWidth() const;
+	virtual int getHeight() const;
 	int getPaddingX() const;
 	int getPaddingY() const;
 	int getMarginX() const;
@@ -74,6 +74,8 @@ public:
 	void setMarginX(int);
 	void setMarginY(int);
 	void setVisible(bool);
+	void show();
+	void hide();
 	void requireDrawUpdate();
 };
 

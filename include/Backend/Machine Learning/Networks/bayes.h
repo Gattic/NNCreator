@@ -14,66 +14,44 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _GSERVICEDATA
-#define _GSERVICEDATA
+#ifndef _GNAIVEBAYES
+#define _GNAIVEBAYES
 
-#include <pthread.h>
+#include "Backend/Database/GTable.h"
+#include "../GMath/OHE.h"
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <string>
-#include <time.h>
 #include <vector>
+#include <map>
 
-namespace shmea {
-	class GList;
-	class GTable;
-	class Serializable;
-};
+namespace glades {
 
-namespace GNet {
-
-class Connection;
-
-class ServiceData
+class NaiveBayes
 {
 private:
 
-	Connection* origin;
-	Connection* destination;
-	std::string sid;
-	std::string command;
-	int dataType;
+	// <class id, class probility> <C, P(C)>
+	std::map<int, double> classes;
+
+	// <class id, <attribute id, probability> > <C, <x, P(x|C)> >
+	std::map<int, std::map<int, double> > attributesPerClass;
+
+	std::vector<OHE> OHEMaps;
 
 public:
 
-	static const int SID_LENGTH = 12;
+	NaiveBayes()
+	{
+		//
+	}
 
-	static const int TYPE_ACK = 0;
-	static const int TYPE_LIST = 1;
-	static const int TYPE_TABLE = 2;
-	static const int TYPE_NETWORK_POINTER = 3;
+	shmea::GTable import(const shmea::GList&);
+	shmea::GTable import(const shmea::GTable&);
+	void train(const shmea::GTable&);
+	int predict(const shmea::GList&);
+	void print() const;
+	void reset();
 
-	shmea::GList* listData;
-	shmea::GTable* tableData;
-
-	ServiceData(Connection*, Connection*, std::string);
-	ServiceData(Connection*, Connection*, std::string, shmea::GList*);
-	ServiceData(Connection*, Connection*, std::string, shmea::GTable*);
-	ServiceData(Connection*, Connection*, std::string, shmea::Serializable*);
-	ServiceData(const ServiceData&);
-	~ServiceData();
-
-	Connection* getOrigin();
-	Connection* getDestination();
-	std::string getSID() const;
-	std::string getCommand() const;
-	int getDataType() const;
-	void setCommand(std::string);
-	void setDataType(int);
-
-	static bool validSID(const std::string&);
-	static std::string generateSID();
+	std::string getClassName(int) const;
 };
 };
 

@@ -14,45 +14,18 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _GML_RNN
-#define _GML_RNN
+#ifndef _GSTANDITEM
+#define _GSTANDITEM
 
-#include "network.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <string>
-#include <vector>
+#include "GList.h"
 
-namespace glades {
+namespace shmea {
 
-class NNInfo;
-class NetworkState;
-
-class RNN : public NNetwork
+class StandItem
 {
-private:
-	virtual void beforeFwdEdge(const NetworkState*);
-	virtual void beforeFwdNode(const NetworkState*);
-	virtual void beforeFwdLayer(const NetworkState*);
-	virtual void beforeFwd();
-	virtual void beforeBackEdge(const NetworkState*);
-	virtual void beforeBackNode(const NetworkState*);
-	virtual void beforeBackLayer(const NetworkState*);
-	virtual void beforeBack();
-
-	virtual void afterFwdEdge(const NetworkState*);
-	virtual void afterFwdNode(const NetworkState*, float = 0.0f);
-	virtual void afterFwdLayer(const NetworkState*, float = 0.0f);
-	virtual void afterFwd();
-	virtual void afterBackEdge(const NetworkState*);
-	virtual void afterBackNode(const NetworkState*);
-	virtual void afterBackLayer(const NetworkState*);
-	virtual void afterBack();
-
 public:
-	RNN();
-	~RNN();
+	virtual GList toXVectorData() const = 0;
+	virtual GList toYVectorData() const = 0;
 };
 };
 

@@ -23,7 +23,6 @@
 class GUI_Callback : public GNet::Service
 {
 private:
-
 	GNet::GServer* serverInstance;
 	GPanel* cPanel;
 
@@ -43,7 +42,7 @@ public:
 	~GUI_Callback()
 	{
 		serverInstance = NULL; // Not ours to delete
-		cPanel = NULL;	   // Not ours to delete
+		cPanel = NULL;		   // Not ours to delete
 	}
 
 	shmea::ServiceData* execute(const shmea::ServiceData* data)

@@ -13,14 +13,16 @@
 #include "Backend/Database/GList.h"
 #include "Backend/Database/GTable.h"
 #include "Backend/Database/ServiceData.h"
+#include "Backend/Machine Learning/DataObjects/ImageInput.h"
+#include "Backend/Machine Learning/DataObjects/NumberInput.h"
+#include "Backend/Machine Learning/Networks/metanetwork.h"
+#include "Backend/Machine Learning/Networks/network.h"
 #include "Backend/Machine Learning/State/Terminator.h"
 #include "Backend/Machine Learning/Structure/hiddenlayerinfo.h"
 #include "Backend/Machine Learning/Structure/inputlayerinfo.h"
 #include "Backend/Machine Learning/Structure/nninfo.h"
 #include "Backend/Machine Learning/Structure/outputlayerinfo.h"
-#include "Backend/Machine Learning/glades.h"
-#include "Backend/Machine Learning/metanetwork.h"
-#include "Backend/Machine Learning/network.h"
+#include "Backend/Machine Learning/main.h"
 #include "Backend/Networking/service.h"
 #include "Frontend/GUI/RUMsgBox.h"
 #include "Frontend/Graphics/graphics.h"
@@ -64,38 +66,62 @@ public:
 				return NULL;
 
 			cNetwork.stop();
-			printf("!!---KILLING NET---!!\n");
+			printf("\n!!---KILLING NET---!!\n");
 		}
 
 		if (cList.size() < 3)
 			return NULL;
 
 		shmea::GString netName = cList.getString(0);
-		shmea::GString testFName = cList.getString(1);
-		int importType = cList.getInt(2);
+		shmea::GString inputFName = cList.getString(1);
+		int inputType = cList.getInt(2);
 		/*int64_t maxTimeStamp = cList.getLong(3);
 		int64_t maxEpoch = cList.getLong(4);
 		float maxAccuracy = cList.getFloat(5);*/
 		// int64_t trainPct = cList.getLong(4), testPct = cList.getLong(5), validationPct =
 		// cList.getLong(6);
 
+		// Modify the paths to properly load the data later
+		glades::DataInput* di = NULL;
+		if (inputType == glades::DataInput::CSV)
+		{
+			inputFName = "datasets/" + inputFName;
+			di = new glades::NumberInput();
+		}
+		else if (inputType == glades::DataInput::IMAGE)
+		{
+			// inputFName = "datasets/images/" + inputFName + "/";
+			di = new glades::ImageInput();
+		}
+		else if (inputType == glades::DataInput::TEXT)
+		{
+			// TODO
+			return NULL;
+		}
+		else
+			return NULL;
+
+		if (!di)
+			return NULL;
+
+		// Load the input data
+		di->import(inputFName);
+
 		// Load the neural network
-		if ((cNetwork.getEpochs() == 0) && (!cNetwork.load(netName.c_str())))
+		if ((cNetwork.getEpochs() == 0) && (!cNetwork.load(netName)))
 		{
 			printf("[NN] Unable to load \"%s\"", netName.c_str());
 			return NULL;
 		}
 
 		// Termination Conditions
-		glades::Terminator* Arnold = new glades::Terminator();
-		/*Arnold->setTimestamp(maxTimeStamp);
-		Arnold->setEpoch(maxEpoch);
-		Arnold->setAccuracy(maxAccuracy);*/
+		/*cNetwork.terminator.setTimestamp(maxTimeStamp);
+		cNetwork.terminator.setEpoch(maxEpoch);
+		cNetwork.terminator.setAccuracy(maxAccuracy);*/
 
 		// Run the training and retrieve a metanetwork
-		shmea::GTable inputTable(testFName, ',', importType);
 		glades::MetaNetwork* newTrainNet =
-			glades::train(&cNetwork, inputTable, Arnold, serverInstance, destination);
+			glades::train(&cNetwork, di, serverInstance, destination);
 
 		return NULL;
 	}

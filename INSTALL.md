@@ -1,88 +1,61 @@
 # Install, Compile, and Run
 
-## Dependencies
+---
 
-Linux/Cygwin:
+## Dependencies
 
 `cmake`
 
 `make`
 
-`gcc`
-
 `g++`
 
-`libGL-devel`
+SDL2 graphics library
+`libsdl2-dev`
 
-`libGL1`
+SDL2 TTF for GUI
+`libsdl2-ttf-dev`
 
-`xorg-server`
+SDL2 Image for GUI
+`libsdl2-image-dev`
 
-`SDL2 graphics library: libsdl2-dev`
+OpenSSL
+`libssl-dev`
+`libcurl4-openssl-dev`
 
-`SDL2 TTF for GUI: libsdl2-ttf-dev`
-
-`SDL2 Image for GUI: libsdl2-image-dev`
-
-`OpenSSL: libssl-dev`
-
+Optional:
+`clang-format`
 `gdb`
 
-Cygwin:
-
-`xinit`
-
-MacOS:
-
-Install homebrew, a macOS package manager.
-
-`/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"`
- 
-`brew install cmake`
-
-Install Xcode command line tools.
-
-`$ xcode-select --install`
-
-`$ brew install pkgconfig`
-
-`brew install openssl`
-
-`brew link --force openssl` (Follow instructions to set environment paths)
-
-`brew install sdl2`
-
-`brew install sdl_ttf`
-
----
-
-## Installation
-
-Portable, no install required.
+One-liner for convenience:
+```
+sudo apt-get install cmake make gcc g++ libsdl2-dev libsdl2-ttf-dev libsdl2-image-dev libssl-dev clang-format libcurl4-openssl-dev gdb
+```
 
 ---
 
 ## Compilation
 
-Linux/MacOS/Windows/Cygwin:
 ```
 mkdir build
 cd build
-cmake ../
+cmake ..
 make
 ```
 
+---
+
+## Installation
+
+make install
+
+---
+
+## Uninstall
+
+make uninstall
+
 ## Run
-
-Cygwin only, then follow Linux/MacOS/Windows instructions:
-
-`xinit`
-
-or
-
-`startx`
-
-Linux/MacOS/Windows/Cygwin:
 
 ```
 cd build
@@ -94,7 +67,6 @@ make run
 ```
 cd build
 make debug
-run #can also pass in fullscreen, nogui, etc here like "run nogui"
 backtrace # When it crashes
 ```
 

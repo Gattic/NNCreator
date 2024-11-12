@@ -14,11 +14,46 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _GLADES_MAIN
-#define _GLADES_MAIN
+#ifndef _GML_RNN
+#define _GML_RNN
 
-//#include "core/version.h"
+#include "network.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <string>
+#include <vector>
 
-// extern Version version;
+namespace glades {
+
+class NNInfo;
+class NetworkState;
+
+class RNN : public NNetwork
+{
+private:
+	void beforeFwdEdge(const NetworkState&);
+	void beforeFwdNode(const NetworkState&);
+	void beforeFwdLayer(const NetworkState&);
+	void beforeFwd();
+	void beforeBackEdge(const NetworkState&);
+	void beforeBackNode(const NetworkState&);
+	void beforeBackLayer(const NetworkState&);
+	void beforeBack();
+
+	void afterFwdEdge(const NetworkState&);
+	void afterFwdNode(const NetworkState&, float = 0.0f);
+	void afterFwdLayer(const NetworkState&, float = 0.0f);
+	void afterFwd();
+	void afterBackEdge(const NetworkState&);
+	void afterBackNode(const NetworkState&);
+	void afterBackLayer(const NetworkState&);
+	void afterBack();
+
+public:
+	RNN();
+	~RNN();
+};
+};
 
 #endif

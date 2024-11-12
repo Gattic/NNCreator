@@ -1,13 +1,14 @@
 *.o
 NNCreator
 callgrind.*
-GQL/*.html
 .DS_Store
 build/*
 unit-tests/build/*
 database/*
+datasets/images/*
 unit-tests/database/*
 *.sublime-workspace
 *.swp
 .gdb_history
 *.vim
+logs/

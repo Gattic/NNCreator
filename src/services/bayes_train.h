@@ -13,7 +13,8 @@
 #include "Backend/Database/GList.h"
 #include "Backend/Database/GTable.h"
 #include "Backend/Database/ServiceData.h"
-#include "Backend/Machine Learning/bayes.h"
+#include "Backend/Machine Learning/Networks/bayes.h"
+#include "Backend/Machine Learning/Networks/network.h"
 #include "Backend/Networking/service.h"
 
 class Bayes_Train : public GNet::Service
