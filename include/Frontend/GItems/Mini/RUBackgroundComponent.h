@@ -40,6 +40,7 @@ protected:
 	bool bgColorEnabled;
 	SDL_Surface* surfaceTheUSA;
 	shmea::GPointer<shmea::Image> bgImage;
+	//shmea::GPointer<shmea::Image> bgCache;
 	SDL_Color bgColor;
 	shmea::GString bgImageLocation;
 	int bgImageType;

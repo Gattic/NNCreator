@@ -14,45 +14,62 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _GNAIVEBAYES
-#define _GNAIVEBAYES
+#ifndef _LOGOUT_SERVER
+#define _LOGOUT_SERVER
 
-#include "Backend/Database/GTable.h"
-#include "../GMath/OHE.h"
-#include <stdio.h>
-#include <vector>
-#include <map>
+#include "../Backend/Database/GString.h"
+#include "../Backend/Database/ServiceData.h"
+#include "../Backend/Networking/main.h"
+#include "../Backend/Networking/service.h"
 
-namespace glades {
-
-class NaiveBayes
+class Logout_Server : public GNet::Service
 {
 private:
-
-	// <class id, class probility> <C, P(C)>
-	std::map<int, double> classes;
-
-	// <class id, <attribute id, probability> > <C, <x, P(x|C)> >
-	std::map<int, std::map<int, double> > attributesPerClass;
-
-	std::vector<OHE> OHEMaps;
+	GNet::GServer* serverInstance;
 
 public:
-
-	NaiveBayes()
+	Logout_Server()
 	{
-		//
+		serverInstance = NULL;
 	}
 
-	shmea::GTable import(const shmea::GList&);
-	shmea::GTable import(const shmea::GTable&);
-	void train(const shmea::GTable&);
-	int predict(const shmea::GList&);
-	void print() const;
-	void reset();
+	Logout_Server(GNet::GServer* newInstance)
+	{
+		serverInstance = newInstance;
+	}
 
-	std::string getClassName(int) const;
-};
+	~Logout_Server()
+	{
+		serverInstance = NULL; // Not ours to delete
+	}
+
+	shmea::ServiceData* execute(const shmea::ServiceData* data)
+	{
+		class GNet::Connection* destination = data->getConnection();
+
+		if (!serverInstance)
+			return NULL;
+
+		printf("[SLOGOUT] %s\n", destination->getIP().c_str());
+
+		// delete it from the data structure
+		serverInstance->removeServerConnection(destination);
+
+		// Clean up the Connection
+		destination->finish();
+
+		return NULL;
+	}
+
+	GNet::Service* MakeService(GNet::GServer* newInstance) const
+	{
+		return new Logout_Server(newInstance);
+	}
+
+	shmea::GString getName() const
+	{
+		return "Logout_Server";
+	}
 };
 
 #endif

@@ -14,59 +14,75 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _GUI_CALLBACK_PROG
-#define _GUI_CALLBACK_PROG
+#ifndef _HANDSHAKE_CLIENT
+#define _HANDSHAKE_CLIENT
 
-#include "Backend/Database/ServiceData.h"
-#include "Backend/Networking/service.h"
+#include "../Backend/Database/GString.h"
+#include "../Backend/Database/GList.h"
+#include "../Backend/Database/ServiceData.h"
+#include "../Backend/Networking/connection.h"
+#include "../Backend/Networking/service.h"
 
-class GUI_Callback : public GNet::Service
+class Handshake_Client : public GNet::Service
 {
 private:
-
 	GNet::GServer* serverInstance;
-	GPanel* cPanel;
 
 public:
-	GUI_Callback()
+	Handshake_Client()
 	{
 		serverInstance = NULL;
-		cPanel = NULL;
 	}
 
-	GUI_Callback(GNet::GServer* newInstance, GPanel* newPanel)
+	Handshake_Client(GNet::GServer* newInstance)
 	{
 		serverInstance = newInstance;
-		cPanel = newPanel;
 	}
 
-	~GUI_Callback()
+	~Handshake_Client()
 	{
 		serverInstance = NULL; // Not ours to delete
-		cPanel = NULL;	   // Not ours to delete
 	}
 
 	shmea::ServiceData* execute(const shmea::ServiceData* data)
 	{
+		// Log the server into the client
+		class GNet::Connection* destination = data->getConnection();
+
 		if (!serverInstance)
 			return NULL;
 
-		if (!cPanel)
+		if (data->getType() != shmea::ServiceData::TYPE_LIST)
 			return NULL;
 
-		cPanel->addToQ(data);
+		shmea::GList cList = data->getList();
+		if (cList.size() < 2)
+			return NULL;
+
+		// Check the characters in the name
+		shmea::GString clientName = cList.getString(0);
+		if (!GNet::Connection::validName(clientName))
+			clientName = "";
+		destination->setName(clientName);
+
+		// get the new encryption key
+		int64_t newKey = cList.getLong(1);
+		//printf("newKeyA: %ld\n", newKey);
+
+		// Set the new Connection key
+		destination->setKey(newKey);
 
 		return NULL;
 	}
 
 	GNet::Service* MakeService(GNet::GServer* newInstance) const
 	{
-		return new GUI_Callback(newInstance, cPanel);
+		return new Handshake_Client(newInstance);
 	}
 
 	shmea::GString getName() const
 	{
-		return "GUI_Callback";
+		return "Handshake_Client";
 	}
 };
 

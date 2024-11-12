@@ -26,7 +26,7 @@
 // SOFTWARE.
 #include "crt0.h"
 #include "Backend/Database/GList.h"
-#include "Backend/Machine Learning/glades.h"
+#include "Backend/Machine Learning/main.h"
 #include "Backend/Networking/main.h"
 #include "Backend/Networking/service.h"
 #include "Backend/Networking/socket.h"
@@ -38,7 +38,7 @@
 #include "services/ml_train.h"
 
 bool NNCreator::running = true;
-Version* NNCreator::version = new Version("0.57");
+Version* NNCreator::version = new Version("0.58");
 int NNCreator::debugType = DEBUG_SIMPLE;
 
 /*!

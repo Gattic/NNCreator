@@ -14,45 +14,11 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#ifndef _GNAIVEBAYES
-#define _GNAIVEBAYES
+#ifndef _GLADES_MAIN
+#define _GLADES_MAIN
 
-#include "Backend/Database/GTable.h"
-#include "../GMath/OHE.h"
-#include <stdio.h>
-#include <vector>
-#include <map>
+//#include "core/version.h"
 
-namespace glades {
-
-class NaiveBayes
-{
-private:
-
-	// <class id, class probility> <C, P(C)>
-	std::map<int, double> classes;
-
-	// <class id, <attribute id, probability> > <C, <x, P(x|C)> >
-	std::map<int, std::map<int, double> > attributesPerClass;
-
-	std::vector<OHE> OHEMaps;
-
-public:
-
-	NaiveBayes()
-	{
-		//
-	}
-
-	shmea::GTable import(const shmea::GList&);
-	shmea::GTable import(const shmea::GTable&);
-	void train(const shmea::GTable&);
-	int predict(const shmea::GList&);
-	void print() const;
-	void reset();
-
-	std::string getClassName(int) const;
-};
-};
+// extern Version version;
 
 #endif
