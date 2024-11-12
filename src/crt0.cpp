@@ -38,7 +38,7 @@
 #include "services/ml_train.h"
 
 bool NNCreator::running = true;
-Version* NNCreator::version = new Version("0.57");
+Version* NNCreator::version = new Version("0.58");
 int NNCreator::debugType = DEBUG_SIMPLE;
 
 /*!

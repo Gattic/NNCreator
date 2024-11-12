@@ -1,8 +1,8 @@
-# NNCreator v0.57 Alpha
+# NNCreator v0.58
 
 ## Github
 
-https://github.com/MeeseeksLookAtMe/NNCreator
+https://github.com/Gattic/NNCreator
 
 ---
 
