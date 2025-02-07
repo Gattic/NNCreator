@@ -23,13 +23,16 @@ OpenSSL
 `libssl-dev`
 `libcurl4-openssl-dev`
 
+FreeType Fonts
+libfreetype6-dev
+
 Optional:
 `clang-format`
 `gdb`
 
 One-liner for convenience:
 ```
-sudo apt-get install cmake make gcc g++ libsdl2-dev libsdl2-ttf-dev libsdl2-image-dev libssl-dev clang-format libcurl4-openssl-dev gdb
+sudo apt-get install cmake make gcc g++ libfreetype6-dev libsdl2-dev libsdl2-ttf-dev libsdl2-image-dev libssl-dev clang-format libcurl4-openssl-dev gdb
 ```
 
 ---
