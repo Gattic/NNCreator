@@ -114,3 +114,10 @@ add_custom_target(debug
 	DEPENDS ${PROJECT_NAME}
 	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
+
+#make profilelocal
+	add_custom_target(profilelocal
+	COMMAND valgrind --tool=callgrind ./build/${PROJECT_NAME} local
+	DEPENDS ${PROJECT_NAME}
+	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+)
