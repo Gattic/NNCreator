@@ -104,6 +104,24 @@ int main(int argc, char* argv[])
 	// Launch the gui
 	if (!noguiMode)
 		Frontend::run(serverInstance, fullScreenMode, compatMode);
+	else
+	{
+		printf("Running in server mode\n");
+
+		// Give time for the server to setup
+                sleep(2);
+		printf("Commands:\n");
+		for (std::string line=""; std::getline(std::cin, line);)
+		{
+			//printf("Input: %s\n", line.c_str());
+			if((!NNCreator::getRunning()) || (line == "exit") || (line == "quit"))
+			{
+				printf("Exiting...\n");
+				NNCreator::stop();
+				break;
+			}
+		}
+	}
 
 	// Cleanup GNet
 	serverInstance->stop();
