@@ -109,12 +109,12 @@ int main(int argc, char* argv[])
 		printf("Running in server mode\n");
 
 		// Give time for the server to setup
-                sleep(2);
+		sleep(2);
 		printf("Commands:\n");
-		for (std::string line=""; std::getline(std::cin, line);)
+		for (std::string line = ""; std::getline(std::cin, line);)
 		{
-			//printf("Input: %s\n", line.c_str());
-			if((!NNCreator::getRunning()) || (line == "exit") || (line == "quit"))
+			// printf("Input: %s\n", line.c_str());
+			if ((!NNCreator::getRunning()) || (line == "exit") || (line == "quit"))
 			{
 				printf("Exiting...\n");
 				NNCreator::stop();
