@@ -88,6 +88,11 @@ public:
 	const static unsigned int AGG_1D = 390;
 	const static unsigned int AGG_1W = 1950;
 	const static unsigned int AGG_3W = 5850;
+	const static unsigned int AGG_1M = 8190;
+
+	const static unsigned int C_AGG_1D = 1440;
+	const static unsigned int C_AGG_1W = 10080;
+	const static unsigned int C_AGG_1M = 43200;
 
 	static const unsigned int DEFAULT_NUM_ZONES = 10;
 	static const unsigned int DEFAULT_GRAPH_SIZE = 1;
