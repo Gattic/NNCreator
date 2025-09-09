@@ -20,7 +20,6 @@
 #include "../GItems/RUColors.h"
 #include "../GItems/RUComponent.h"
 #include "GeneralGraphable.h"
-#include <SDL2/SDL.h>
 #include <map>
 #include <pthread.h>
 #include <stdio.h>
@@ -107,14 +106,14 @@ public:
 	virtual ~RUGraph();
 
 	template< typename T>
-	void add(shmea::GString, const T*, SDL_Color = RUColors::DEFAULT_COLOR_LINE, bool = true);
+	void add(shmea::GString, const T*, GfxColor = RUColors::DEFAULT_COLOR_LINE, bool = true);
 
 	template< typename T>
-	void set(const shmea::GString&, const std::vector<T*>&, SDL_Color = RUColors::DEFAULT_COLOR_LINE);
+	void set(const shmea::GString&, const std::vector<T*>&, GfxColor = RUColors::DEFAULT_COLOR_LINE);
 
 
 	template< typename T>
-	void set(shmea::GString, const T*, SDL_Color = RUColors::DEFAULT_COLOR_LINE, bool = true);
+	void set(shmea::GString, const T*, GfxColor = RUColors::DEFAULT_COLOR_LINE, bool = true);
 
 	std::vector<shmea::GString> getNames() const;
 	void remove(const shmea::GString&);
@@ -155,7 +154,7 @@ public:
 };
 
 template< typename T>
-void RUGraph::add(shmea::GString label, const T* newPoint, SDL_Color lineColor, bool recompute)
+void RUGraph::add(shmea::GString label, const T* newPoint, GfxColor lineColor, bool recompute)
 {
 	T* plotterPoint = new T(*newPoint);
 	if ((graphables.find(label) == graphables.end()) || (graphables[label] == NULL))
@@ -177,7 +176,7 @@ void RUGraph::add(shmea::GString label, const T* newPoint, SDL_Color lineColor, 
 }
 
 template< typename T>
-void RUGraph::set(const shmea::GString& label, const std::vector<T*>& graphPoints, SDL_Color lineColor)
+void RUGraph::set(const shmea::GString& label, const std::vector<T*>& graphPoints, GfxColor lineColor)
 {
 	GeneralGraphable* newPlotter = NULL;
 	if (graphables.find(label) != graphables.end())
@@ -205,7 +204,7 @@ void RUGraph::set(const shmea::GString& label, const std::vector<T*>& graphPoint
 }
 
 template< typename T>
-void RUGraph::set(shmea::GString label, const T* newPoint, SDL_Color lineColor, bool recompute)
+void RUGraph::set(shmea::GString label, const T* newPoint, GfxColor lineColor, bool recompute)
 {
     clear();
     add(label, newPoint, lineColor, recompute);

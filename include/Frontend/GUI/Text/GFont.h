@@ -18,22 +18,20 @@
 #define _GFONT
 
 #include "Backend/Database/GString.h"
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_opengl.h>
-#include <SDL2/SDL_ttf.h>
+#include "../../Graphics/GfxTypes.h"
+// SDL_ttf is included transitively via GfxTypes
 #include <map>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
 
-class SDL_Renderer;
-class SDL_Texture;
+// Renderer comes from GfxTypes alias
 
 class GLetter
 {
 private:
 	char letter; // unnecassary
-	SDL_Texture* tex;
+	GfxTexture* tex;
 	int width; // NOT SCALED BY DIMRATIO YET!!
 public:
 	GLetter()
@@ -41,7 +39,7 @@ public:
 		tex = NULL;
 	}
 
-	GLetter(char newLetter, SDL_Texture* newTex, int newWidth)
+	GLetter(char newLetter, GfxTexture* newTex, int newWidth)
 	{
 		letter = newLetter;
 		tex = newTex;
@@ -59,7 +57,7 @@ public:
 	{
 		// TODO: Destroy the texture here
 		if(tex)
-			SDL_DestroyTexture(tex);
+			GFX_DestroyTexture(tex);
 		tex = NULL;
 	}
 
@@ -68,7 +66,7 @@ public:
 		return letter;
 	}
 
-	SDL_Texture* getTexture()
+	GfxTexture* getTexture()
 	{
 		return tex;
 	}
@@ -85,11 +83,12 @@ private:
 	static const int DEFAULT_FONT_SIZE = 30; // font resolution?
 
 	shmea::GString fontPath;
-	TTF_Font* font;
+	TTF_Font_Type* font;
+	bool ownsTTF;
 	int fontSize;
-	SDL_Color textColor;
+	GfxColor textColor;
 	std::map<char, GLetter*> textureMap;
-	SDL_Renderer* cRenderer;
+	GfxNativeRenderer* cRenderer;
 	int maxHeight;
 
 	void loadLetters();
@@ -97,23 +96,23 @@ private:
 public:
 	// constructor
 	GFont();
-	GFont(SDL_Renderer*, shmea::GString = "");
+	GFont(GfxNativeRenderer*, shmea::GString = "");
 	GFont(const GFont&);
 	~GFont();
 
-	SDL_Color getTextColor() const;
+	GfxColor getTextColor() const;
 	int getFontSize() const;
 	shmea::GString getFontPath() const;
-	TTF_Font* getFont() const;
+	TTF_Font_Type* getFont() const;
 	GLetter* getLetter(char) const;
 	int getMaxHeight() const;
 
 	void setFontSize(int);
-	void setTextColor(SDL_Color);
+	void setTextColor(GfxColor);
 
 	//
 	static bool validChar(char);
-	static char keycodeTOchar(SDL_Keycode);
+	static char keycodeTOchar(GfxKeycode);
 	static char specialChar(char keyPressed);
 };
 

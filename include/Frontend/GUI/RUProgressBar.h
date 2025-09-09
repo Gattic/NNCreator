@@ -29,7 +29,7 @@ class RUProgressBar : public RUComponent
 protected:
 	int value;
 	int maxValue;
-	SDL_Color barColor;
+	GfxColor barColor;
 
 public:
 	// constructors & destructor

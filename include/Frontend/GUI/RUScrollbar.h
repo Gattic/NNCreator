@@ -32,7 +32,7 @@ protected:
 	int maxValue;
 	int optionsShown;
 	int orientation;
-	SDL_Color barColor;
+	GfxColor barColor;
 	float arrowSpace;
 
 	const static shmea::GString arrowUpLocation;

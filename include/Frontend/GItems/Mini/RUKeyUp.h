@@ -19,7 +19,7 @@
 
 #include "../RUItemArea.h"
 #include "../GeneralListener.h"
-#include <SDL2/SDL.h>
+#include "../../Graphics/GfxTypes.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
@@ -33,7 +33,7 @@ class RUKeyUp : public virtual RUItemArea
 {
 protected:
 	// events
-	virtual void onKeyUp(gfxpp*, GPanel*, SDL_Keycode, Uint16);
+	virtual void onKeyUp(gfxpp*, GPanel*, GfxKeycode, Uint16);
 
 	// event listeners
 	GeneralListener KeyUpListener;
@@ -47,7 +47,7 @@ public:
 	void setKeyUpListener(GeneralListener);
 
 	// events
-	void onKeyUpHelper(gfxpp*, EventTracker*, GPanel*, SDL_Keycode, Uint16);
+	void onKeyUpHelper(gfxpp*, EventTracker*, GPanel*, GfxKeycode, Uint16);
 };
 
 #endif

@@ -51,7 +51,7 @@ public:
 	virtual void calculateSubItemPositions(std::pair<int, int>);
 
 	// events
-	virtual void processSubItemEvents(gfxpp*, EventTracker*, GPanel*, SDL_Event, int, int);
+	virtual void processSubItemEvents(gfxpp*, EventTracker*, GPanel*, GfxEvent, int, int);
 
 	// render
 	virtual void updateBackgroundHelper(gfxpp*);

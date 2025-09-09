@@ -17,8 +17,7 @@
 #ifndef _RUELLIPSE
 #define _RUELLIPSE
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_opengl.h>
+// removed SDL includes; this header should be backend-agnostic
 #include <map>
 #include <pthread.h>
 #include <stdio.h>

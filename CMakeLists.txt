@@ -28,6 +28,18 @@ project(NNCreator)
 set(G_VERSION_MAJOR 0)
 set(G_VERSION_MINOR 57)
 
+# Backend build options
+option(ENABLE_SDL2 "Build with SDL2 backend" OFF)
+option(ENABLE_OPENGL "Build with OpenGL/GLFW backend" ON)
+
+# Propagate compile definitions for conditional compilation
+if(ENABLE_SDL2)
+  add_definitions(-DGFX_HAVE_SDL2)
+endif()
+if(ENABLE_OPENGL)
+  add_definitions(-DGFX_HAVE_OPENGL)
+endif()
+
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   message(STATUS "Setting build type to '${DEFAULT_BUILD_TYPE}' as none was specified.")
   set(CMAKE_BUILD_TYPE "${DEFAULT_BUILD_TYPE}" CACHE STRING "Choose the type of build." FORCE)

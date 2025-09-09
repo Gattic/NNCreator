@@ -18,8 +18,7 @@
 #define _RUBORDERCOMP
 
 #include "../RUItemArea.h"
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_opengl.h>
+#include "../../Graphics/GfxTypes.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
@@ -30,25 +29,26 @@ class RUBorderComponent : public virtual RUItemArea
 {
 protected:
 	bool borderEnabled;
-	SDL_Color borderColor;
+	GfxColor borderColor;
 	int borderWidth;
 
 public:
+	static const int DEFAULT_BORDER_WIDTH = 1;
 	// constructors & destructor
 	RUBorderComponent();
 	RUBorderComponent(int);
-	RUBorderComponent(SDL_Color);
-	RUBorderComponent(int, SDL_Color);
+	RUBorderComponent(GfxColor);
+	RUBorderComponent(int, GfxColor);
 	virtual ~RUBorderComponent();
 
 	// gets
 	bool getBorderEnabled() const;
-	SDL_Color getBorderColor() const;
+	GfxColor getBorderColor() const;
 	int getBorderWidth() const;
 
 	// sets
 	void toggleBorder(bool);
-	void setBorderColor(SDL_Color);
+	void setBorderColor(GfxColor);
 	void setBorderWidth(int);
 
 	// render

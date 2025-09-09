@@ -19,8 +19,6 @@
 #define _RUCOMPONENT
 
 #include "GItem.h"
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_opengl.h>
 #include <map>
 #include <stdio.h>
 #include <stdlib.h>
@@ -41,7 +39,7 @@ public:
 	virtual void calculateSubItemPositions(std::pair<int, int>);
 
 	// events
-	virtual void processSubItemEvents(gfxpp*, EventTracker*, GPanel*, SDL_Event, int, int);
+	virtual void processSubItemEvents(gfxpp*, EventTracker*, GPanel*, GfxEvent, int, int);
 	virtual void hover(gfxpp*);
 	virtual void unhover(gfxpp*);
 

@@ -20,7 +20,6 @@
 #include "GItem.h"
 #include "Backend/Database/ServiceData.h"
 #include "Backend/Database/GString.h"
-#include <SDL2/SDL.h>
 #include <map>
 #include <pthread.h>
 #include <stdio.h>
@@ -69,7 +68,7 @@ public:
 	void hide(gfxpp*);
 	virtual void hover(gfxpp*);
 	virtual void unhover(gfxpp*);
-	virtual void processSubItemEvents(gfxpp*, EventTracker*, GPanel*, SDL_Event, int, int);
+	virtual void processSubItemEvents(gfxpp*, EventTracker*, GPanel*, GfxEvent, int, int);
 	virtual void updateBackgroundHelper(gfxpp*);
 
 	virtual shmea::GString getType() const;

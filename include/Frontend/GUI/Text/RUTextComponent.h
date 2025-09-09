@@ -18,9 +18,6 @@
 #define _RUTEXTCOMPONENT
 
 #include "../../GItems/RUComponent.h"
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_opengl.h>
-#include <SDL2/SDL_ttf.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
@@ -85,6 +82,7 @@ public:
 	// constructor
 	RUTextComponent();
 	virtual ~RUTextComponent();
+	virtual void unsetFocus();
 
 	// gets
 	shmea::GString getText() const;
@@ -109,7 +107,7 @@ public:
 	void setKeyListener(void (GPanel::*)(char));
 
 	// events
-	virtual bool onKeyHelper(gfxpp*, GPanel*, SDL_Keycode, Uint16);
+	virtual bool onKeyHelper(gfxpp*, GPanel*, GfxKeycode, Uint16);
 
 	// type
 	virtual shmea::GString getType() const = 0;

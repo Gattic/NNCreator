@@ -46,6 +46,7 @@
 #include "Frontend/GLayouts/GLinearLayout.h"
 #include "Frontend/GUI/RUCheckbox.h"
 #include "Frontend/GUI/RUDropdown.h"
+#include "Frontend/GUI/RUForm.h"
 #include "Frontend/GUI/RUImageComponent.h"
 #include "Frontend/GUI/RUMsgBox.h"
 #include "Frontend/GUI/RUTabContainer.h"
@@ -204,7 +205,7 @@ void NNCreatorPanel::buildPanel()
 	RULabel* lblTableConf = new RULabel();
 	lblTableConf->setWidth(300);
 	lblTableConf->setHeight(25);
-	lblTableConf->setText("            Confusion Matrix");
+	lblTableConf->setText("Confusion Matrix");
 	lblTableConf->setName("lblTableConf");
 	confTableLayout->addSubItem(lblTableConf);
 
@@ -285,7 +286,7 @@ void NNCreatorPanel::buildPanel()
 	RUButton* btnLoad = new RUButton();
 	btnLoad->setWidth(206);
 	btnLoad->setHeight(30);
-	btnLoad->setText("      Reload List");
+	btnLoad->setText("Reload List");
 	btnLoad->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedLoad));
 	btnLoad->setName("btnLoad");
 	loadNetLayout->addSubItem(btnLoad);
@@ -318,7 +319,7 @@ void NNCreatorPanel::buildPanel()
 	btnSave = new RUButton("green");
 	btnSave->setWidth(100);
 	btnSave->setHeight(30);
-	btnSave->setText("    Save");
+	btnSave->setText("Save");
 	btnSave->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedSave));
 	btnSave->setName("btnSave");
 	netNameLayout->addSubItem(btnSave);
@@ -327,7 +328,7 @@ void NNCreatorPanel::buildPanel()
 	btnDelete = new RUButton("red");
 	btnDelete->setWidth(100);
 	btnDelete->setHeight(30);
-	btnDelete->setText("  Delete");
+	btnDelete->setText("Delete");
 	btnDelete->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedDelete));
 	btnDelete->setName("btnDelete");
 	netNameLayout->addSubItem(btnDelete);
@@ -376,7 +377,7 @@ void NNCreatorPanel::buildPanel()
 	RUButton* sendButton = new RUButton("green");
 	sendButton->setWidth(80);
 	sendButton->setHeight(30);
-	sendButton->setText("   Run");
+	sendButton->setText("Run");
 	sendButton->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedRun));
 	sendButton->setName("sendButton");
 	runTestLayout->addSubItem(sendButton);
@@ -385,7 +386,7 @@ void NNCreatorPanel::buildPanel()
 	RUButton* contButton = new RUButton("blue");
 	contButton->setWidth(120);
 	contButton->setHeight(30);
-	contButton->setText("  Continue");
+	contButton->setText("Continue");
 	contButton->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedContinue));
 	contButton->setName("contButton");
 	runTestLayout->addSubItem(contButton);
@@ -394,7 +395,7 @@ void NNCreatorPanel::buildPanel()
 	RUButton* killButton = new RUButton("red");
 	killButton->setWidth(70);
 	killButton->setHeight(30);
-	killButton->setText("   Kill");
+	killButton->setText("Kill");
 	killButton->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedKill));
 	killButton->setName("killButton");
 	runTestLayout->addSubItem(killButton);
@@ -405,7 +406,7 @@ void NNCreatorPanel::buildPanel()
 	// leftSideLayout->addSubItem(crossValLayout); // TODO uncomment when cross val is tested
 
 	// Cross Validation checkbox
-	chkCrossVal = new RUCheckbox(" Cross Validate");
+	chkCrossVal = new RUCheckbox("Cross Validate");
 	chkCrossVal->setWidth(200);
 	chkCrossVal->setHeight(30);
 	chkCrossVal->setName("chkCrossVal");
@@ -469,7 +470,7 @@ void NNCreatorPanel::buildPanel()
 	inputOverallLayout->setX(getWidth() - 500);
 	inputOverallLayout->setY(90);
 	inputOverallLayout->setOrientation(GLinearLayout::VERTICAL);
-	layerTabs->addTab("   Input", inputOverallLayout);
+	layerTabs->addTab("Input", inputOverallLayout);
 
 	// Edit Input Layer Header
 	lblEditInputLayer = new RULabel();
@@ -478,6 +479,9 @@ void NNCreatorPanel::buildPanel()
 	lblEditInputLayer->setText("Edit Input Layer");
 	lblEditInputLayer->setName("lblEditInputLayer");
 	inputOverallLayout->addSubItem(lblEditInputLayer);
+
+	RUForm* inputLayerForm = new RUForm("inputLayerForm");
+	inputOverallLayout->addSubItem(inputLayerForm);
 
 	GLinearLayout* batchUpdateLayout = new GLinearLayout("batchUpdateLayout");
 	batchUpdateLayout->setOrientation(GLinearLayout::HORIZONTAL);
@@ -498,6 +502,7 @@ void NNCreatorPanel::buildPanel()
 	tbBatchSize->setText("1");
 	tbBatchSize->setName("tbBatchSize");
 	batchUpdateLayout->addSubItem(tbBatchSize);
+	inputLayerForm->addSubItem(tbBatchSize);
 
 	GLinearLayout* inputLCLayout = new GLinearLayout("inputLCLayout");
 	inputLCLayout->setOrientation(GLinearLayout::HORIZONTAL);
@@ -517,6 +522,7 @@ void NNCreatorPanel::buildPanel()
 	tbinputLR->setHeight(30);
 	tbinputLR->setName("tbinputLR");
 	inputLCLayout->addSubItem(tbinputLR);
+	inputLayerForm->addSubItem(tbinputLR);
 
 	GLinearLayout* inputMFLayout = new GLinearLayout("inputMFLayout");
 	inputMFLayout->setOrientation(GLinearLayout::HORIZONTAL);
@@ -536,6 +542,7 @@ void NNCreatorPanel::buildPanel()
 	tbinputMF->setHeight(30);
 	tbinputMF->setName("tbinputMF");
 	inputMFLayout->addSubItem(tbinputMF);
+	inputLayerForm->addSubItem(tbinputMF);
 
 	GLinearLayout* inputWDLayout1 = new GLinearLayout("inputWDLayout1");
 	inputWDLayout1->setOrientation(GLinearLayout::HORIZONTAL);
@@ -555,6 +562,7 @@ void NNCreatorPanel::buildPanel()
 	tbinputWD1->setHeight(30);
 	tbinputWD1->setName("tbinputWD1");
 	inputWDLayout1->addSubItem(tbinputWD1);
+	inputLayerForm->addSubItem(tbinputWD1);
 
 	GLinearLayout* inputWDLayout2 = new GLinearLayout("inputWDLayout2");
 	inputWDLayout2->setOrientation(GLinearLayout::HORIZONTAL);
@@ -574,6 +582,7 @@ void NNCreatorPanel::buildPanel()
 	tbinputWD2->setHeight(30);
 	tbinputWD2->setName("tbinputWD2");
 	inputWDLayout2->addSubItem(tbinputWD2);
+	inputLayerForm->addSubItem(tbinputWD2);
 
 	GLinearLayout* inputDropoutLayout = new GLinearLayout("inputDropoutLayout");
 	inputDropoutLayout->setOrientation(GLinearLayout::HORIZONTAL);
@@ -594,6 +603,7 @@ void NNCreatorPanel::buildPanel()
 	tbinputDropout->setText("0.0");
 	tbinputDropout->setName("tbinputDropout");
 	inputDropoutLayout->addSubItem(tbinputDropout);
+	inputLayerForm->addSubItem(tbinputDropout);
 
 	GLinearLayout* inputATLayout = new GLinearLayout("inputATLayout");
 	inputATLayout->setOrientation(GLinearLayout::HORIZONTAL);
@@ -641,6 +651,7 @@ void NNCreatorPanel::buildPanel()
 	tbinputAP->setHeight(30);
 	tbinputAP->setName("tbinputAP");
 	inputAPLayout->addSubItem(tbinputAP);
+	inputLayerForm->addSubItem(tbinputAP);
 
 	//-----------
 
@@ -649,7 +660,7 @@ void NNCreatorPanel::buildPanel()
 	lblPreview->setWidth(200);
 	lblPreview->setHeight(40);
 	lblPreview->setPadding(10);
-	lblPreview->setText(" Preview");
+	lblPreview->setText("Preview");
 	lblPreview->setName("lblPreview");
 	inputOverallLayout->addSubItem(lblPreview);
 
@@ -661,7 +672,7 @@ void NNCreatorPanel::buildPanel()
 	RUButton* btnPreviewTrain = new RUButton("blue");
 	btnPreviewTrain->setWidth(150);
 	btnPreviewTrain->setHeight(30);
-	btnPreviewTrain->setText(" Training Data");
+	btnPreviewTrain->setText("Training Data");
 	btnPreviewTrain->setMouseDownListener(
 		GeneralListener(this, &NNCreatorPanel::clickedPreviewTrain));
 	btnPreviewTrain->setName("btnPreviewTrain");
@@ -671,7 +682,7 @@ void NNCreatorPanel::buildPanel()
 	RUButton* tbnPreviewTest = new RUButton("blue");
 	tbnPreviewTest->setWidth(150);
 	tbnPreviewTest->setHeight(30);
-	tbnPreviewTest->setText(" Testing Data");
+	tbnPreviewTest->setText("Testing Data");
 	tbnPreviewTest->setMouseDownListener(
 		GeneralListener(this, &NNCreatorPanel::clickedPreviewTest));
 	tbnPreviewTest->setName("tbnPreviewTest");
@@ -693,11 +704,11 @@ void NNCreatorPanel::buildPanel()
 	previewTable->setWidth(getWidth() / 4);
 	previewTable->setHeight(getHeight() / 4);
 	previewTable->setName("previewTable");
-	previewTabs->addTab("   CSV", previewTable);
+	previewTabs->addTab("CSV", previewTable);
 
 	previewImageLayout = new GLinearLayout("previewImageLayout");
 	previewImageLayout->setOrientation(GLinearLayout::VERTICAL);
-	previewTabs->addTab("   Image", previewImageLayout);
+	previewTabs->addTab("Image", previewImageLayout);
 
 	shmea::GPointer<shmea::Image> prevImage(new shmea::Image());
 	// prevImage->LoadPNG("resources/bg.png");
@@ -718,7 +729,7 @@ void NNCreatorPanel::buildPanel()
 	RUButton* btnPrevious = new RUButton("blue");
 	btnPrevious->setWidth(110);
 	btnPrevious->setHeight(30);
-	btnPrevious->setText(" Previous");
+	btnPrevious->setText("Previous");
 	btnPrevious->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedPrevious));
 	btnPrevious->setName("btnPrevious");
 	prevImageBtnsLayout->addSubItem(btnPrevious);
@@ -727,7 +738,7 @@ void NNCreatorPanel::buildPanel()
 	RUButton* btnNext = new RUButton("blue");
 	btnNext->setWidth(80);
 	btnNext->setHeight(30);
-	btnNext->setText(" Next");
+	btnNext->setText("Next");
 	btnNext->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedNext));
 	btnNext->setName("btnNext");
 	prevImageBtnsLayout->addSubItem(btnNext);
@@ -736,7 +747,10 @@ void NNCreatorPanel::buildPanel()
 	hiddenOverallLayout->setX(getWidth() - 500);
 	hiddenOverallLayout->setY(90);
 	hiddenOverallLayout->setOrientation(GLinearLayout::VERTICAL);
-	layerTabs->addTab(" Hidden", hiddenOverallLayout);
+	layerTabs->addTab("Hidden", hiddenOverallLayout);
+
+	RUForm* hiddenLayerForm = new RUForm("hiddenLayerForm");
+	hiddenOverallLayout->addSubItem(hiddenLayerForm);
 
 	// Hidden Layer Title Label
 	RULabel* lbllayertitle = new RULabel();
@@ -767,6 +781,7 @@ void NNCreatorPanel::buildPanel()
 	tbHiddenLayerCount->setName("tbHiddenLayerCount");
 	tbHiddenLayerCount->setLoseFocusListener(GeneralListener(this, &NNCreatorPanel::tbHLLoseFocus));
 	hlcLayout->addSubItem(tbHiddenLayerCount);
+	hiddenLayerForm->addSubItem(tbHiddenLayerCount);
 
 	GLinearLayout* hlSelectLayout = new GLinearLayout("hlSelectLayout");
 	hlSelectLayout->setOrientation(GLinearLayout::HORIZONTAL);
@@ -807,6 +822,7 @@ void NNCreatorPanel::buildPanel()
 	tbHiddenLayerSize->setHeight(30);
 	tbHiddenLayerSize->setName("tbHiddenLayerSize");
 	hlSizeLayout->addSubItem(tbHiddenLayerSize);
+	hiddenLayerForm->addSubItem(tbHiddenLayerSize);
 
 	GLinearLayout* lcLayout = new GLinearLayout("lcLayout");
 	lcLayout->setOrientation(GLinearLayout::HORIZONTAL);
@@ -826,6 +842,7 @@ void NNCreatorPanel::buildPanel()
 	tbLearningRate->setHeight(30);
 	tbLearningRate->setName("tbLearningRate");
 	lcLayout->addSubItem(tbLearningRate);
+	hiddenLayerForm->addSubItem(tbLearningRate);
 
 	GLinearLayout* mfLayout = new GLinearLayout("mfLayout");
 	mfLayout->setOrientation(GLinearLayout::HORIZONTAL);
@@ -845,6 +862,7 @@ void NNCreatorPanel::buildPanel()
 	tbMomentumFactor->setHeight(30);
 	tbMomentumFactor->setName("tbMomentumFactor");
 	mfLayout->addSubItem(tbMomentumFactor);
+	hiddenLayerForm->addSubItem(tbMomentumFactor);
 
 	GLinearLayout* wdLayout1 = new GLinearLayout("wdLayout1");
 	wdLayout1->setOrientation(GLinearLayout::HORIZONTAL);
@@ -864,6 +882,7 @@ void NNCreatorPanel::buildPanel()
 	tbWeightDecay1->setHeight(30);
 	tbWeightDecay1->setName("tbWeightDecay1");
 	wdLayout1->addSubItem(tbWeightDecay1);
+	hiddenLayerForm->addSubItem(tbWeightDecay1);
 
 	GLinearLayout* wdLayout2 = new GLinearLayout("wdLayout2");
 	wdLayout2->setOrientation(GLinearLayout::HORIZONTAL);
@@ -883,6 +902,7 @@ void NNCreatorPanel::buildPanel()
 	tbWeightDecay2->setHeight(30);
 	tbWeightDecay2->setName("tbWeightDecay2");
 	wdLayout2->addSubItem(tbWeightDecay2);
+	hiddenLayerForm->addSubItem(tbWeightDecay2);
 
 	GLinearLayout* pHiddenLayout = new GLinearLayout("pHiddenLayout");
 	pHiddenLayout->setOrientation(GLinearLayout::HORIZONTAL);
@@ -902,6 +922,7 @@ void NNCreatorPanel::buildPanel()
 	tbPHidden->setHeight(30);
 	tbPHidden->setName("tbPHidden");
 	pHiddenLayout->addSubItem(tbPHidden);
+	hiddenLayerForm->addSubItem(tbPHidden);
 
 	GLinearLayout* actTypeLayout = new GLinearLayout("actTypeLayout");
 	actTypeLayout->setOrientation(GLinearLayout::HORIZONTAL);
@@ -949,6 +970,7 @@ void NNCreatorPanel::buildPanel()
 	tbActivationParam->setHeight(30);
 	tbActivationParam->setName("tbActivationParam");
 	actParamLayout->addSubItem(tbActivationParam);
+	hiddenLayerForm->addSubItem(tbActivationParam);
 
 	GLinearLayout* hCopyLayout = new GLinearLayout("hCopyLayout");
 	hCopyLayout->setOrientation(GLinearLayout::HORIZONTAL);
@@ -977,7 +999,7 @@ void NNCreatorPanel::buildPanel()
 	RUButton* btnCopy = new RUButton();
 	btnCopy->setWidth(122);
 	btnCopy->setHeight(30);
-	btnCopy->setText("     Copy");
+	btnCopy->setText("Copy");
 	btnCopy->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedCopy));
 	btnCopy->setName("btnCopy");
 	bCopyLayout->addSubItem(btnCopy);
@@ -986,7 +1008,7 @@ void NNCreatorPanel::buildPanel()
 	RUButton* btnRemove = new RUButton("red");
 	btnRemove->setWidth(122);
 	btnRemove->setHeight(30);
-	btnRemove->setText("   Remove");
+	btnRemove->setText("Remove");
 	btnRemove->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedRemove));
 	btnRemove->setName("btnRemove");
 	bCopyLayout->addSubItem(btnRemove);
@@ -995,7 +1017,7 @@ void NNCreatorPanel::buildPanel()
 	outputOverallLayout->setX(getWidth() - 500);
 	outputOverallLayout->setY(90);
 	outputOverallLayout->setOrientation(GLinearLayout::VERTICAL);
-	layerTabs->addTab(" Output", outputOverallLayout);
+	layerTabs->addTab("Output", outputOverallLayout);
 
 	// Edit Output Layer Header
 	lblEditOutputLayer = new RULabel();
@@ -1024,9 +1046,9 @@ void NNCreatorPanel::buildPanel()
 	ddOutputType->setOptionsShown(2);
 	ddOutputType->setName("ddOutputType");
 
-	ddOutputType->addOption(" Regression");
-	ddOutputType->addOption(" Classification");
-	ddOutputType->addOption(" KL Divergence");
+	ddOutputType->addOption("Regression");
+	ddOutputType->addOption("Classification");
+	ddOutputType->addOption("KL Divergence");
 	outputTypeLayout->addSubItem(ddOutputType);
 
 	GLinearLayout* outputSizeLayout = new GLinearLayout("outputSizeLayout");
@@ -1081,7 +1103,7 @@ void NNCreatorPanel::loadDDNN()
 	ddNeuralNet->clearOptions();
 
 	// add the "new" item option
-	ddNeuralNet->addOption(" New");
+	ddNeuralNet->addOption("New");
 
 	// add items from nnetworks table to dropdown
 	shmea::SaveFolder* nnList = new shmea::SaveFolder("neuralnetworks");

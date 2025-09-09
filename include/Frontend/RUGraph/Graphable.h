@@ -17,8 +17,6 @@
 #ifndef _GRAPHABLE_H
 #define _GRAPHABLE_H
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_opengl.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -43,7 +41,7 @@ public:
 
 	// constructors & destructor
 	Graphable();
-	Graphable(RUGraph*, SDL_Color);
+	Graphable(RUGraph*, GfxColor);
 	virtual ~Graphable();
 
 	unsigned int size() const;
@@ -60,7 +58,7 @@ public:
 };
 
 template <class T>
-Graphable<T>::Graphable(RUGraph* newParent, SDL_Color newColor) : GraphableAttr(newParent, newColor)
+Graphable<T>::Graphable(RUGraph* newParent, GfxColor newColor) : GraphableAttr(newParent, newColor)
 {
 	visible = true;
 }

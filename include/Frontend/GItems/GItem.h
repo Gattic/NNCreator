@@ -29,7 +29,6 @@
 #include "Mini/RUMouseWheel.h"
 #include "RUItemArea.h"
 #include "GeneralListener.h"
-#include <SDL2/SDL.h>
 #include <map>
 #include <stdio.h>
 #include <stdlib.h>
@@ -56,7 +55,7 @@ protected:
 	int id;
 	unsigned int zindex;
 	shmea::GString name;
-	SDL_Texture* background;
+	GfxTexture* background;
 	std::vector<GItem*> subitems;
 
 	EventTracker* eventsStatus;
@@ -79,7 +78,7 @@ public:
 	GItem* getItemByID(int);
 	GItem* getItemByName(const shmea::GString&);
 	unsigned int getZIndex() const;
-	SDL_Texture* getBackground();
+	GfxTexture* getBackground();
 	std::vector<GItem*> getItems() const;
 
 	// sets
@@ -101,8 +100,8 @@ public:
 	virtual void updateBackgroundHelper(gfxpp*) = 0;
 
 	// event functions
-	EventTracker* processEvents(gfxpp*, GPanel*, SDL_Event, int, int);
-	virtual void processSubItemEvents(gfxpp*, EventTracker*, GPanel*, SDL_Event, int, int) = 0;
+	EventTracker* processEvents(gfxpp*, GPanel*, GfxEvent, int, int);
+	virtual void processSubItemEvents(gfxpp*, EventTracker*, GPanel*, GfxEvent, int, int) = 0;
 
 	virtual shmea::GString getType() const = 0;
 };
