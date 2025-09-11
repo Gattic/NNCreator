@@ -458,7 +458,7 @@ void NNCreatorPanel::buildPanel()
 
 	// Layer Tab navigation
 	layerTabs = new RUTabContainer();
-	layerTabs->setWidth(90);
+	layerTabs->setWidth(120);
 	layerTabs->setTabHeight(30);
 	layerTabs->setOptionsShown(3);
 	layerTabs->setPadding(10);

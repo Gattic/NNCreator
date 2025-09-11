@@ -18,6 +18,7 @@
 #define _GRELATIVELAYOUT
 
 #include "../GItems/GLayout.h"
+#include <map>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -32,21 +33,59 @@ class EventTracker;
 
 class GRelativeLayout : public GLayout
 {
+public:
+	// Alignment options within this layout's bounds
+	enum Alignment
+	{
+		TOP_LEFT = 0,
+		TOP = 1,
+		TOP_RIGHT = 2,
+		LEFT = 3,
+		CENTER = 4,
+		RIGHT = 5,
+		BOTTOM_LEFT = 6,
+		BOTTOM = 7,
+		BOTTOM_RIGHT = 8
+	};
+
+private:
 	// render
 	void updateBackground(gfxpp*);
+
+	// Track per-item alignment within this layout
+	std::map<GItem*, int> itemAlignment;
+
+	// Cached computed inner content size derived from children
+	int computedContentWidth;
+	int computedContentHeight;
+
+	// Recompute content size based on current visible children and their alignment
+	void computeContentExtents();
 
 public:
 	GRelativeLayout(shmea::GString);
 
 	virtual void calculateSubItemPositions(std::pair<int, int>);
 
+
 	// events
 	virtual void processSubItemEvents(gfxpp*, EventTracker*, GPanel*, GfxEvent, int, int);
+
 
 	// render
 	virtual void updateBackgroundHelper(gfxpp*);
 
+
 	virtual shmea::GString getType() const;
+
+	// API to add and configure aligned children
+	virtual void addSubItem(GItem*, unsigned int = Z_FRONT);
+	void addSubItemAligned(GItem*, Alignment, unsigned int = Z_FRONT);
+	void setItemAlignment(GItem*, Alignment);
+
+	// Access computed content size (excludes padding)
+	int getComputedContentWidth() const { return computedContentWidth; }
+	int getComputedContentHeight() const { return computedContentHeight; }
 };
 
 #endif

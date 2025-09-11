@@ -67,6 +67,11 @@ protected:
 	bool passwordField;
 	unsigned int cursorStart;
 	bool readOnly;
+	int fontPixelHeight; // 0 = auto (existing behavior)
+	bool autoWidthToText; // when true, set width to text width (default true)
+
+	// helpers
+	int measureFullTextWidth(gfxpp*) const;
 
 	// render
 	void calculateRenderInfo(GFont*);
@@ -97,6 +102,10 @@ public:
 	void setPasswordField(bool);
 	void setReadOnly(bool);
 	void setFontColor(int);
+	void setFontSize(int);
+	int getFontSize() const;
+	void setAutoWidthToText(bool);
+	bool getAutoWidthToText() const;
 
 	// render
 	void drawText(gfxpp*);
