@@ -69,9 +69,11 @@ protected:
 	bool readOnly;
 	int fontPixelHeight; // 0 = auto (existing behavior)
 	bool autoWidthToText; // when true, set width to text width (default true)
+	bool autoHeightToFont; // when true, set height to font pixel height (default false)
 
 	// helpers
 	int measureFullTextWidth(gfxpp*) const;
+	int measureFontPixelHeight(gfxpp*) const;
 
 	// render
 	void calculateRenderInfo(GFont*);
@@ -88,6 +90,7 @@ public:
 	RUTextComponent();
 	virtual ~RUTextComponent();
 	virtual void unsetFocus();
+	virtual void updateBackgroundHelper(gfxpp*) override;
 
 	// gets
 	shmea::GString getText() const;
@@ -106,6 +109,8 @@ public:
 	int getFontSize() const;
 	void setAutoWidthToText(bool);
 	bool getAutoWidthToText() const;
+	void setAutoHeightToFont(bool);
+	bool getAutoHeightToFont() const;
 
 	// render
 	void drawText(gfxpp*);
