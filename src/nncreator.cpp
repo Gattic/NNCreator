@@ -293,14 +293,13 @@ void NNCreatorPanel::buildPanel()
 	GLinearLayout* netNameLayout = new GLinearLayout("netNameLayout");
 	netNameLayout->setOrientation(GLinearLayout::HORIZONTAL);
 	leftSideLayout->addSubItem(netNameLayout);
-
 	// Network Name label
 	lblNetName = new RULabel();
 	lblNetName->setX(6);
 	lblNetName->setY(6 + lblNeuralNet->getY() + lblNeuralNet->getHeight());
 	lblNetName->setWidth(200);
 	lblNetName->setHeight(30);
-	lblNetName->setText("Network Name");
+	lblNetName->setText("Network Structure");
 	lblNetName->setName("lblNetName");
 	netNameLayout->addSubItem(lblNetName);
 
@@ -331,6 +330,80 @@ void NNCreatorPanel::buildPanel()
 	btnDelete->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedDelete));
 	btnDelete->setName("btnDelete");
 	netNameLayout->addSubItem(btnDelete);
+
+	GLinearLayout* loadNetLayoutWeights = new GLinearLayout("loadNetLayoutWeights");
+	loadNetLayoutWeights->setOrientation(GLinearLayout::HORIZONTAL);
+	leftSideLayout->addSubItem(loadNetLayoutWeights);
+
+	// Neural Net selector label
+	lblNeuralNetWeights = new RULabel();
+	lblNeuralNetWeights->setWidth(200);
+	lblNeuralNetWeights->setHeight(30);
+	lblNeuralNetWeights->setText("Load NN Weights");
+	lblNeuralNetWeights->setName("lblNeuralNetWeights");
+	loadNetLayoutWeights->addSubItem(lblNeuralNetWeights);
+
+	// Neural Net selector
+	ddNeuralNetWeights = new RUDropdown();
+	ddNeuralNetWeights->setWidth(220);
+	ddNeuralNetWeights->setHeight(30);
+	ddNeuralNetWeights->setOptionsShown(3);
+	ddNeuralNetWeights->setName("ddNeuralNetWeights");
+	ddNeuralNetWeights->setOptionChangedListener(
+		GeneralListener(this, &NNCreatorPanel::nnWeightsSelectorChanged));
+	loadNetLayoutWeights->addSubItem(ddNeuralNetWeights);
+
+	// Load button
+	RUButton* btnLoadWeights = new RUButton();
+	btnLoadWeights->setWidth(206);
+	btnLoadWeights->setHeight(30);
+	btnLoadWeights->setText("      Reload List");
+	btnLoadWeights->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedLoad));
+	btnLoadWeights->setName("btnLoad");
+	loadNetLayoutWeights->addSubItem(btnLoadWeights);
+
+	GLinearLayout* netNameLayoutWeights = new GLinearLayout("netNameLayout");
+	netNameLayoutWeights->setOrientation(GLinearLayout::HORIZONTAL);
+	leftSideLayout->addSubItem(netNameLayoutWeights);
+	// Network Name label
+	lblNetNameWeights = new RULabel();
+	lblNetNameWeights->setX(6);
+	lblNetNameWeights->setY(6 + lblNeuralNet->getY() + lblNeuralNet->getHeight());
+	lblNetNameWeights->setWidth(200);
+	lblNetNameWeights->setHeight(30);
+	lblNetNameWeights->setText("NN Weights");
+	lblNetNameWeights->setName("lblNetNameWeights");
+	netNameLayoutWeights->addSubItem(lblNetNameWeights);
+
+	// Network Name textbox
+	tbNetNameWeights = new RUTextbox();
+	tbNetNameWeights->setX(20 + lblNetNameWeights->getX() + lblNetNameWeights->getWidth());
+	tbNetNameWeights->setY(lblNetName->getY());
+	tbNetNameWeights->setWidth(220);
+	tbNetNameWeights->setHeight(30);
+	tbNetNameWeights->setText("");
+	tbNetNameWeights->setName("tbNetNameWeights");
+	netNameLayoutWeights->addSubItem(tbNetNameWeights);
+
+	// Save button
+	btnSaveWeights = new RUButton("green");
+	btnSaveWeights->setWidth(100);
+	btnSaveWeights->setHeight(30);
+	btnSaveWeights->setText("    Save");
+	btnSaveWeights->setMouseDownListener(
+		GeneralListener(this, &NNCreatorPanel::clickedSaveWeights));
+	btnSaveWeights->setName("btnSaveWeights");
+	netNameLayoutWeights->addSubItem(btnSaveWeights);
+
+	// Delete button
+	btnDeleteWeights = new RUButton("red");
+	btnDeleteWeights->setWidth(100);
+	btnDeleteWeights->setHeight(30);
+	btnDeleteWeights->setText("  Delete");
+	btnDeleteWeights->setMouseDownListener(
+		GeneralListener(this, &NNCreatorPanel::clickedDeleteWeights));
+	btnDeleteWeights->setName("btnDeleteWeights");
+	netNameLayoutWeights->addSubItem(btnDeleteWeights);
 
 	// Input/Output Data Type Layout
 	GLinearLayout* dataTypeLayout = new GLinearLayout("dataTypeLayout");
@@ -1095,6 +1168,25 @@ void NNCreatorPanel::loadDDNN()
 
 		ddNeuralNet->addOption(cItem->getName());
 	}
+
+	// clear the old items
+	ddNeuralNetWeights->clearOptions();
+
+	// add the "new" item option
+	ddNeuralNetWeights->addOption(" ");
+
+	// add items from nnetworks table to dropdown
+	shmea::SaveFolder* nnListWeights = new shmea::SaveFolder("nn-state");
+	nnListWeights->load();
+	std::vector<shmea::SaveTable*> saveTablesWeights = nnListWeights->getItems();
+	for (unsigned int i = 0; i < saveTablesWeights.size(); ++i)
+	{
+		shmea::SaveTable* cItem = saveTablesWeights[i];
+		if (!cItem)
+			continue;
+
+		ddNeuralNetWeights->addOption(cItem->getName());
+	}
 }
 
 /*!
@@ -1455,7 +1547,7 @@ void NNCreatorPanel::clickedSave(const shmea::GString& cmpName, int x, int y)
 	syncFormVar();
 
 	shmea::GString netName = tbNetName->getText();
-	formInfo->setName(netName.c_str());
+	//	formInfo->setName(netName.c_str());
 
 	shmea::GType batchSize =
 		shmea::GString::Typify(tbBatchSize->getText(), tbBatchSize->getText().size());
@@ -1513,6 +1605,71 @@ void NNCreatorPanel::clickedSave(const shmea::GString& cmpName, int x, int y)
 	NNetwork* network = new NNetwork(formInfo);
 	glades::saveNeuralNetwork(network);
 	loadDDNN();
+}
+
+/*!
+ * @brief Save NN weights to file
+ * @details save a neural network bias and edge weights
+ * @param cmpName the name of the component where the event happened
+ * @param x the x-coordinate where the event happened (not used)
+ * @param y the y-coordinate where the event happened (not used)
+ */
+void NNCreatorPanel::clickedSaveWeights(const shmea::GString& cmpName, int x, int y)
+{
+
+	if (!tbNetNameWeights)
+		return;
+
+	if (tbNetNameWeights->getText().length() == 0)
+		return;
+
+	shmea::SaveFolder* folderToSave = new shmea::SaveFolder("nn-state");
+	if (!folderToSave->checkFolder())
+	{
+		return;
+	}
+
+	std::ofstream out((folderToSave->getPath() + tbNetNameWeights->getText()).c_str());
+	if (!out)
+	{
+		return;
+	}
+
+	shmea::GString serverIP = "127.0.0.1";
+
+	// make sure the layers are up to date
+	syncFormVar();
+
+	shmea::GString netName = tbNetNameWeights->getText();
+
+	int layerCount = nn->getLayersCount();
+	for (int i = 1; i < layerCount; ++i)
+	{
+		float biasWeight = nn->getLayerBiasWeight(i);
+		int lNeuronCount = nn->getLayerNeuronsCount(i);
+		int neuronEdgeCount = 0;
+		std::vector<shmea::GPointer<DrawNeuron> > neurons = nn->getLayerNeurons(i);
+		if (lNeuronCount > 0 && neurons.size() > 0)
+		{
+			neuronEdgeCount = neurons[0]->getWeights().size();
+		}
+
+		out << biasWeight << " ";
+		out << lNeuronCount << " ";
+		out << neuronEdgeCount << "\n";
+
+		for (int n = 0; n < lNeuronCount; ++n)
+		{
+			DrawNeuron neuron = *neurons[n];
+			std::vector<shmea::GPointer<float> > cWeights = neuron.getWeights();
+			for (int e = 0; e < cWeights.size(); ++e)
+			{
+				float w = *cWeights[e];
+				out << w << " ";
+			}
+		}
+		out << "\n";
+	}
 }
 
 /*!
@@ -1583,6 +1740,7 @@ void NNCreatorPanel::clickedRun(const shmea::GString& cmpName, int x, int y)
 	// Get the vars from the components
 	shmea::GString netName = tbNetName->getText();
 	shmea::GString testFName = ddDatasets->getSelectedText();
+	shmea::GString netNameWeights = ddNeuralNetWeights->getSelectedText();
 	int64_t trainPct =
 		parsePct(shmea::GString::Typify(tbTrainPct->getText(), tbTrainPct->getText().size()));
 	int64_t testPct =
@@ -1612,6 +1770,9 @@ void NNCreatorPanel::clickedRun(const shmea::GString& cmpName, int x, int y)
 	wData.addString(netName);
 	wData.addString(testFName);
 	wData.addInt(importType);
+	if (netNameWeights.c_str() != " ")
+		wData.addString(netNameWeights);
+
 	/*wData.addLong(trainPct);
 	wData.addLong(testPct);
 	wData.addLong(validationPct);*/
@@ -1660,6 +1821,7 @@ void NNCreatorPanel::clickedContinue(const shmea::GString& cmpName, int x, int y
 	// Get the vars from the components
 	shmea::GString netName = tbNetName->getText();
 	shmea::GString testFName = ddDatasets->getSelectedText();
+	shmea::GString netNameWeights = ddNeuralNetWeights->getSelectedText();
 	int64_t trainPct =
 		parsePct(shmea::GString::Typify(tbTrainPct->getText(), tbTrainPct->getText().size()));
 	int64_t testPct =
@@ -1688,6 +1850,8 @@ void NNCreatorPanel::clickedContinue(const shmea::GString& cmpName, int x, int y
 	wData.addString(netName);
 	wData.addString(testFName);
 	wData.addInt(importType);
+	if (netNameWeights.c_str() != " ")
+		wData.addString(netNameWeights);
 	/*wData.addLong(trainPct);
 	wData.addLong(testPct);
 	wData.addLong(validationPct);*/
@@ -1825,6 +1989,19 @@ void NNCreatorPanel::clickedDelete(const shmea::GString& cmpName, int x, int y)
 	RUMsgBox::MsgBox(this, "Neural Net", buffer, RUMsgBox::MESSAGEBOX);
 }
 
+void NNCreatorPanel::clickedDeleteWeights(const shmea::GString& cmpName, int x, int y)
+{
+	shmea::GString netName = tbNetNameWeights->getText();
+	shmea::SaveFolder* nnList = new shmea::SaveFolder("nn-state");
+	nnList->deleteItem(netName);
+	loadDDNN();
+
+	// Display a popup alert
+	char buffer[netName.length()];
+	sprintf(buffer, "Deleted \"%s\"", netName.c_str());
+	RUMsgBox::MsgBox(this, "Neural Net", buffer, RUMsgBox::MESSAGEBOX);
+}
+
 void NNCreatorPanel::clickedPreviewTrain(const shmea::GString& cmpName, int x, int y)
 {
 	if (!ddDatasets)
@@ -1912,6 +2089,21 @@ void NNCreatorPanel::nnSelectorChanged(int newIndex)
 
 	// Load the NN into the form
 	loadNNet(cNetwork.getNNInfo());
+}
+
+void NNCreatorPanel::nnWeightsSelectorChanged(int newIndex)
+{
+	// Only load after a selection click (not an open click)
+	if (ddNeuralNetWeights->isOpen())
+		return;
+
+	// make sure the user wants to actually load a network, since index 0 = " "
+	int loadOrSave = ddNeuralNetWeights->getSelectedIndex();
+	if (loadOrSave == 0)
+		return;
+
+	shmea::GString netName = ddNeuralNetWeights->getSelectedText();
+	tbNetNameWeights->setText(netName);
 }
 
 /*!
