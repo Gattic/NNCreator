@@ -130,8 +130,6 @@ void NNCreatorPanel::buildPanel()
 
 	// Learning Curve Label
 	RULabel* lblGraphLC = new RULabel();
-	lblGraphLC->setWidth(300);
-	lblGraphLC->setHeight(25);
 	lblGraphLC->setText("Learning Curve (Epoch, Error)");
 	lblGraphLC->setName("lblGraphLC");
 	lcGraphLayout->addSubItem(lblGraphLC);
@@ -149,8 +147,6 @@ void NNCreatorPanel::buildPanel()
 
 	// ROC Curve Label
 	RULabel* lblGraphROC = new RULabel();
-	lblGraphROC->setWidth(350);
-	lblGraphROC->setHeight(25);
 	lblGraphROC->setText("ROC Curve (False Pos, True pos)");
 	lblGraphROC->setName("lblGraphROC");
 	rocGraphLayout->addSubItem(lblGraphROC);
@@ -175,8 +171,6 @@ void NNCreatorPanel::buildPanel()
 
 	// Output Image Label
 	RULabel* lblOutputImg = new RULabel();
-	lblOutputImg->setWidth(310);
-	lblOutputImg->setHeight(24);
 	lblOutputImg->setText("Output Image");
 	lblOutputImg->setName("lblOutputImg");
 	outputImageLayout->addSubItem(lblOutputImg);
@@ -203,8 +197,6 @@ void NNCreatorPanel::buildPanel()
 
 	// Confusion Matrix Label
 	RULabel* lblTableConf = new RULabel();
-	lblTableConf->setWidth(300);
-	lblTableConf->setHeight(25);
 	lblTableConf->setText("Confusion Matrix");
 	lblTableConf->setName("lblTableConf");
 	confTableLayout->addSubItem(lblTableConf);
@@ -235,16 +227,12 @@ void NNCreatorPanel::buildPanel()
 
 	// Epochs Label
 	lblEpochs = new RULabel();
-	lblEpochs->setWidth(100);
-	lblEpochs->setHeight(26);
 	lblEpochs->setText("");
 	lblEpochs->setName("lblEpochs");
 	statsLayout->addSubItem(lblEpochs);
 
 	// Accuracy Label
 	lblAccuracy = new RULabel();
-	lblAccuracy->setWidth(200);
-	lblAccuracy->setHeight(26);
 	lblAccuracy->setText("");
 	lblAccuracy->setName("lblAccuracy");
 	statsLayout->addSubItem(lblAccuracy);
@@ -253,8 +241,6 @@ void NNCreatorPanel::buildPanel()
 
 	// Neural Network Settings header
 	lblSettings = new RULabel();
-	lblSettings->setWidth(250);
-	lblSettings->setHeight(40);
 	lblSettings->setPadding(10);
 	lblSettings->setText("Neural Network Settings");
 	lblSettings->setName("lblSettings");
@@ -266,8 +252,6 @@ void NNCreatorPanel::buildPanel()
 
 	// Neural Net selector label
 	lblNeuralNet = new RULabel();
-	lblNeuralNet->setWidth(200);
-	lblNeuralNet->setHeight(30);
 	lblNeuralNet->setText("Neural Network");
 	lblNeuralNet->setName("lblNeuralNet");
 	loadNetLayout->addSubItem(lblNeuralNet);
@@ -284,8 +268,6 @@ void NNCreatorPanel::buildPanel()
 
 	// Load button
 	RUButton* btnLoad = new RUButton();
-	btnLoad->setWidth(206);
-	btnLoad->setHeight(30);
 	btnLoad->setText("Reload List");
 	btnLoad->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedLoad));
 	btnLoad->setName("btnLoad");
@@ -299,8 +281,6 @@ void NNCreatorPanel::buildPanel()
 	lblNetName = new RULabel();
 	lblNetName->setX(6);
 	lblNetName->setY(6 + lblNeuralNet->getY() + lblNeuralNet->getHeight());
-	lblNetName->setWidth(200);
-	lblNetName->setHeight(30);
 	lblNetName->setText("Network Name");
 	lblNetName->setName("lblNetName");
 	netNameLayout->addSubItem(lblNetName);
@@ -310,15 +290,12 @@ void NNCreatorPanel::buildPanel()
 	tbNetName->setX(20 + lblNetName->getX() + lblNetName->getWidth());
 	tbNetName->setY(lblNetName->getY());
 	tbNetName->setWidth(220);
-	tbNetName->setHeight(30);
 	tbNetName->setText("");
 	tbNetName->setName("tbNetName");
 	netNameLayout->addSubItem(tbNetName);
 
 	// Save button
 	btnSave = new RUButton("green");
-	btnSave->setWidth(100);
-	btnSave->setHeight(30);
 	btnSave->setText("Save");
 	btnSave->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedSave));
 	btnSave->setName("btnSave");
@@ -326,8 +303,6 @@ void NNCreatorPanel::buildPanel()
 
 	// Delete button
 	btnDelete = new RUButton("red");
-	btnDelete->setWidth(100);
-	btnDelete->setHeight(30);
 	btnDelete->setText("Delete");
 	btnDelete->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedDelete));
 	btnDelete->setName("btnDelete");
@@ -340,8 +315,6 @@ void NNCreatorPanel::buildPanel()
 
 	// Input/Output Data Type label
 	RULabel* lbldatarow = new RULabel();
-	lbldatarow->setWidth(170);
-	lbldatarow->setHeight(30);
 	lbldatarow->setText("Data Type/Path");
 	lbldatarow->setName("lbldatarow");
 	dataTypeLayout->addSubItem(lbldatarow);
@@ -375,8 +348,6 @@ void NNCreatorPanel::buildPanel()
 
 	// Run Button
 	RUButton* sendButton = new RUButton("green");
-	sendButton->setWidth(80);
-	sendButton->setHeight(30);
 	sendButton->setText("Run");
 	sendButton->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedRun));
 	sendButton->setName("sendButton");
@@ -384,8 +355,6 @@ void NNCreatorPanel::buildPanel()
 
 	// Continue Button
 	RUButton* contButton = new RUButton("blue");
-	contButton->setWidth(120);
-	contButton->setHeight(30);
 	contButton->setText("Continue");
 	contButton->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedContinue));
 	contButton->setName("contButton");
@@ -393,8 +362,6 @@ void NNCreatorPanel::buildPanel()
 
 	// Kill Button
 	RUButton* killButton = new RUButton("red");
-	killButton->setWidth(70);
-	killButton->setHeight(30);
 	killButton->setText("Kill");
 	killButton->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedKill));
 	killButton->setName("killButton");
@@ -416,8 +383,6 @@ void NNCreatorPanel::buildPanel()
 
 	// train % label
 	lblttv = new RULabel();
-	lblttv->setWidth(175);
-	lblttv->setHeight(30);
 	lblttv->setText("Train/Test/Val");
 	lblttv->setName("lblttv");
 	crossValLayout->addSubItem(lblttv);
@@ -425,7 +390,6 @@ void NNCreatorPanel::buildPanel()
 	// train %
 	tbTrainPct = new RUTextbox();
 	tbTrainPct->setWidth(80);
-	tbTrainPct->setHeight(30);
 	tbTrainPct->setText("70");
 	tbTrainPct->setName("tbTrainPct");
 	crossValLayout->addSubItem(tbTrainPct);
@@ -433,7 +397,6 @@ void NNCreatorPanel::buildPanel()
 	// test %
 	tbTestPct = new RUTextbox();
 	tbTestPct->setWidth(80);
-	tbTestPct->setHeight(30);
 	tbTestPct->setText("20");
 	tbTestPct->setName("tbTestPct");
 	crossValLayout->addSubItem(tbTestPct);
@@ -441,7 +404,6 @@ void NNCreatorPanel::buildPanel()
 	// validation %
 	tbValidationPct = new RUTextbox();
 	tbValidationPct->setWidth(80);
-	tbValidationPct->setHeight(30);
 	tbValidationPct->setText("10");
 	tbValidationPct->setName("tbValidationPct");
 	crossValLayout->addSubItem(tbValidationPct);
@@ -474,8 +436,6 @@ void NNCreatorPanel::buildPanel()
 
 	// Edit Input Layer Header
 	lblEditInputLayer = new RULabel();
-	lblEditInputLayer->setWidth(250);
-	lblEditInputLayer->setHeight(40);
 	lblEditInputLayer->setText("Edit Input Layer");
 	lblEditInputLayer->setName("lblEditInputLayer");
 	inputOverallLayout->addSubItem(lblEditInputLayer);
@@ -489,8 +449,6 @@ void NNCreatorPanel::buildPanel()
 
 	// Batch label
 	RULabel* lblBatchSize = new RULabel();
-	lblBatchSize->setWidth(250);
-	lblBatchSize->setHeight(30);
 	lblBatchSize->setText("Batch Size ");
 	lblBatchSize->setName("lblBatchSize");
 	batchUpdateLayout->addSubItem(lblBatchSize);
@@ -498,7 +456,6 @@ void NNCreatorPanel::buildPanel()
 	// Batch
 	tbBatchSize = new RUTextbox();
 	tbBatchSize->setWidth(160);
-	tbBatchSize->setHeight(30);
 	tbBatchSize->setText("1");
 	tbBatchSize->setName("tbBatchSize");
 	batchUpdateLayout->addSubItem(tbBatchSize);
@@ -510,8 +467,6 @@ void NNCreatorPanel::buildPanel()
 
 	// learning rate label
 	lblinputLR = new RULabel();
-	lblinputLR->setWidth(250);
-	lblinputLR->setHeight(30);
 	lblinputLR->setText("Learning Rate");
 	lblinputLR->setName("lblinputLR");
 	inputLCLayout->addSubItem(lblinputLR);
@@ -519,7 +474,6 @@ void NNCreatorPanel::buildPanel()
 	// learning rate textbox
 	tbinputLR = new RUTextbox();
 	tbinputLR->setWidth(160);
-	tbinputLR->setHeight(30);
 	tbinputLR->setName("tbinputLR");
 	inputLCLayout->addSubItem(tbinputLR);
 	inputLayerForm->addSubItem(tbinputLR);
@@ -530,8 +484,6 @@ void NNCreatorPanel::buildPanel()
 
 	// momentum factor label
 	lblinputMF = new RULabel();
-	lblinputMF->setWidth(250);
-	lblinputMF->setHeight(30);
 	lblinputMF->setText("Momentum Factor");
 	lblinputMF->setName("lblinputMF");
 	inputMFLayout->addSubItem(lblinputMF);
@@ -539,7 +491,6 @@ void NNCreatorPanel::buildPanel()
 	// momentum factor textbox
 	tbinputMF = new RUTextbox();
 	tbinputMF->setWidth(160);
-	tbinputMF->setHeight(30);
 	tbinputMF->setName("tbinputMF");
 	inputMFLayout->addSubItem(tbinputMF);
 	inputLayerForm->addSubItem(tbinputMF);
@@ -550,8 +501,6 @@ void NNCreatorPanel::buildPanel()
 
 	// weight decay label
 	lblinputWD1 = new RULabel();
-	lblinputWD1->setWidth(250);
-	lblinputWD1->setHeight(30);
 	lblinputWD1->setText("L1 Regularization");
 	lblinputWD1->setName("lblinputWD1");
 	inputWDLayout1->addSubItem(lblinputWD1);
@@ -559,7 +508,6 @@ void NNCreatorPanel::buildPanel()
 	// weight decay textbox
 	tbinputWD1 = new RUTextbox();
 	tbinputWD1->setWidth(160);
-	tbinputWD1->setHeight(30);
 	tbinputWD1->setName("tbinputWD1");
 	inputWDLayout1->addSubItem(tbinputWD1);
 	inputLayerForm->addSubItem(tbinputWD1);
@@ -570,8 +518,6 @@ void NNCreatorPanel::buildPanel()
 
 	// weight decay label
 	lblinputWD2 = new RULabel();
-	lblinputWD2->setWidth(250);
-	lblinputWD2->setHeight(30);
 	lblinputWD2->setText("L2 Regularization");
 	lblinputWD2->setName("lblinputWD2");
 	inputWDLayout2->addSubItem(lblinputWD2);
@@ -579,7 +525,6 @@ void NNCreatorPanel::buildPanel()
 	// weight decay textbox
 	tbinputWD2 = new RUTextbox();
 	tbinputWD2->setWidth(160);
-	tbinputWD2->setHeight(30);
 	tbinputWD2->setName("tbinputWD2");
 	inputWDLayout2->addSubItem(tbinputWD2);
 	inputLayerForm->addSubItem(tbinputWD2);
@@ -590,8 +535,6 @@ void NNCreatorPanel::buildPanel()
 
 	// pHidden label
 	lblinputDropout = new RULabel();
-	lblinputDropout->setWidth(250);
-	lblinputDropout->setHeight(30);
 	lblinputDropout->setText("Dropout p: ");
 	lblinputDropout->setName("lblinputDropout");
 	inputDropoutLayout->addSubItem(lblinputDropout);
@@ -599,7 +542,6 @@ void NNCreatorPanel::buildPanel()
 	// pHidden textbox
 	tbinputDropout = new RUTextbox();
 	tbinputDropout->setWidth(160);
-	tbinputDropout->setHeight(30);
 	tbinputDropout->setText("0.0");
 	tbinputDropout->setName("tbinputDropout");
 	inputDropoutLayout->addSubItem(tbinputDropout);
@@ -611,8 +553,6 @@ void NNCreatorPanel::buildPanel()
 
 	// activation functions label
 	lblinputAF = new RULabel();
-	lblinputAF->setWidth(250);
-	lblinputAF->setHeight(30);
 	lblinputAF->setText("Activation Type");
 	lblinputAF->setName("lblinputAF");
 	inputATLayout->addSubItem(lblinputAF);
@@ -639,8 +579,6 @@ void NNCreatorPanel::buildPanel()
 
 	// Activation param label
 	RULabel* lblinputAP = new RULabel();
-	lblinputAP->setWidth(250);
-	lblinputAP->setHeight(30);
 	lblinputAP->setText("Activation Param");
 	lblinputAP->setName("lblinputAP");
 	inputAPLayout->addSubItem(lblinputAP);
@@ -648,7 +586,6 @@ void NNCreatorPanel::buildPanel()
 	// Activation param textbox
 	tbinputAP = new RUTextbox();
 	tbinputAP->setWidth(160);
-	tbinputAP->setHeight(30);
 	tbinputAP->setName("tbinputAP");
 	inputAPLayout->addSubItem(tbinputAP);
 	inputLayerForm->addSubItem(tbinputAP);
@@ -657,8 +594,6 @@ void NNCreatorPanel::buildPanel()
 
 	// Preview label Header
 	RULabel* lblPreview = new RULabel();
-	lblPreview->setWidth(200);
-	lblPreview->setHeight(40);
 	lblPreview->setPadding(10);
 	lblPreview->setText("Preview");
 	lblPreview->setName("lblPreview");
@@ -670,8 +605,6 @@ void NNCreatorPanel::buildPanel()
 
 	// Preview Train Data Button
 	RUButton* btnPreviewTrain = new RUButton("blue");
-	btnPreviewTrain->setWidth(150);
-	btnPreviewTrain->setHeight(30);
 	btnPreviewTrain->setText("Training Data");
 	btnPreviewTrain->setMouseDownListener(
 		GeneralListener(this, &NNCreatorPanel::clickedPreviewTrain));
@@ -679,14 +612,12 @@ void NNCreatorPanel::buildPanel()
 	previewButtonsLayout->addSubItem(btnPreviewTrain);
 
 	// Preview Test Data Button
-	RUButton* tbnPreviewTest = new RUButton("blue");
-	tbnPreviewTest->setWidth(150);
-	tbnPreviewTest->setHeight(30);
-	tbnPreviewTest->setText("Testing Data");
-	tbnPreviewTest->setMouseDownListener(
+	RUButton* btnPreviewTest = new RUButton("blue");
+	btnPreviewTest->setText("Testing Data");
+	btnPreviewTest->setMouseDownListener(
 		GeneralListener(this, &NNCreatorPanel::clickedPreviewTest));
-	tbnPreviewTest->setName("tbnPreviewTest");
-	previewButtonsLayout->addSubItem(tbnPreviewTest);
+	btnPreviewTest->setName("btnPreviewTest");
+	previewButtonsLayout->addSubItem(btnPreviewTest);
 
 	previewTabs = new RUTabContainer();
 	previewTabs->setWidth(90);
@@ -727,8 +658,6 @@ void NNCreatorPanel::buildPanel()
 
 	// Previous Button
 	RUButton* btnPrevious = new RUButton("blue");
-	btnPrevious->setWidth(110);
-	btnPrevious->setHeight(30);
 	btnPrevious->setText("Previous");
 	btnPrevious->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedPrevious));
 	btnPrevious->setName("btnPrevious");
@@ -736,8 +665,6 @@ void NNCreatorPanel::buildPanel()
 
 	// Next Button
 	RUButton* btnNext = new RUButton("blue");
-	btnNext->setWidth(80);
-	btnNext->setHeight(30);
 	btnNext->setText("Next");
 	btnNext->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedNext));
 	btnNext->setName("btnNext");
@@ -754,8 +681,6 @@ void NNCreatorPanel::buildPanel()
 
 	// Hidden Layer Title Label
 	RULabel* lbllayertitle = new RULabel();
-	lbllayertitle->setWidth(270);
-	lbllayertitle->setHeight(40);
 	lbllayertitle->setText("Edit Hidden Layers");
 	lbllayertitle->setName("lbllayertitle");
 	hiddenOverallLayout->addSubItem(lbllayertitle);
@@ -766,8 +691,6 @@ void NNCreatorPanel::buildPanel()
 
 	// hidden layer count label
 	lblHiddenLayerCount = new RULabel();
-	lblHiddenLayerCount->setWidth(250);
-	lblHiddenLayerCount->setHeight(30);
 	lblHiddenLayerCount->setPadding(10);
 	lblHiddenLayerCount->setText("Hidden Layer Count");
 	lblHiddenLayerCount->setName("lblHiddenLayerCount");
@@ -776,7 +699,6 @@ void NNCreatorPanel::buildPanel()
 	// hidden layer count textbox
 	tbHiddenLayerCount = new RUTextbox();
 	tbHiddenLayerCount->setWidth(160);
-	tbHiddenLayerCount->setHeight(30);
 	tbHiddenLayerCount->setText(shmea::GString::intTOstring(formInfo->numHiddenLayers()));
 	tbHiddenLayerCount->setName("tbHiddenLayerCount");
 	tbHiddenLayerCount->setLoseFocusListener(GeneralListener(this, &NNCreatorPanel::tbHLLoseFocus));
@@ -789,8 +711,6 @@ void NNCreatorPanel::buildPanel()
 
 	// edit hidden layer header
 	lblEditHiddenLayer = new RULabel();
-	lblEditHiddenLayer->setWidth(250);
-	lblEditHiddenLayer->setHeight(30);
 	lblEditHiddenLayer->setText("Edit Hidden Layer");
 	lblEditHiddenLayer->setName("lblEditHiddenLayer");
 	hlSelectLayout->addSubItem(lblEditHiddenLayer);
@@ -810,8 +730,6 @@ void NNCreatorPanel::buildPanel()
 
 	// hidden layer size label
 	lblHiddenLayerSize = new RULabel();
-	lblHiddenLayerSize->setWidth(250);
-	lblHiddenLayerSize->setHeight(30);
 	lblHiddenLayerSize->setText("Size");
 	lblHiddenLayerSize->setName("lblHiddenLayerSize");
 	hlSizeLayout->addSubItem(lblHiddenLayerSize);
@@ -819,7 +737,6 @@ void NNCreatorPanel::buildPanel()
 	// hidden layer size textbox
 	tbHiddenLayerSize = new RUTextbox();
 	tbHiddenLayerSize->setWidth(160);
-	tbHiddenLayerSize->setHeight(30);
 	tbHiddenLayerSize->setName("tbHiddenLayerSize");
 	hlSizeLayout->addSubItem(tbHiddenLayerSize);
 	hiddenLayerForm->addSubItem(tbHiddenLayerSize);
@@ -830,8 +747,6 @@ void NNCreatorPanel::buildPanel()
 
 	// learning rate label
 	lblLearningRate = new RULabel();
-	lblLearningRate->setWidth(250);
-	lblLearningRate->setHeight(30);
 	lblLearningRate->setText("Learning Rate");
 	lblLearningRate->setName("lblLearningRate");
 	lcLayout->addSubItem(lblLearningRate);
@@ -839,7 +754,6 @@ void NNCreatorPanel::buildPanel()
 	// learning rate textbox
 	tbLearningRate = new RUTextbox();
 	tbLearningRate->setWidth(160);
-	tbLearningRate->setHeight(30);
 	tbLearningRate->setName("tbLearningRate");
 	lcLayout->addSubItem(tbLearningRate);
 	hiddenLayerForm->addSubItem(tbLearningRate);
@@ -850,8 +764,6 @@ void NNCreatorPanel::buildPanel()
 
 	// momentum factor label
 	lblMomentumFactor = new RULabel();
-	lblMomentumFactor->setWidth(250);
-	lblMomentumFactor->setHeight(30);
 	lblMomentumFactor->setText("Momentum Factor");
 	lblMomentumFactor->setName("lblMomentumFactor");
 	mfLayout->addSubItem(lblMomentumFactor);
@@ -859,7 +771,6 @@ void NNCreatorPanel::buildPanel()
 	// momentum factor textbox
 	tbMomentumFactor = new RUTextbox();
 	tbMomentumFactor->setWidth(160);
-	tbMomentumFactor->setHeight(30);
 	tbMomentumFactor->setName("tbMomentumFactor");
 	mfLayout->addSubItem(tbMomentumFactor);
 	hiddenLayerForm->addSubItem(tbMomentumFactor);
@@ -870,8 +781,6 @@ void NNCreatorPanel::buildPanel()
 
 	// weight decay label
 	lblWeightDecay1 = new RULabel();
-	lblWeightDecay1->setWidth(250);
-	lblWeightDecay1->setHeight(30);
 	lblWeightDecay1->setText("L1 Regularization");
 	lblWeightDecay1->setName("lblWeightDecay1");
 	wdLayout1->addSubItem(lblWeightDecay1);
@@ -879,7 +788,6 @@ void NNCreatorPanel::buildPanel()
 	// weight decay textbox
 	tbWeightDecay1 = new RUTextbox();
 	tbWeightDecay1->setWidth(160);
-	tbWeightDecay1->setHeight(30);
 	tbWeightDecay1->setName("tbWeightDecay1");
 	wdLayout1->addSubItem(tbWeightDecay1);
 	hiddenLayerForm->addSubItem(tbWeightDecay1);
@@ -890,8 +798,6 @@ void NNCreatorPanel::buildPanel()
 
 	// weight decay label
 	lblWeightDecay2 = new RULabel();
-	lblWeightDecay2->setWidth(250);
-	lblWeightDecay2->setHeight(30);
 	lblWeightDecay2->setText("L2 Regularization");
 	lblWeightDecay2->setName("lblWeightDecay2");
 	wdLayout2->addSubItem(lblWeightDecay2);
@@ -899,7 +805,6 @@ void NNCreatorPanel::buildPanel()
 	// weight decay textbox
 	tbWeightDecay2 = new RUTextbox();
 	tbWeightDecay2->setWidth(160);
-	tbWeightDecay2->setHeight(30);
 	tbWeightDecay2->setName("tbWeightDecay2");
 	wdLayout2->addSubItem(tbWeightDecay2);
 	hiddenLayerForm->addSubItem(tbWeightDecay2);
@@ -910,8 +815,6 @@ void NNCreatorPanel::buildPanel()
 
 	// pHidden label
 	lblPHidden = new RULabel();
-	lblPHidden->setWidth(250);
-	lblPHidden->setHeight(30);
 	lblPHidden->setText("Hidden Layer p: ");
 	lblPHidden->setName("lblPHidden");
 	pHiddenLayout->addSubItem(lblPHidden);
@@ -919,7 +822,6 @@ void NNCreatorPanel::buildPanel()
 	// pHidden textbox
 	tbPHidden = new RUTextbox();
 	tbPHidden->setWidth(160);
-	tbPHidden->setHeight(30);
 	tbPHidden->setName("tbPHidden");
 	pHiddenLayout->addSubItem(tbPHidden);
 	hiddenLayerForm->addSubItem(tbPHidden);
@@ -930,8 +832,6 @@ void NNCreatorPanel::buildPanel()
 
 	// activation functions label
 	lblActivationFunctions = new RULabel();
-	lblActivationFunctions->setWidth(250);
-	lblActivationFunctions->setHeight(30);
 	lblActivationFunctions->setText("Activation Type");
 	lblActivationFunctions->setName("lblActivationFunctions");
 	actTypeLayout->addSubItem(lblActivationFunctions);
@@ -958,8 +858,6 @@ void NNCreatorPanel::buildPanel()
 
 	// Activation param label
 	RULabel* lblActivationParam = new RULabel();
-	lblActivationParam->setWidth(250);
-	lblActivationParam->setHeight(30);
 	lblActivationParam->setText("Activation Param");
 	lblActivationParam->setName("lblActivationParam");
 	actParamLayout->addSubItem(lblActivationParam);
@@ -967,7 +865,6 @@ void NNCreatorPanel::buildPanel()
 	// Activation param textbox
 	tbActivationParam = new RUTextbox();
 	tbActivationParam->setWidth(160);
-	tbActivationParam->setHeight(30);
 	tbActivationParam->setName("tbActivationParam");
 	actParamLayout->addSubItem(tbActivationParam);
 	hiddenLayerForm->addSubItem(tbActivationParam);
@@ -978,8 +875,6 @@ void NNCreatorPanel::buildPanel()
 
 	// Layer Dest label
 	RULabel* lblCopyDest = new RULabel();
-	lblCopyDest->setWidth(250);
-	lblCopyDest->setHeight(30);
 	lblCopyDest->setText("Dest Layer");
 	lblCopyDest->setName("lblCopyDest");
 	hCopyLayout->addSubItem(lblCopyDest);
@@ -987,7 +882,6 @@ void NNCreatorPanel::buildPanel()
 	// copy/remove destination textbox
 	tbCopyDestination = new RUTextbox();
 	tbCopyDestination->setWidth(160);
-	tbCopyDestination->setHeight(30);
 	tbCopyDestination->setName("tbCopyDestination");
 	hCopyLayout->addSubItem(tbCopyDestination);
 
@@ -997,8 +891,6 @@ void NNCreatorPanel::buildPanel()
 
 	// Copy button
 	RUButton* btnCopy = new RUButton();
-	btnCopy->setWidth(122);
-	btnCopy->setHeight(30);
 	btnCopy->setText("Copy");
 	btnCopy->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedCopy));
 	btnCopy->setName("btnCopy");
@@ -1006,8 +898,6 @@ void NNCreatorPanel::buildPanel()
 
 	// Remove button
 	RUButton* btnRemove = new RUButton("red");
-	btnRemove->setWidth(122);
-	btnRemove->setHeight(30);
 	btnRemove->setText("Remove");
 	btnRemove->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedRemove));
 	btnRemove->setName("btnRemove");
@@ -1021,8 +911,6 @@ void NNCreatorPanel::buildPanel()
 
 	// Edit Output Layer Header
 	lblEditOutputLayer = new RULabel();
-	lblEditOutputLayer->setWidth(275);
-	lblEditOutputLayer->setHeight(40);
 	lblEditOutputLayer->setText("Edit Output Layer");
 	lblEditOutputLayer->setName("lblEditOutputLayer");
 	outputOverallLayout->addSubItem(lblEditOutputLayer);
@@ -1033,8 +921,6 @@ void NNCreatorPanel::buildPanel()
 
 	// output type label
 	lblOutputType = new RULabel();
-	lblOutputType->setWidth(200);
-	lblOutputType->setHeight(30);
 	lblOutputType->setText("Output Type");
 	lblOutputType->setName("lblOutputType");
 	outputTypeLayout->addSubItem(lblOutputType);
@@ -1057,8 +943,6 @@ void NNCreatorPanel::buildPanel()
 
 	// output layer size label
 	lblOutputLayerSize = new RULabel();
-	lblOutputLayerSize->setWidth(200);
-	lblOutputLayerSize->setHeight(30);
 	lblOutputLayerSize->setText("Size");
 	lblOutputLayerSize->setName("lblOutputLayerSize");
 	outputSizeLayout->addSubItem(lblOutputLayerSize);
@@ -1066,7 +950,6 @@ void NNCreatorPanel::buildPanel()
 	// output layer size textbox
 	tbOutputLayerSize = new RUTextbox();
 	tbOutputLayerSize->setWidth(210);
-	tbOutputLayerSize->setHeight(30);
 	tbOutputLayerSize->setText("1");
 	tbOutputLayerSize->setName("tbOutputLayerSize");
 	outputSizeLayout->addSubItem(tbOutputLayerSize);
