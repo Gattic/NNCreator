@@ -18,7 +18,7 @@
 #ifndef _RUITEMAREA
 #define _RUITEMAREA
 
-#include <SDL2/SDL.h>
+#include "../Graphics/GfxTypes.h"
 #include <map>
 #include <stdio.h>
 #include <stdlib.h>
@@ -58,7 +58,7 @@ public:
 	int getPaddingY() const;
 	int getMarginX() const;
 	int getMarginY() const;
-	SDL_Rect getLocationRect() const;
+	GfxRect getLocationRect() const;
 	bool isVisible() const;
 	bool getDrawUpdateRequired() const;
 

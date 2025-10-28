@@ -19,7 +19,7 @@
 
 #include "../RUItemArea.h"
 #include "../GeneralListener.h"
-#include <SDL2/SDL.h>
+#include "../../Graphics/GfxTypes.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
@@ -33,8 +33,8 @@ class RUMouseMotion : public virtual RUItemArea
 {
 protected:
 	bool unhovered;
-	SDL_SystemCursor cursor;
-	SDL_Cursor* cursorPtr;
+	GfxSystemCursor cursor;
+	GfxCursor* cursorPtr;
 	bool customCursor;
 
 	// events
@@ -49,10 +49,10 @@ public:
 	virtual ~RUMouseMotion();
 
 	// gets
-	SDL_SystemCursor getCursor() const;
+	GfxSystemCursor getCursor() const;
 
 	// sets
-	void setCursor(SDL_SystemCursor);
+	void setCursor(GfxSystemCursor);
 
 	// event functions
 	void setMouseMotionListener(GeneralListener);

@@ -17,10 +17,11 @@
 #define _GRAPHICS
 
 #include "Backend/Database/GString.h"
+#ifdef GFX_HAVE_SDL2
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
-#include <SDL2/SDL_opengl.h>
 #include <SDL2/SDL_ttf.h>
+#endif
 #include <iostream>
 #include <math.h>
 #include <stdio.h>
@@ -28,6 +29,10 @@
 #include <vector>
 #include <map>
 #include <string>
+#include "GfxTypes.h"
+
+// Forward declaration to avoid heavy GLFW include in header
+struct GLFWwindow;
 
 class GItem;
 class RUComponent;
@@ -35,6 +40,10 @@ class RULabel;
 class GPanel;
 class Object;
 class GFont;
+class GfxRenderer;
+#ifdef GFX_HAVE_OPENGL
+class GLTextRenderer;
+#endif
 
 class gfxpp
 {
@@ -51,6 +60,21 @@ class gfxpp
 	friend class RUDropdown;
 	friend class RUKeyDown;
 	friend class RUKeyUp;
+
+	// GLFW callback helpers need access to private state
+	friend void glfw_window_close_cb(GLFWwindow*);
+	friend void glfw_key_cb(GLFWwindow*, int, int, int, int);
+	friend void glfw_mouse_button_cb(GLFWwindow*, int, int, int);
+	friend void glfw_cursor_pos_cb(GLFWwindow*, double, double);
+	friend void glfw_scroll_cb(GLFWwindow*, double, double);
+	friend void glfw_framebuffer_size_cb(GLFWwindow*, int, int);
+
+public:
+	enum RenderBackend
+	{
+		RENDER_BACKEND_SDL2 = 0,
+		RENDER_BACKEND_OPENGL = 1
+	};
 
 private:
 	int errorFlag;
@@ -85,23 +109,47 @@ private:
 	bool leftPressed;
 	bool rightPressed;
 
+	#ifdef GFX_HAVE_SDL2
 	SDL_Window* window;
 	SDL_GLContext context;
 	SDL_Renderer* renderer;
+	#endif
+	GLFWwindow* glfwWindow;
+	bool glfwInitialized;
+	RenderBackend renderBackend;
+	GfxRenderer* draw;
+	bool ttfReady;
+	bool finalized;
 
 	std::vector<GItem*> guiElements; // < RUComponent* || GLayout* >
 
+	#ifdef GFX_HAVE_SDL2
 	SDL_Cursor* systemCursor;
+	#endif
 	GItem* focusedItem;
+
+	// External event listeners use unified GfxEvent (SDL-backed or stubbed)
+	typedef void (*EventListenerFn)(const GfxEvent&, void*);
+	struct EventListener { EventListenerFn fn; void* userData; };
+	std::vector<EventListener> listeners;
 
 	// main
 	void display();
 	int initHelper(bool, shmea::GString, bool);
 	int init2D(bool);
+	int initOpenGL();
 	void clean2D();
 
+	// For GLFW-based OpenGL path: synthetic event queue (GfxEvent container)
+	std::vector<GfxEvent> glfwEventQueue;
+
+	// OpenGL text cache (fontPath+size -> renderer)
+#ifdef GFX_HAVE_OPENGL
+	std::map<std::string, GLTextRenderer*> glTextCache;
+#endif
+
 public:
-	static const float MAX_FRAMES_PER_SECOND = 30.0f;
+	static const float MAX_FRAMES_PER_SECOND;
 
 	static const int X_AXIS = 0;
 	static const int Y_AXIS = 1;
@@ -112,8 +160,18 @@ public:
 
 	gfxpp();
 	gfxpp(shmea::GString, int = _2D, bool = true, bool = true, int = 800, int = 600);
+	// External window constructors
+	gfxpp(GLFWwindow* externalWindow, int width, int height);
+	#ifdef GFX_HAVE_SDL2
+	gfxpp(SDL_Window* externalWindow, SDL_Renderer* externalRenderer, int width, int height);
+	#endif
+	~gfxpp();
 	int getErrorFlag() const;
+	#ifdef GFX_HAVE_SDL2
 	SDL_Renderer* getRenderer();
+	#endif
+	GfxRenderer* getDraw() { return draw; }
+	RenderBackend getRenderBackend() const { return renderBackend; }
 
 	// GFX Utils
 	static unsigned int RGBfromHue(double, int8_t*, int8_t*, int8_t*);
@@ -128,7 +186,8 @@ public:
 	void removeItem(int); // id
 	GItem* getItemByID(int);
 	void setFocus(GItem*);
-	SDL_Cursor* getSystemCursor();
+	GfxCursor* getSystemCursor();
+	void setCursor(GfxCursor*);
 	int getWidth() const;
 	int getHeight() const;
 
@@ -136,6 +195,14 @@ public:
 	void run();
 	void finish();
 	bool getRunning() const;
+
+	// Get a cached GL text renderer for a font path and pixel height; created on demand
+#ifdef GFX_HAVE_OPENGL
+	GLTextRenderer* getGLText(const std::string& fontPath, int pixelHeight);
+#endif
+
+	// Event listeners (available for both SDL2 and OpenGL builds)
+	void addEventListener(EventListenerFn fn, void* userData) { if(fn) listeners.push_back((EventListener){fn, userData}); }
 };
 
 #endif

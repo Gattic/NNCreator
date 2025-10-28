@@ -18,9 +18,6 @@
 #define _RUTEXTCOMPONENT
 
 #include "../../GItems/RUComponent.h"
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_opengl.h>
-#include <SDL2/SDL_ttf.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
@@ -70,6 +67,13 @@ protected:
 	bool passwordField;
 	unsigned int cursorStart;
 	bool readOnly;
+	int fontPixelHeight; // 0 = auto (existing behavior)
+	bool autoWidthToText; // when true, set width to text width (default true)
+	bool autoHeightToFont; // when true, set height to font pixel height (default false)
+
+	// helpers
+	int measureFullTextWidth(gfxpp*) const;
+	int measureFontPixelHeight(gfxpp*) const;
 
 	// render
 	void calculateRenderInfo(GFont*);
@@ -85,6 +89,8 @@ public:
 	// constructor
 	RUTextComponent();
 	virtual ~RUTextComponent();
+	virtual void unsetFocus();
+	virtual void updateBackgroundHelper(gfxpp*) override;
 
 	// gets
 	shmea::GString getText() const;
@@ -99,6 +105,12 @@ public:
 	void setPasswordField(bool);
 	void setReadOnly(bool);
 	void setFontColor(int);
+	void setFontSize(int);
+	int getFontSize() const;
+	void setAutoWidthToText(bool);
+	bool getAutoWidthToText() const;
+	void setAutoHeightToFont(bool);
+	bool getAutoHeightToFont() const;
 
 	// render
 	void drawText(gfxpp*);
@@ -109,7 +121,7 @@ public:
 	void setKeyListener(void (GPanel::*)(char));
 
 	// events
-	virtual bool onKeyHelper(gfxpp*, GPanel*, SDL_Keycode, Uint16);
+	virtual bool onKeyHelper(gfxpp*, GPanel*, GfxKeycode, Uint16);
 
 	// type
 	virtual shmea::GString getType() const = 0;

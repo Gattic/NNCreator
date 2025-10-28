@@ -1,4 +1,4 @@
-// Copyright 2020 Robert Carneiro, Derek Meer, Matthew Tabak, Eric Lujan
+// Copyright 2025 Robert Carneiro
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
 // associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -14,36 +14,39 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+#ifndef _RUFORM
+#define _RUFORM
 
-#ifndef _GLAYOUT
-#define _GLAYOUT
+#include "../GItems/RUComponent.h"
 
-#include "GItem.h"
-#include "Backend/Database/GString.h"
-#include <map>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <vector>
-
-class gfxpp;
-
-class GLayout : public GItem
+class RUForm : public RUComponent
 {
 protected:
-	GPanel* panel;
-	int layoutType; // 0 = Relative; 1 = Linear
+    // render
+    virtual void updateBackground(gfxpp*);
+
+    // events
+    virtual void onKeyDown(gfxpp*, GPanel*, GfxKeycode, Uint16);
+
+    // helpers
+    int findFocusedIndex() const;
+    bool isFocusable(GItem*) const;
+    void focusByIndex(gfxpp*, int);
+    void focusNext(gfxpp*);
+    void focusPrev(gfxpp*);
 
 public:
-	GLayout();
-	virtual ~GLayout();
+    RUForm(shmea::GString);
+    virtual ~RUForm();
 
-	// gets
-	int getLayoutType() const;
+    virtual void calculateSubItemPositions(std::pair<int, int>);
+    virtual void processSubItemEvents(gfxpp*, EventTracker*, GPanel*, GfxEvent, int, int);
+    virtual void updateBackgroundHelper(gfxpp*);
 
-	virtual void hover(gfxpp*);
-	virtual void unhover(gfxpp*);
-	virtual shmea::GString getType() const = 0;
+    virtual shmea::GString getType() const;
 };
 
 #endif
+
+
+

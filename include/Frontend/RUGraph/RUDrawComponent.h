@@ -18,7 +18,7 @@
 #define _RUDRAWCOMP
 
 #include "RUGraph.h"
-#include <SDL2/SDL.h>
+#include "../Graphics/GfxTypes.h"
 #include <map>
 #include <pthread.h>
 #include <stdio.h>
@@ -72,9 +72,9 @@ public:
 	//
 	virtual void add(gfxpp*, const shmea::GString&, const Point2&);
 	virtual void set(gfxpp*, const shmea::GString&, const std::vector<Point2*>&,
-			 SDL_Color = RUColors::DEFAULT_COLOR_LINE);
+			 GfxColor = RUColors::DEFAULT_COLOR_LINE);
 	virtual void set(gfxpp*, const shmea::GString&, const shmea::GList&,
-			 SDL_Color = RUColors::DEFAULT_COLOR_LINE);
+			 GfxColor = RUColors::DEFAULT_COLOR_LINE);
 };
 
 #endif

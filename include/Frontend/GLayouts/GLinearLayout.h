@@ -31,8 +31,13 @@ class EventTracker;
 
 class GLinearLayout : public GLayout
 {
+public:
+	// Horizontal alignment for VERTICAL orientation
+	enum HAlign { ALIGN_LEFT = 0, ALIGN_CENTER = 1, ALIGN_RIGHT = 2 };
+
 protected:
 	int orientation;
+	HAlign horizontalAlign;
 
 	virtual void onMouseDown(gfxpp*, GPanel*, int, int);
 
@@ -48,10 +53,14 @@ public:
 	int getOrientation() const;
 	void setOrientation(int);
 
+	// Alignment API (affects VERTICAL orientation)
+	void setAlignment(HAlign);
+	HAlign getAlignment() const;
+
 	virtual void calculateSubItemPositions(std::pair<int, int>);
 
 	// events
-	virtual void processSubItemEvents(gfxpp*, EventTracker*, GPanel*, SDL_Event, int, int);
+	virtual void processSubItemEvents(gfxpp*, EventTracker*, GPanel*, GfxEvent, int, int);
 
 	// render
 	virtual void updateBackgroundHelper(gfxpp*);

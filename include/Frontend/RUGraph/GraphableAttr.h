@@ -17,8 +17,7 @@
 #ifndef _GRAPHABLEATTR_H
 #define _GRAPHABLEATTR_H
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_opengl.h>
+#include "../Graphics/GfxTypes.h"
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -38,7 +37,7 @@ protected:
 	RUGraph* parent;
 	bool xMode;
 	bool yMode;
-	SDL_Color lineColor;
+	GfxColor lineColor;
 
 public:
 
@@ -46,7 +45,7 @@ public:
 
 	// constructors & destructor
 	GraphableAttr();
-	GraphableAttr(RUGraph*, SDL_Color);
+	GraphableAttr(RUGraph*, GfxColor);
 	virtual ~GraphableAttr();
 
 	// gets
@@ -56,12 +55,12 @@ public:
 	float getYMaxModed() const;
 	bool getXMode() const;
 	bool getYMode() const;
-	SDL_Color getColor() const;
+	GfxColor getColor() const;
 
 	// sets
 	void setXMode(bool);
 	void setYMode(bool);
-	void setColor(SDL_Color);
+	void setColor(GfxColor);
 	virtual void clear();
 
 	// render

@@ -1,8 +1,7 @@
 #ifndef _DRAWNEURALNET
 #define _DRAWNEURALNET
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_opengl.h>
+// removed SDL includes; this header should be backend-agnostic
 #include "RULayerInfo.h"
 #include <vector>
 #include "Backend/Database/GPointer.h"
@@ -36,6 +35,7 @@ public:
     int getLayersCount();
     std::vector<shmea::GPointer<DrawNeuron> > getLayerNeurons(int);
     int getLayerNeuronsCount(int);
+    float getLayerBiasWeight(int);
 
 
 

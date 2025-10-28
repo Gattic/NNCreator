@@ -41,7 +41,7 @@ class GeneralGraphable
 		virtual unsigned int size() const = 0;
 		virtual unsigned int normalizedSize() const = 0;
 		virtual void setVisible(bool newVisible) = 0;
-		virtual void setColor(SDL_Color newColor) = 0;
+		virtual void setColor(GfxColor newColor) = 0;
 		virtual void computeAxisRanges(bool additionOptimization = false) = 0;
 		virtual void updateBackground(gfxpp* cGfx) = 0;
 	};
@@ -60,7 +60,7 @@ class GeneralGraphable
 			//
 		}
 
-		GraphableModel(RUGraph* newGraph, SDL_Color newColor)
+		GraphableModel(RUGraph* newGraph, GfxColor newColor)
 		{
 			g = new Graphable<T>(newGraph, newColor);
 		}
@@ -96,7 +96,7 @@ class GeneralGraphable
 			g->setVisible(newVisible);
 		}
 
-		void setColor(SDL_Color newColor)
+		void setColor(GfxColor newColor)
 		{
 			g->setColor(newColor);
 		}
@@ -132,7 +132,7 @@ public:
 	}
 
 	template< typename T>
-	GeneralGraphable(RUGraph* newGraph, SDL_Color newColor, T t) // Explicit templates on consctuctors do not work
+	GeneralGraphable(RUGraph* newGraph, GfxColor newColor, T t) // Explicit templates on consctuctors do not work
 	{
 		object = new GraphableModel<T>(newGraph, newColor);
 	}
@@ -178,7 +178,7 @@ public:
 			object->setVisible(newVisible);
 	}
 
-	void setColor(SDL_Color newColor)
+	void setColor(GfxColor newColor)
 	{
 		if(object)
 			object->setColor(newColor);

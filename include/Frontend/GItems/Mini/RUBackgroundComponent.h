@@ -21,9 +21,7 @@
 #include "Backend/Database/GString.h"
 #include "Backend/Database/GPointer.h"
 #include "Backend/Database/image.h"
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_opengl.h>
+#include "../../Graphics/GfxTypes.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
@@ -38,21 +36,31 @@ class RUBackgroundComponent : public virtual RUItemArea
 protected:
 	bool bgEnabled;
 	bool bgColorEnabled;
-	SDL_Surface* surfaceTheUSA;
+	GfxSurface* surfaceTheUSA;
 	shmea::GPointer<shmea::Image> bgImage;
 	//shmea::GPointer<shmea::Image> bgCache;
-	SDL_Color bgColor;
+	GfxColor bgColor;
 	shmea::GString bgImageLocation;
 	int bgImageType;
+
+#ifdef GFX_HAVE_OPENGL
+	// OpenGL texture cache for background image
+	unsigned int glTextureId;
+	int glTextureWidth;
+	int glTextureHeight;
+	bool glTextureValid;
+	void ensureGLTexture();
+	void destroyGLTexture();
+#endif
 
 	bool resetSurface();
 	void refreshImage();
 
-	void fromSurface(SDL_Surface*);
+	void fromSurface(GfxSurface*);
 	void fromImage(shmea::GPointer<shmea::Image>);
 
 public:
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+#if GFX_BYTEORDER == GFX_BIG_ENDIAN
 	static const unsigned int rmask = 0xFF000000;
 	static const unsigned int gmask = 0x00FF0000;
 	static const unsigned int bmask = 0x0000FF00;
@@ -81,26 +89,26 @@ public:
 
 	// constructors & destructor
 	RUBackgroundComponent();
-	RUBackgroundComponent(SDL_Color);
+	RUBackgroundComponent(GfxColor);
 	virtual ~RUBackgroundComponent();
 
 	// gets
 	bool getBGEnabled() const;
 	bool getBGColorEnabled() const;
 	shmea::GString getBGImageLocation() const;
-	SDL_Color getBGColor() const;
+	GfxColor getBGColor() const;
 
 	// sets
 	void toggleBG(bool);
 	void toggleBGColor(bool);
 	void setBGImageFromLocation(const shmea::GString&);
-	void setBGImageFromSurface(SDL_Surface*);
+	void setBGImageFromSurface(GfxSurface*);
 	void setBGImage(shmea::GPointer<shmea::Image>);
-	void setBGColor(SDL_Color);
+	void setBGColor(GfxColor);
 
 	// render
 	void updateBGBackground(gfxpp*);
-	void drawVerticalGradient(SDL_Renderer*, SDL_Rect, SDL_Color, SDL_Color, int = 0);
+	void drawVerticalGradient(class GfxRenderer*, GfxRect, GfxColor, GfxColor, int = 0);
 };
 
 #endif
