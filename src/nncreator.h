@@ -104,11 +104,20 @@ protected:
 	RULabel* lblNeuralNet;
 	RUDropdown* ddNeuralNet;
 
+	RULabel* lblNeuralNetWeights;
+	RUDropdown* ddNeuralNetWeights;
+
 	RULabel* lblNetName;
 	RUTextbox* tbNetName;
 
 	RUButton* btnSave;
 	RUButton* btnDelete;
+
+	RULabel* lblNetNameWeights;
+	RUTextbox* tbNetNameWeights;
+
+	RUButton* btnSaveWeights;
+	RUButton* btnDeleteWeights;
 
 	RUTabContainer* layerTabs;
 	GLinearLayout* inputOverallLayout;
@@ -220,6 +229,7 @@ public:
 	void loadDatasets();
 
 	void clickedSave(const shmea::GString&, int, int);
+	void clickedSaveWeights(const shmea::GString&, int, int);
 	void clickedEditSwitch(const shmea::GString&, int, int);
 	void clickedDSTypeSwitch(int);
 	void clickedRun(const shmea::GString&, int, int);
@@ -231,11 +241,13 @@ public:
 	void clickedKill(const shmea::GString&, int, int);
 	void clickedContinue(const shmea::GString&, int, int);
 	void clickedDelete(const shmea::GString&, int, int);
+	void clickedDeleteWeights(const shmea::GString&, int, int);
 	void clickedPreviewTrain(const shmea::GString&, int, int);
 	void clickedPreviewTest(const shmea::GString&, int, int);
 	void clickedPrevious(const shmea::GString&, int, int);
 	void clickedNext(const shmea::GString&, int, int);
 	void nnSelectorChanged(int);
+	void nnWeightsSelectorChanged(int);
 	void resetSim();
 };
 

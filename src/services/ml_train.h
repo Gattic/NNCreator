@@ -114,6 +114,23 @@ public:
 			return NULL;
 		}
 
+		if (cList.size() > 3)
+		{
+			shmea::GString netNameWeights = cList.getString(3);
+			if (netNameWeights.c_str() != " ")
+			{
+				// Create layers
+				cNetwork.setMustdBuildMeat(false);
+				cNetwork.meat.build(cNetwork.skeleton, di, false);
+
+				// Load the biases and weights from file
+				if (!cNetwork.meat.loadState(cNetwork.skeleton, netNameWeights.c_str()))
+				{
+					printf("[NN Save Load] Unable to load the network biases and weights");
+				}
+			}
+		}
+
 		// Termination Conditions
 		/*cNetwork.terminator.setTimestamp(maxTimeStamp);
 		cNetwork.terminator.setEpoch(maxEpoch);
@@ -122,6 +139,7 @@ public:
 		// Run the training and retrieve a metanetwork
 		glades::MetaNetwork* newTrainNet =
 			glades::train(&cNetwork, di, serverInstance, destination);
+		cNetwork.setMustdBuildMeat(true);
 
 		return NULL;
 	}

@@ -15,6 +15,7 @@ class RULayerInfo
 protected:
     int layerType;
     int neuronQty;
+	float biasWeight;
 //    double* weights;
     std::vector<shmea::GPointer<DrawNeuron> > neuronList;
 
@@ -28,11 +29,13 @@ public:
  
     int getNeurons() const;
     std::vector<shmea::GPointer<DrawNeuron> > getNeuronList() const;
+    float getBiasWeight() const;
 
     void setNeurons(int newNeuronSize, int newPrevLayer=0);
     void setActivation(int, float);
     void setWeights(int, std::vector<shmea::GPointer<float> >);
     void displayLayer();
+    void setBiasWeight(float);
     
 
 };

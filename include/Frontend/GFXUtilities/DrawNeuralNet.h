@@ -35,6 +35,7 @@ public:
     int getLayersCount();
     std::vector<shmea::GPointer<DrawNeuron> > getLayerNeurons(int);
     int getLayerNeuronsCount(int);
+    float getLayerBiasWeight(int);
 
 
 
