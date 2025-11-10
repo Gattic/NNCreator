@@ -1,6 +1,6 @@
 mkdir -p build
 
-ENABLE_SDL2=ON
+ENABLE_SDL2=OFF
 ENABLE_OPENGL=ON
 
 for arg in "$@"; do
