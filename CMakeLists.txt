@@ -66,13 +66,6 @@ add_custom_target(run
 	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
 
-#make fmt
-add_custom_target(fmt ALL
-	COMMAND ./clang-format-all
-	DEPENDS ${PROJECT_NAME}
-	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-)
-
 #make local
 add_custom_target(local
 	COMMAND ${PROJECT_NAME} local
