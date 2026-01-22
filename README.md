@@ -1,4 +1,4 @@
-# NNCreator v0.58
+# NNCreator v0.59
 
 ## Github
 
