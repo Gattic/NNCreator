@@ -4,6 +4,8 @@
 
 ## Dependencies
 
+### Debian
+
 `cmake`
 
 `make`
@@ -34,6 +36,15 @@ One-liner for convenience:
 ```
 sudo apt-get install cmake make gcc g++ libfreetype6-dev libsdl2-dev libsdl2-ttf-dev libsdl2-image-dev libssl-dev clang-format libcurl4-openssl-dev gdb
 ```
+
+### Fedora
+
+sudo dnf install -y gcc gcc-c++ clang cmake make
+sudo dnf install -y freetype-devel
+sudo dnf install -y libasan
+sudo dnf install -y mesa-libGL-devel mesa-libGLU-devel libglvnd-devel
+sudo dnf install -y glfw-devel
+sudo dnf install -y libcurl-devel
 
 ---
 
