@@ -1,4 +1,4 @@
-// Copyright 2020 Robert Carneiro, Derek Meer, Matthew Tabak, Eric Lujan
+// Copyright 2026 Robert Carneiro, Derek Meer, Matthew Tabak, Eric Lujan
 //
 // associated documentation files (the "Software"), to deal in the Software without restriction,
 // including without limitation the rights to use, copy, modify, merge, publish, distribute,
@@ -194,6 +194,10 @@ public:
 	// main
 	void run();
 	void finish();
+	// Request that the gfx loop exit at the next safe point. This only clears
+	// the running flag; cleanup still happens in finish(), which is typically
+	// called after run()/display() return.
+	void requestFinish() { running = false; }
 	bool getRunning() const;
 
 	// Get a cached GL text renderer for a font path and pixel height; created on demand

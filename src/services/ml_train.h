@@ -26,6 +26,7 @@
 #include "Backend/Networking/service.h"
 #include "Frontend/GUI/RUMsgBox.h"
 #include "Frontend/Graphics/graphics.h"
+#include <string>
 
 class NNInfo;
 
@@ -72,9 +73,61 @@ public:
 		if (cList.size() < 3)
 			return NULL;
 
-		shmea::GString netName = cList.getString(0);
+		shmea::GString modelName = cList.getString(0);
 		shmea::GString inputFName = cList.getString(1);
 		int inputType = cList.getInt(2);
+
+		// Optional modern config payload:
+		//  [3]=netType (int)
+		//  [4]=lrScheduleType (int: 0 none, 1 step, 2 exp, 3 cosine)
+		//  [5]=stepSize (int)
+		//  [6]=gamma (float)
+		//  [7]=tMax (int)
+		//  [8]=minMult (float)
+		//  [9]=globalGradClipNorm (float)
+		//  [10]=perElementGradClip (float)
+		//  [11]=tbpttWindowOverride (int)
+		//
+		// Backward compatibility:
+		// - If [3] is a string, treat it as legacy weights filename (nn-state) and ignore modern fields.
+		int netTypeOverride = -1;
+		int schedType = 0;
+		int stepSize = 0;
+		float gamma = 1.0f;
+		int tMax = 0;
+		float minMult = 0.0f;
+		float clipNorm = 0.0f;
+		float perElemClip = 10.0f;
+		int tbpttOverride = 0;
+		// Legacy (pre-unified) weights filename (database/nn-state/<file>).
+		// This service no longer loads these directly because NNetwork's internal graph state
+		// is private; unified model packages should be used instead.
+		shmea::GString legacyWeightsName = " ";
+		bool hasLegacyWeights = false;
+
+		int idx = 3;
+		if (cList.size() > idx)
+		{
+			const shmea::GType t = cList[idx];
+			if (t.getType() == shmea::GType::STRING_TYPE)
+			{
+				legacyWeightsName = cList.getString(idx);
+				hasLegacyWeights = (legacyWeightsName != " ");
+			}
+			else
+			{
+				netTypeOverride = cList.getInt(idx);
+				++idx;
+				if (cList.size() > idx) { schedType = cList.getInt(idx); ++idx; }
+				if (cList.size() > idx) { stepSize = cList.getInt(idx); ++idx; }
+				if (cList.size() > idx) { gamma = cList.getFloat(idx); ++idx; }
+				if (cList.size() > idx) { tMax = cList.getInt(idx); ++idx; }
+				if (cList.size() > idx) { minMult = cList.getFloat(idx); ++idx; }
+				if (cList.size() > idx) { clipNorm = cList.getFloat(idx); ++idx; }
+				if (cList.size() > idx) { perElemClip = cList.getFloat(idx); ++idx; }
+				if (cList.size() > idx) { tbpttOverride = cList.getInt(idx); ++idx; }
+			}
+		}
 		/*int64_t maxTimeStamp = cList.getLong(3);
 		int64_t maxEpoch = cList.getLong(4);
 		float maxAccuracy = cList.getFloat(5);*/
@@ -107,29 +160,43 @@ public:
 		// Load the input data
 		di->import(inputFName);
 
-		// Load the neural network
-		if ((cNetwork.getEpochs() == 0) && (!cNetwork.load(netName)))
+		// Load the model (unified model package preferred; legacy fallback).
+		if (cNetwork.getEpochs() == 0)
 		{
-			printf("[NN] Unable to load \"%s\"", netName.c_str());
-			return NULL;
-		}
-
-		if (cList.size() > 3)
-		{
-			shmea::GString netNameWeights = cList.getString(3);
-			if (netNameWeights.c_str() != " ")
+			const glades::NNetworkStatus st = cNetwork.loadModel(std::string(modelName.c_str()), di, netTypeOverride);
+			if (!st.ok())
 			{
-				// Create layers
-				cNetwork.setMustdBuildMeat(false);
-				cNetwork.meat.build(cNetwork.skeleton, di, false);
-
-				// Load the biases and weights from file
-				if (!cNetwork.meat.loadState(cNetwork.skeleton, netNameWeights.c_str()))
+				if (!cNetwork.load(modelName))
 				{
-					printf("[NN Save Load] Unable to load the network biases and weights");
+					printf("[NN] Unable to load model \"%s\": %s\n", modelName.c_str(), st.message.c_str());
+					return NULL;
 				}
 			}
 		}
+
+		// Apply optional overrides (modern features).
+		if (netTypeOverride >= 0 && netTypeOverride <= 3)
+		{
+			// netType is a constructor-time trait, but loadModel(netTypeOverride) handles override.
+			// If we're on legacy load(), best-effort set cNetwork.netType via a rebuild path inside training.
+		}
+		if (schedType == 1)
+			cNetwork.setLearningRateScheduleStep(stepSize, gamma);
+		else if (schedType == 2)
+			cNetwork.setLearningRateScheduleExp(gamma);
+		else if (schedType == 3)
+			cNetwork.setLearningRateScheduleCosine(tMax, minMult);
+		else
+			cNetwork.setLearningRateScheduleNone();
+		cNetwork.setGlobalGradClipNorm(clipNorm);
+		cNetwork.setPerElementGradClip(perElemClip);
+		cNetwork.getTrainingConfigMutable().tbpttWindowOverride = tbpttOverride;
+
+		// Legacy weights load (pre-unified persistence).
+		// Intentionally not supported here anymore; these should be migrated into model packages.
+		if (hasLegacyWeights)
+			printf("[NN] note: legacy nn-state weights \"%s\" ignored; use unified model packages instead\n",
+			       legacyWeightsName.c_str());
 
 		// Termination Conditions
 		/*cNetwork.terminator.setTimestamp(maxTimeStamp);

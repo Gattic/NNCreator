@@ -14,69 +14,38 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
+// TrainingCore: side-effect-free training/inference core.
+//
+// This module owns the "run loop" for the neural network engine, but it does NOT:
+// - print to stdout/stderr
+// - send GUI/network messages
+// - instantiate any default callbacks
+//
+// Observability is optional and provided by pluggable callbacks passed in by the caller.
+//
+#ifndef _GLADES_TRAINING_CORE_H_
+#define _GLADES_TRAINING_CORE_H_
 
-#ifndef _RUITEMAREA
-#define _RUITEMAREA
+namespace glades {
 
-#include "../Graphics/GfxTypes.h"
-#include <map>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <string>
-#include <vector>
+class NNetwork;
+class DataInput;
+class ITrainingCallbacks;
+struct NNetworkStatus;
 
-class RUItemArea
+class TrainingCore
 {
-
-protected:
-	int x;
-	int y;
-	int width;
-	int height;
-	int paddingX;
-	int paddingY;
-	int marginX;
-	int marginY;
-	bool visible;
-	bool drawUpdate;
-
-	// events
-	bool inRange(int, int) const;
-
 public:
-	RUItemArea();
-	RUItemArea(int, int, int, int);
-	virtual ~RUItemArea();
-
-	// gets
-	int getX() const;
-	int getY() const;
-	virtual int getWidth() const;
-	virtual int getHeight() const;
-	int getPaddingX() const;
-	int getPaddingY() const;
-	int getMarginX() const;
-	int getMarginY() const;
-	GfxRect getLocationRect() const;
-	bool isVisible() const;
-	bool getDrawUpdateRequired() const;
-
-	// sets
-	void setX(int);
-	void setY(int);
-	void setWidth(int);
-	void setHeight(int);
-	void setPadding(int);
-	void setPaddingX(int);
-	void setPaddingY(int);
-	void setMargin(int);
-	void setMarginX(int);
-	void setMarginY(int);
-	void setVisible(bool);
-	void show();
-	void hide();
-	void requireDrawUpdate();
+	// Run a single train/test loop using the provided callbacks (may be NULL).
+	// This function is synchronous and does not retain the callbacks pointer.
+	//
+	// NOTE: TrainingCore is a legacy/stable API surface. The implementation delegates to `Trainer`
+	// to keep training orchestration separate from model representation.
+	static NNetworkStatus run(NNetwork& net, const DataInput* data, int runType, ITrainingCallbacks* callbacks);
 };
 
+} // namespace glades
+
 #endif
+

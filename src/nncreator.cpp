@@ -28,9 +28,8 @@
 #include "Backend/Database/GList.h"
 #include "Backend/Database/GTable.h"
 #include "Backend/Database/GType.h"
-#include "Backend/Database/SaveFolder.h"
-#include "Backend/Database/SaveTable.h"
 #include "Backend/Machine Learning/DataObjects/ImageInput.h"
+#include "Backend/Machine Learning/DataObjects/NumberInput.h"
 #include "Backend/Machine Learning/GMath/gmath.h"
 #include "Backend/Machine Learning/Networks/network.h"
 #include "Backend/Machine Learning/Structure/hiddenlayerinfo.h"
@@ -59,9 +58,105 @@
 #include "crt0.h"
 #include "main.h"
 #include "services/gui_callback.h"
+#include <algorithm>
+#include <dirent.h>
+#include <errno.h>
+#include <fstream>
+#include <sys/stat.h>
+#include <unistd.h>
 
 // using namespace shmea;
 using namespace glades;
+
+namespace {
+static bool isDir(const std::string& path)
+{
+	struct stat st;
+	if (stat(path.c_str(), &st) != 0)
+		return false;
+	return S_ISDIR(st.st_mode);
+}
+
+static std::vector<std::string> listModelPackages()
+{
+	std::vector<std::string> out;
+	const std::string root = "database/models";
+	if (!isDir(root))
+		return out;
+
+	DIR* dir = opendir(root.c_str());
+	if (!dir)
+		return out;
+
+	struct dirent* ent = NULL;
+	while ((ent = readdir(dir)) != NULL)
+	{
+		const std::string name(ent->d_name ? ent->d_name : "");
+		if (!name.size() || name[0] == '.')
+			continue;
+
+		// Only include directories (model packages).
+		// Note: some filesystems may return DT_UNKNOWN; fall back to stat.
+		bool isD = false;
+		if (ent->d_type == DT_DIR)
+			isD = true;
+		else if (ent->d_type == DT_UNKNOWN)
+			isD = isDir(root + "/" + name);
+		if (!isD)
+			continue;
+
+		out.push_back(name);
+	}
+
+	closedir(dir);
+	std::sort(out.begin(), out.end());
+	return out;
+}
+
+static bool deleteRecursive(const std::string& path)
+{
+	struct stat st;
+	if (lstat(path.c_str(), &st) != 0)
+		return false;
+
+	if (S_ISDIR(st.st_mode))
+	{
+		DIR* dir = opendir(path.c_str());
+		if (!dir)
+			return false;
+
+		struct dirent* ent = NULL;
+		while ((ent = readdir(dir)) != NULL)
+		{
+			const std::string name(ent->d_name ? ent->d_name : "");
+			if (name == "." || name == "..")
+				continue;
+			if (!deleteRecursive(path + "/" + name))
+			{
+				closedir(dir);
+				return false;
+			}
+		}
+		closedir(dir);
+		return (rmdir(path.c_str()) == 0);
+	}
+
+	return (unlink(path.c_str()) == 0);
+}
+
+static int scheduleTypeFromIndex(int idx)
+{
+	// maps to glades::LearningRateScheduleConfig::Type
+	switch (idx)
+	{
+	case 1: return 1; // STEP
+	case 2: return 2; // EXP
+	case 3: return 3; // COSINE
+	case 0:
+	default: return 0; // NONE
+	}
+}
+} // namespace
 
 /*!
  * @brief NNCreatorPanel constructor
@@ -246,9 +341,34 @@ void NNCreatorPanel::buildPanel()
 	lblSettings->setName("lblSettings");
 	leftSideLayout->addSubItem(lblSettings);
 
+	// Tabs to keep settings usable on smaller windows.
+	RUTabContainer* settingsTabs = new RUTabContainer();
+	settingsTabs->setWidth(480);
+	settingsTabs->setTabHeight(30);
+	settingsTabs->setOptionsShown(3);
+	settingsTabs->setPadding(6);
+	settingsTabs->setName("settingsTabs");
+	leftSideLayout->addSubItem(settingsTabs);
+	settingsTabs->setSelectedTab(0);
+
+	GLinearLayout* modelSettingsLayout = new GLinearLayout("modelSettingsLayout");
+	modelSettingsLayout->setOrientation(GLinearLayout::VERTICAL);
+	modelSettingsLayout->setPadding(6);
+	settingsTabs->addTab("Model", modelSettingsLayout);
+
+	GLinearLayout* trainingSettingsLayout = new GLinearLayout("trainingSettingsLayout");
+	trainingSettingsLayout->setOrientation(GLinearLayout::VERTICAL);
+	trainingSettingsLayout->setPadding(6);
+	settingsTabs->addTab("Training", trainingSettingsLayout);
+
+	GLinearLayout* dataRunSettingsLayout = new GLinearLayout("dataRunSettingsLayout");
+	dataRunSettingsLayout->setOrientation(GLinearLayout::VERTICAL);
+	dataRunSettingsLayout->setPadding(6);
+	settingsTabs->addTab("Data/Run", dataRunSettingsLayout);
+
 	GLinearLayout* loadNetLayout = new GLinearLayout("loadNetLayout");
 	loadNetLayout->setOrientation(GLinearLayout::HORIZONTAL);
-	leftSideLayout->addSubItem(loadNetLayout);
+	modelSettingsLayout->addSubItem(loadNetLayout);
 
 	// Neural Net selector label
 	lblNeuralNet = new RULabel();
@@ -275,7 +395,7 @@ void NNCreatorPanel::buildPanel()
 
 	GLinearLayout* netNameLayout = new GLinearLayout("netNameLayout");
 	netNameLayout->setOrientation(GLinearLayout::HORIZONTAL);
-	leftSideLayout->addSubItem(netNameLayout);
+	modelSettingsLayout->addSubItem(netNameLayout);
 	// Network Name label
 	lblNetName = new RULabel();
 	lblNetName->setX(6);
@@ -307,84 +427,164 @@ void NNCreatorPanel::buildPanel()
 	btnDelete->setName("btnDelete");
 	netNameLayout->addSubItem(btnDelete);
 
-	GLinearLayout* loadNetLayoutWeights = new GLinearLayout("loadNetLayoutWeights");
-	loadNetLayoutWeights->setOrientation(GLinearLayout::HORIZONTAL);
-	leftSideLayout->addSubItem(loadNetLayoutWeights);
+	// ==== Modern training config (net type, LR schedule, grad clipping, TBPTT) ====
+	GLinearLayout* netTypeLayout = new GLinearLayout("netTypeLayout");
+	netTypeLayout->setOrientation(GLinearLayout::HORIZONTAL);
+	modelSettingsLayout->addSubItem(netTypeLayout);
 
-	// Neural Net selector label
-	lblNeuralNetWeights = new RULabel();
-	lblNeuralNetWeights->setWidth(200);
-	lblNeuralNetWeights->setHeight(30);
-	lblNeuralNetWeights->setText("Load NN Weights");
-	lblNeuralNetWeights->setName("lblNeuralNetWeights");
-	loadNetLayoutWeights->addSubItem(lblNeuralNetWeights);
+	lblNetType = new RULabel();
+	lblNetType->setWidth(200);
+	lblNetType->setHeight(30);
+	lblNetType->setText("Net Type");
+	lblNetType->setName("lblNetType");
+	netTypeLayout->addSubItem(lblNetType);
 
-	// Neural Net selector
-	ddNeuralNetWeights = new RUDropdown();
-	ddNeuralNetWeights->setWidth(220);
-	ddNeuralNetWeights->setHeight(30);
-	ddNeuralNetWeights->setOptionsShown(3);
-	ddNeuralNetWeights->setName("ddNeuralNetWeights");
-	ddNeuralNetWeights->setOptionChangedListener(
-		GeneralListener(this, &NNCreatorPanel::nnWeightsSelectorChanged));
-	loadNetLayoutWeights->addSubItem(ddNeuralNetWeights);
+	ddNetType = new RUDropdown();
+	ddNetType->setWidth(220);
+	ddNetType->setHeight(30);
+	ddNetType->setOptionsShown(4);
+	ddNetType->setName("ddNetType");
+	ddNetType->addOption("DFF");
+	ddNetType->addOption("RNN");
+	ddNetType->addOption("GRU");
+	ddNetType->addOption("LSTM");
+	ddNetType->setSelectedIndex(0);
+	netTypeLayout->addSubItem(ddNetType);
 
-	// Load button
-	RUButton* btnLoadWeights = new RUButton();
-	btnLoadWeights->setWidth(206);
-	btnLoadWeights->setHeight(30);
-	btnLoadWeights->setText("      Reload List");
-	btnLoadWeights->setMouseDownListener(GeneralListener(this, &NNCreatorPanel::clickedLoad));
-	btnLoadWeights->setName("btnLoad");
-	loadNetLayoutWeights->addSubItem(btnLoadWeights);
+	GLinearLayout* lrSchedLayout = new GLinearLayout("lrSchedLayout");
+	lrSchedLayout->setOrientation(GLinearLayout::HORIZONTAL);
+	trainingSettingsLayout->addSubItem(lrSchedLayout);
 
-	GLinearLayout* netNameLayoutWeights = new GLinearLayout("netNameLayout");
-	netNameLayoutWeights->setOrientation(GLinearLayout::HORIZONTAL);
-	leftSideLayout->addSubItem(netNameLayoutWeights);
-	// Network Name label
-	lblNetNameWeights = new RULabel();
-	lblNetNameWeights->setX(6);
-	lblNetNameWeights->setY(6 + lblNeuralNet->getY() + lblNeuralNet->getHeight());
-	lblNetNameWeights->setWidth(200);
-	lblNetNameWeights->setHeight(30);
-	lblNetNameWeights->setText("NN Weights");
-	lblNetNameWeights->setName("lblNetNameWeights");
-	netNameLayoutWeights->addSubItem(lblNetNameWeights);
+	lblLRSchedule = new RULabel();
+	lblLRSchedule->setWidth(200);
+	lblLRSchedule->setHeight(30);
+	lblLRSchedule->setText("LR Schedule");
+	lblLRSchedule->setName("lblLRSchedule");
+	lrSchedLayout->addSubItem(lblLRSchedule);
 
-	// Network Name textbox
-	tbNetNameWeights = new RUTextbox();
-	tbNetNameWeights->setX(20 + lblNetNameWeights->getX() + lblNetNameWeights->getWidth());
-	tbNetNameWeights->setY(lblNetName->getY());
-	tbNetNameWeights->setWidth(220);
-	tbNetNameWeights->setHeight(30);
-	tbNetNameWeights->setText("");
-	tbNetNameWeights->setName("tbNetNameWeights");
-	netNameLayoutWeights->addSubItem(tbNetNameWeights);
+	ddLRSchedule = new RUDropdown();
+	ddLRSchedule->setWidth(220);
+	ddLRSchedule->setHeight(30);
+	ddLRSchedule->setOptionsShown(4);
+	ddLRSchedule->setName("ddLRSchedule");
+	ddLRSchedule->addOption("None");
+	ddLRSchedule->addOption("Step");
+	ddLRSchedule->addOption("Exp");
+	ddLRSchedule->addOption("Cosine");
+	ddLRSchedule->setSelectedIndex(0);
+	lrSchedLayout->addSubItem(ddLRSchedule);
 
-	// Save button
-	btnSaveWeights = new RUButton("green");
-	btnSaveWeights->setWidth(100);
-	btnSaveWeights->setHeight(30);
-	btnSaveWeights->setText("    Save");
-	btnSaveWeights->setMouseDownListener(
-		GeneralListener(this, &NNCreatorPanel::clickedSaveWeights));
-	btnSaveWeights->setName("btnSaveWeights");
-	netNameLayoutWeights->addSubItem(btnSaveWeights);
+	GLinearLayout* lrParams1 = new GLinearLayout("lrParams1");
+	lrParams1->setOrientation(GLinearLayout::HORIZONTAL);
+	trainingSettingsLayout->addSubItem(lrParams1);
 
-	// Delete button
-	btnDeleteWeights = new RUButton("red");
-	btnDeleteWeights->setWidth(100);
-	btnDeleteWeights->setHeight(30);
-	btnDeleteWeights->setText("  Delete");
-	btnDeleteWeights->setMouseDownListener(
-		GeneralListener(this, &NNCreatorPanel::clickedDeleteWeights));
-	btnDeleteWeights->setName("btnDeleteWeights");
-	netNameLayoutWeights->addSubItem(btnDeleteWeights);
+	lblStepSize = new RULabel();
+	lblStepSize->setWidth(120);
+	lblStepSize->setHeight(30);
+	lblStepSize->setText("Step");
+	lblStepSize->setName("lblStepSize");
+	lrParams1->addSubItem(lblStepSize);
+	tbStepSize = new RUTextbox();
+	tbStepSize->setWidth(80);
+	tbStepSize->setHeight(30);
+	tbStepSize->setText("3");
+	tbStepSize->setName("tbStepSize");
+	lrParams1->addSubItem(tbStepSize);
+
+	lblGamma = new RULabel();
+	lblGamma->setWidth(80);
+	lblGamma->setHeight(30);
+	lblGamma->setText("Gamma");
+	lblGamma->setName("lblGamma");
+	lrParams1->addSubItem(lblGamma);
+	tbGamma = new RUTextbox();
+	tbGamma->setWidth(120);
+	tbGamma->setHeight(30);
+	tbGamma->setText("0.25");
+	tbGamma->setName("tbGamma");
+	lrParams1->addSubItem(tbGamma);
+
+	GLinearLayout* lrParams2 = new GLinearLayout("lrParams2");
+	lrParams2->setOrientation(GLinearLayout::HORIZONTAL);
+	trainingSettingsLayout->addSubItem(lrParams2);
+
+	lblTMax = new RULabel();
+	lblTMax->setWidth(120);
+	lblTMax->setHeight(30);
+	lblTMax->setText("TMax");
+	lblTMax->setName("lblTMax");
+	lrParams2->addSubItem(lblTMax);
+	tbTMax = new RUTextbox();
+	tbTMax->setWidth(80);
+	tbTMax->setHeight(30);
+	tbTMax->setText("50");
+	tbTMax->setName("tbTMax");
+	lrParams2->addSubItem(tbTMax);
+
+	lblMinMult = new RULabel();
+	lblMinMult->setWidth(80);
+	lblMinMult->setHeight(30);
+	lblMinMult->setText("Min");
+	lblMinMult->setName("lblMinMult");
+	lrParams2->addSubItem(lblMinMult);
+	tbMinMult = new RUTextbox();
+	tbMinMult->setWidth(120);
+	tbMinMult->setHeight(30);
+	tbMinMult->setText("0.0");
+	tbMinMult->setName("tbMinMult");
+	lrParams2->addSubItem(tbMinMult);
+
+	GLinearLayout* clipLayout = new GLinearLayout("clipLayout");
+	clipLayout->setOrientation(GLinearLayout::HORIZONTAL);
+	trainingSettingsLayout->addSubItem(clipLayout);
+
+	lblGradClipNorm = new RULabel();
+	lblGradClipNorm->setWidth(200);
+	lblGradClipNorm->setHeight(30);
+	lblGradClipNorm->setText("Grad Clip Norm");
+	lblGradClipNorm->setName("lblGradClipNorm");
+	clipLayout->addSubItem(lblGradClipNorm);
+	tbGradClipNorm = new RUTextbox();
+	tbGradClipNorm->setWidth(80);
+	tbGradClipNorm->setHeight(30);
+	tbGradClipNorm->setText("0.0");
+	tbGradClipNorm->setName("tbGradClipNorm");
+	clipLayout->addSubItem(tbGradClipNorm);
+
+	lblPerElemClip = new RULabel();
+	lblPerElemClip->setWidth(80);
+	lblPerElemClip->setHeight(30);
+	lblPerElemClip->setText("Elem");
+	lblPerElemClip->setName("lblPerElemClip");
+	clipLayout->addSubItem(lblPerElemClip);
+	tbPerElemClip = new RUTextbox();
+	tbPerElemClip->setWidth(120);
+	tbPerElemClip->setHeight(30);
+	tbPerElemClip->setText("10.0");
+	tbPerElemClip->setName("tbPerElemClip");
+	clipLayout->addSubItem(tbPerElemClip);
+
+	GLinearLayout* tbpttLayout = new GLinearLayout("tbpttLayout");
+	tbpttLayout->setOrientation(GLinearLayout::HORIZONTAL);
+	trainingSettingsLayout->addSubItem(tbpttLayout);
+
+	lblTBPTT = new RULabel();
+	lblTBPTT->setWidth(200);
+	lblTBPTT->setHeight(30);
+	lblTBPTT->setText("TBPTT Window");
+	lblTBPTT->setName("lblTBPTT");
+	tbpttLayout->addSubItem(lblTBPTT);
+	tbTBPTT = new RUTextbox();
+	tbTBPTT->setWidth(220);
+	tbTBPTT->setHeight(30);
+	tbTBPTT->setText("0");
+	tbTBPTT->setName("tbTBPTT");
+	tbpttLayout->addSubItem(tbTBPTT);
 
 	// Input/Output Data Type Layout
 	GLinearLayout* dataTypeLayout = new GLinearLayout("dataTypeLayout");
 	dataTypeLayout->setOrientation(GLinearLayout::HORIZONTAL);
-	leftSideLayout->addSubItem(dataTypeLayout);
+	dataRunSettingsLayout->addSubItem(dataTypeLayout);
 
 	// Input/Output Data Type label
 	RULabel* lbldatarow = new RULabel();
@@ -417,7 +617,7 @@ void NNCreatorPanel::buildPanel()
 	// Run layout
 	GLinearLayout* runTestLayout = new GLinearLayout("runTestLayout");
 	runTestLayout->setOrientation(GLinearLayout::HORIZONTAL);
-	leftSideLayout->addSubItem(runTestLayout);
+	dataRunSettingsLayout->addSubItem(runTestLayout);
 
 	// Run Button
 	RUButton* sendButton = new RUButton("green");
@@ -443,7 +643,7 @@ void NNCreatorPanel::buildPanel()
 	// Cross Validation Layout
 	GLinearLayout* crossValLayout = new GLinearLayout("crossValLayout");
 	crossValLayout->setOrientation(GLinearLayout::HORIZONTAL);
-	// leftSideLayout->addSubItem(crossValLayout); // TODO uncomment when cross val is tested
+	// dataRunSettingsLayout->addSubItem(crossValLayout); // TODO uncomment when cross val is tested
 
 	// Cross Validation checkbox
 	chkCrossVal = new RUCheckbox("Cross Validate");
@@ -1061,37 +1261,10 @@ void NNCreatorPanel::loadDDNN()
 	// add the "new" item option
 	ddNeuralNet->addOption("New");
 
-	// add items from nnetworks table to dropdown
-	shmea::SaveFolder* nnList = new shmea::SaveFolder("neuralnetworks");
-	nnList->load();
-	std::vector<shmea::SaveTable*> saveTables = nnList->getItems();
-	for (unsigned int i = 0; i < saveTables.size(); ++i)
-	{
-		shmea::SaveTable* cItem = saveTables[i];
-		if (!cItem)
-			continue;
-
-		ddNeuralNet->addOption(cItem->getName());
-	}
-
-	// clear the old items
-	ddNeuralNetWeights->clearOptions();
-
-	// add the "new" item option
-	ddNeuralNetWeights->addOption(" ");
-
-	// add items from nnetworks table to dropdown
-	shmea::SaveFolder* nnListWeights = new shmea::SaveFolder("nn-state");
-	nnListWeights->load();
-	std::vector<shmea::SaveTable*> saveTablesWeights = nnListWeights->getItems();
-	for (unsigned int i = 0; i < saveTablesWeights.size(); ++i)
-	{
-		shmea::SaveTable* cItem = saveTablesWeights[i];
-		if (!cItem)
-			continue;
-
-		ddNeuralNetWeights->addOption(cItem->getName());
-	}
+	// add items from unified model packages to dropdown
+	const std::vector<std::string> models = listModelPackages();
+	for (size_t i = 0; i < models.size(); ++i)
+		ddNeuralNet->addOption(models[i].c_str());
 }
 
 /*!
@@ -1446,135 +1619,82 @@ void NNCreatorPanel::clickedSave(const shmea::GString& cmpName, int x, int y)
 	if (tbNetName->getText().length() == 0)
 		return;
 
-	shmea::GString serverIP = "127.0.0.1";
-
 	// make sure the layers are up to date
 	syncFormVar();
 
-	shmea::GString netName = tbNetName->getText();
-	//	formInfo->setName(netName.c_str());
+	const shmea::GString modelName = tbNetName->getText();
+	formInfo->setName(modelName.c_str());
 
-	shmea::GType batchSize =
-		shmea::GString::Typify(tbBatchSize->getText(), tbBatchSize->getText().size());
-	if (batchSize.getType() != shmea::GType::LONG_TYPE)
-		return;
+	const int netType = (ddNetType ? ddNetType->getSelectedIndex() : glades::NNetwork::TYPE_DFF);
+	glades::NNetwork net(formInfo, netType);
 
-	shmea::GType inputLR =
-		shmea::GString::Typify(tbinputLR->getText(), tbinputLR->getText().size());
-	if (inputLR.getType() != shmea::GType::FLOAT_TYPE)
-		return;
+	// Apply modern training config (will be persisted into the model manifest).
+	const int schedIdx = (ddLRSchedule ? ddLRSchedule->getSelectedIndex() : 0);
+	const int schedType = scheduleTypeFromIndex(schedIdx);
 
-	shmea::GType inputMF =
-		shmea::GString::Typify(tbinputMF->getText(), tbinputMF->getText().size());
-	if (inputMF.getType() != shmea::GType::FLOAT_TYPE)
-		return;
+	const int stepSize = (tbStepSize ? shmea::GString::Typify(tbStepSize->getText(), tbStepSize->getText().size()).getInt() : 0);
+	const float gamma = (tbGamma ? shmea::GString::Typify(tbGamma->getText(), tbGamma->getText().size()).getFloat() : 1.0f);
+	const int tMax = (tbTMax ? shmea::GString::Typify(tbTMax->getText(), tbTMax->getText().size()).getInt() : 0);
+	const float minMult = (tbMinMult ? shmea::GString::Typify(tbMinMult->getText(), tbMinMult->getText().size()).getFloat() : 0.0f);
 
-	shmea::GType inputWD1 =
-		shmea::GString::Typify(tbinputWD1->getText(), tbinputWD1->getText().size());
-	if (inputWD1.getType() != shmea::GType::FLOAT_TYPE)
-		return;
+	if (schedType == 1)
+		net.setLearningRateScheduleStep(stepSize, gamma);
+	else if (schedType == 2)
+		net.setLearningRateScheduleExp(gamma);
+	else if (schedType == 3)
+		net.setLearningRateScheduleCosine(tMax, minMult);
+	else
+		net.setLearningRateScheduleNone();
 
-	shmea::GType inputWD2 =
-		shmea::GString::Typify(tbinputWD2->getText(), tbinputWD2->getText().size());
-	if (inputWD2.getType() != shmea::GType::FLOAT_TYPE)
-		return;
+	const float clipNorm = (tbGradClipNorm ? shmea::GString::Typify(tbGradClipNorm->getText(), tbGradClipNorm->getText().size()).getFloat() : 0.0f);
+	const float perElem = (tbPerElemClip ? shmea::GString::Typify(tbPerElemClip->getText(), tbPerElemClip->getText().size()).getFloat() : 10.0f);
+	net.setGlobalGradClipNorm(clipNorm);
+	net.setPerElementGradClip(perElem);
 
-	shmea::GType inputDropout =
-		shmea::GString::Typify(tbinputDropout->getText(), tbinputDropout->getText().size());
-	if (inputDropout.getType() != shmea::GType::FLOAT_TYPE)
-		return;
+	const int tbpttOverride = (tbTBPTT ? shmea::GString::Typify(tbTBPTT->getText(), tbTBPTT->getText().size()).getInt() : 0);
+	net.getTrainingConfigMutable().tbpttWindowOverride = tbpttOverride;
 
-	shmea::GType inputAP =
-		shmea::GString::Typify(tbinputAP->getText(), tbinputAP->getText().size());
-	if (inputAP.getType() != shmea::GType::FLOAT_TYPE)
-		return;
+	// Best-effort: initialize the model's weight tensors based on the current dataset selection.
+	// If no dataset is selected, saveModel() may still succeed depending on implementation.
+	glades::DataInput* di = NULL;
+	if (ddDataType && ddDatasets && ddDatasets->getSelectedText().length() > 0)
+	{
+		shmea::GString inputFName = ddDatasets->getSelectedText();
+		const shmea::GString dtype = ddDataType->getSelectedText();
+		if (dtype == "CSV")
+		{
+			inputFName = "datasets/" + inputFName;
+			di = new glades::NumberInput();
+		}
+		else if (dtype == "Image")
+		{
+			di = new glades::ImageInput();
+		}
 
-	shmea::GType outputSize =
-		shmea::GString::Typify(tbOutputLayerSize->getText(), tbOutputLayerSize->getText().size());
-	if (outputSize.getType() != shmea::GType::LONG_TYPE)
-		return;
+		if (di)
+		{
+			di->import(inputFName);
+			// A test pass is enough to force graph/tensor initialization.
+			net.test(di);
+		}
+	}
 
-	// just make sure the expected hidden layer counts are equal
-	shmea::GType layerCountCheck =
-		shmea::GString::Typify(tbHiddenLayerCount->getText(), tbHiddenLayerCount->getText().size());
-	if (layerCountCheck.getType() != shmea::GType::LONG_TYPE)
-		return;
+	const glades::NNetworkStatus st = net.saveModel(std::string(modelName.c_str()));
+	if (!st.ok())
+	{
+		const shmea::GString msg = "Save failed: " + shmea::GString(st.message.c_str());
+		RUMsgBox::MsgBox(this, "Model Package", msg, RUMsgBox::MESSAGEBOX);
+	}
+	else
+	{
+		const shmea::GString msg = "Saved \"" + modelName + "\"";
+		RUMsgBox::MsgBox(this, "Model Package", msg, RUMsgBox::MESSAGEBOX);
+	}
 
-	int newCount = (int)layerCountCheck.getLong();
-	if (newCount != formInfo->numHiddenLayers())
-		return;
+	if (di)
+		delete di;
 
-	// Save the neural network
-	populateInputLayerForm();
-	populateHLayerForm();
-	NNetwork* network = new NNetwork(formInfo);
-	glades::saveNeuralNetwork(network);
 	loadDDNN();
-}
-
-/*!
- * @brief Save NN weights to file
- * @details save a neural network bias and edge weights
- * @param cmpName the name of the component where the event happened
- * @param x the x-coordinate where the event happened (not used)
- * @param y the y-coordinate where the event happened (not used)
- */
-void NNCreatorPanel::clickedSaveWeights(const shmea::GString& cmpName, int x, int y)
-{
-
-	if (!tbNetNameWeights)
-		return;
-
-	if (tbNetNameWeights->getText().length() == 0)
-		return;
-
-	shmea::SaveFolder* folderToSave = new shmea::SaveFolder("nn-state");
-	if (!folderToSave->checkFolder())
-	{
-		return;
-	}
-
-	std::ofstream out((folderToSave->getPath() + tbNetNameWeights->getText()).c_str());
-	if (!out)
-	{
-		return;
-	}
-
-	shmea::GString serverIP = "127.0.0.1";
-
-	// make sure the layers are up to date
-	syncFormVar();
-
-	shmea::GString netName = tbNetNameWeights->getText();
-
-	int layerCount = nn->getLayersCount();
-	for (int i = 1; i < layerCount; ++i)
-	{
-		float biasWeight = nn->getLayerBiasWeight(i);
-		int lNeuronCount = nn->getLayerNeuronsCount(i);
-		int neuronEdgeCount = 0;
-		std::vector<shmea::GPointer<DrawNeuron> > neurons = nn->getLayerNeurons(i);
-		if (lNeuronCount > 0 && neurons.size() > 0)
-		{
-			neuronEdgeCount = neurons[0]->getWeights().size();
-		}
-
-		out << biasWeight << " ";
-		out << lNeuronCount << " ";
-		out << neuronEdgeCount << "\n";
-
-		for (int n = 0; n < lNeuronCount; ++n)
-		{
-			DrawNeuron neuron = *neurons[n];
-			std::vector<shmea::GPointer<float> > cWeights = neuron.getWeights();
-			for (int e = 0; e < cWeights.size(); ++e)
-			{
-				float w = *cWeights[e];
-				out << w << " ";
-			}
-		}
-		out << "\n";
-	}
 }
 
 /*!
@@ -1645,7 +1765,6 @@ void NNCreatorPanel::clickedRun(const shmea::GString& cmpName, int x, int y)
 	// Get the vars from the components
 	shmea::GString netName = tbNetName->getText();
 	shmea::GString testFName = ddDatasets->getSelectedText();
-	shmea::GString netNameWeights = ddNeuralNetWeights->getSelectedText();
 	int64_t trainPct =
 		parsePct(shmea::GString::Typify(tbTrainPct->getText(), tbTrainPct->getText().size()));
 	int64_t testPct =
@@ -1675,8 +1794,18 @@ void NNCreatorPanel::clickedRun(const shmea::GString& cmpName, int x, int y)
 	wData.addString(netName);
 	wData.addString(testFName);
 	wData.addInt(importType);
-	if (netNameWeights.c_str() != " ")
-		wData.addString(netNameWeights);
+
+	// Modern config payload (kept simple and order-stable).
+	// ML_Train will treat these as optional if absent.
+	wData.addInt(ddNetType ? ddNetType->getSelectedIndex() : glades::NNetwork::TYPE_DFF);
+	wData.addInt(ddLRSchedule ? scheduleTypeFromIndex(ddLRSchedule->getSelectedIndex()) : 0);
+	wData.addInt(tbStepSize ? shmea::GString::Typify(tbStepSize->getText(), tbStepSize->getText().size()).getInt() : 0);
+	wData.addFloat(tbGamma ? shmea::GString::Typify(tbGamma->getText(), tbGamma->getText().size()).getFloat() : 1.0f);
+	wData.addInt(tbTMax ? shmea::GString::Typify(tbTMax->getText(), tbTMax->getText().size()).getInt() : 0);
+	wData.addFloat(tbMinMult ? shmea::GString::Typify(tbMinMult->getText(), tbMinMult->getText().size()).getFloat() : 0.0f);
+	wData.addFloat(tbGradClipNorm ? shmea::GString::Typify(tbGradClipNorm->getText(), tbGradClipNorm->getText().size()).getFloat() : 0.0f);
+	wData.addFloat(tbPerElemClip ? shmea::GString::Typify(tbPerElemClip->getText(), tbPerElemClip->getText().size()).getFloat() : 10.0f);
+	wData.addInt(tbTBPTT ? shmea::GString::Typify(tbTBPTT->getText(), tbTBPTT->getText().size()).getInt() : 0);
 
 	/*wData.addLong(trainPct);
 	wData.addLong(testPct);
@@ -1726,7 +1855,6 @@ void NNCreatorPanel::clickedContinue(const shmea::GString& cmpName, int x, int y
 	// Get the vars from the components
 	shmea::GString netName = tbNetName->getText();
 	shmea::GString testFName = ddDatasets->getSelectedText();
-	shmea::GString netNameWeights = ddNeuralNetWeights->getSelectedText();
 	int64_t trainPct =
 		parsePct(shmea::GString::Typify(tbTrainPct->getText(), tbTrainPct->getText().size()));
 	int64_t testPct =
@@ -1755,8 +1883,17 @@ void NNCreatorPanel::clickedContinue(const shmea::GString& cmpName, int x, int y
 	wData.addString(netName);
 	wData.addString(testFName);
 	wData.addInt(importType);
-	if (netNameWeights.c_str() != " ")
-		wData.addString(netNameWeights);
+
+	// Modern config payload (optional).
+	wData.addInt(ddNetType ? ddNetType->getSelectedIndex() : glades::NNetwork::TYPE_DFF);
+	wData.addInt(ddLRSchedule ? scheduleTypeFromIndex(ddLRSchedule->getSelectedIndex()) : 0);
+	wData.addInt(tbStepSize ? shmea::GString::Typify(tbStepSize->getText(), tbStepSize->getText().size()).getInt() : 0);
+	wData.addFloat(tbGamma ? shmea::GString::Typify(tbGamma->getText(), tbGamma->getText().size()).getFloat() : 1.0f);
+	wData.addInt(tbTMax ? shmea::GString::Typify(tbTMax->getText(), tbTMax->getText().size()).getInt() : 0);
+	wData.addFloat(tbMinMult ? shmea::GString::Typify(tbMinMult->getText(), tbMinMult->getText().size()).getFloat() : 0.0f);
+	wData.addFloat(tbGradClipNorm ? shmea::GString::Typify(tbGradClipNorm->getText(), tbGradClipNorm->getText().size()).getFloat() : 0.0f);
+	wData.addFloat(tbPerElemClip ? shmea::GString::Typify(tbPerElemClip->getText(), tbPerElemClip->getText().size()).getFloat() : 10.0f);
+	wData.addInt(tbTBPTT ? shmea::GString::Typify(tbTBPTT->getText(), tbTBPTT->getText().size()).getInt() : 0);
 	/*wData.addLong(trainPct);
 	wData.addLong(testPct);
 	wData.addLong(validationPct);*/
@@ -1884,27 +2021,21 @@ void NNCreatorPanel::clickedKill(const shmea::GString& cmpName, int x, int y)
 void NNCreatorPanel::clickedDelete(const shmea::GString& cmpName, int x, int y)
 {
 	shmea::GString netName = tbNetName->getText();
-	shmea::SaveFolder* nnList = new shmea::SaveFolder("neuralnetworks");
-	nnList->deleteItem(netName);
+	const std::string path = std::string("database/models/") + std::string(netName.c_str());
+	const bool ok = deleteRecursive(path);
 	loadDDNN();
 
 	// Display a popup alert
-	char buffer[netName.length()];
-	sprintf(buffer, "Deleted \"%s\"", netName.c_str());
-	RUMsgBox::MsgBox(this, "Neural Net", buffer, RUMsgBox::MESSAGEBOX);
-}
-
-void NNCreatorPanel::clickedDeleteWeights(const shmea::GString& cmpName, int x, int y)
-{
-	shmea::GString netName = tbNetNameWeights->getText();
-	shmea::SaveFolder* nnList = new shmea::SaveFolder("nn-state");
-	nnList->deleteItem(netName);
-	loadDDNN();
-
-	// Display a popup alert
-	char buffer[netName.length()];
-	sprintf(buffer, "Deleted \"%s\"", netName.c_str());
-	RUMsgBox::MsgBox(this, "Neural Net", buffer, RUMsgBox::MESSAGEBOX);
+	if (ok)
+	{
+		const shmea::GString msgBoxText = "Deleted \"" + netName + "\"";
+		RUMsgBox::MsgBox(this, "Model Package", msgBoxText, RUMsgBox::MESSAGEBOX);
+	}
+	else
+	{
+		const shmea::GString msgBoxText = "Delete failed \"" + netName + "\"";
+		RUMsgBox::MsgBox(this, "Model Package", msgBoxText, RUMsgBox::MESSAGEBOX);
+	}
 }
 
 void NNCreatorPanel::clickedPreviewTrain(const shmea::GString& cmpName, int x, int y)
@@ -1984,31 +2115,70 @@ void NNCreatorPanel::nnSelectorChanged(int newIndex)
 	tbNetName->setText(netName);
 	formInfo->setName(netName.c_str());
 
-	// Load a machine learning model
-	glades::NNetwork cNetwork;
-	if (!cNetwork.load(netName.c_str()))
+	// Load NNInfo + modern config from unified model package.
+	const std::string modelName(netName.c_str());
+	const std::string base = std::string("database/models/") + modelName + "/";
+	const std::string nninfoPath = base + "nninfo.csv";
+	const std::string manifestPath = base + "manifest.txt";
+
+	// Parse manifest (best-effort; defaults preserved if fields are missing).
 	{
-		printf("[NN] Unable to load \"%s\"", netName.c_str());
-		return;
+		std::ifstream mf(manifestPath.c_str());
+		std::string line;
+		while (mf && std::getline(mf, line))
+		{
+			if (line.find("netType=") == 0)
+			{
+				const int v = atoi(line.substr(strlen("netType=")).c_str());
+				if (ddNetType && v >= 0 && v <= 3)
+					ddNetType->setSelectedIndex(v);
+			}
+			else if (line.find("lrScheduleType=") == 0)
+			{
+				const int v = atoi(line.substr(strlen("lrScheduleType=")).c_str());
+				if (ddLRSchedule && v >= 0 && v <= 3)
+					ddLRSchedule->setSelectedIndex(v);
+			}
+			else if (line.find("lrSchedule=") == 0)
+			{
+				const std::string v = line.substr(strlen("lrSchedule="));
+				if (ddLRSchedule)
+				{
+					if (v == "none") ddLRSchedule->setSelectedIndex(0);
+					else if (v == "step") ddLRSchedule->setSelectedIndex(1);
+					else if (v == "exp") ddLRSchedule->setSelectedIndex(2);
+					else if (v == "cosine") ddLRSchedule->setSelectedIndex(3);
+				}
+			}
+			else if (line.find("stepSize=") == 0 && tbStepSize)
+				tbStepSize->setText(line.substr(strlen("stepSize=")).c_str());
+			else if (line.find("gamma=") == 0 && tbGamma)
+				tbGamma->setText(line.substr(strlen("gamma=")).c_str());
+			else if ((line.find("tMax=") == 0 || line.find("cosineTMaxEpochs=") == 0) && tbTMax)
+			{
+				const char* key = (line.find("tMax=") == 0) ? "tMax=" : "cosineTMaxEpochs=";
+				tbTMax->setText(line.substr(strlen(key)).c_str());
+			}
+			else if ((line.find("minMult=") == 0 || line.find("minMultiplier=") == 0) && tbMinMult)
+			{
+				const char* key = (line.find("minMult=") == 0) ? "minMult=" : "minMultiplier=";
+				tbMinMult->setText(line.substr(strlen(key)).c_str());
+			}
+			else if (line.find("globalGradClipNorm=") == 0 && tbGradClipNorm)
+				tbGradClipNorm->setText(line.substr(strlen("globalGradClipNorm=")).c_str());
+			else if (line.find("perElementGradClip=") == 0 && tbPerElemClip)
+				tbPerElemClip->setText(line.substr(strlen("perElementGradClip=")).c_str());
+			else if ((line.find("tbpttWindowOverride=") == 0 || line.find("tbpttWindow=") == 0) && tbTBPTT)
+			{
+				const char* key = (line.find("tbpttWindowOverride=") == 0) ? "tbpttWindowOverride=" : "tbpttWindow=";
+				tbTBPTT->setText(line.substr(strlen(key)).c_str());
+			}
+		}
 	}
 
-	// Load the NN into the form
-	loadNNet(cNetwork.getNNInfo());
-}
-
-void NNCreatorPanel::nnWeightsSelectorChanged(int newIndex)
-{
-	// Only load after a selection click (not an open click)
-	if (ddNeuralNetWeights->isOpen())
-		return;
-
-	// make sure the user wants to actually load a network, since index 0 = " "
-	int loadOrSave = ddNeuralNetWeights->getSelectedIndex();
-	if (loadOrSave == 0)
-		return;
-
-	shmea::GString netName = ddNeuralNetWeights->getSelectedText();
-	tbNetNameWeights->setText(netName);
+	shmea::GTable tab(nninfoPath.c_str(), ',', shmea::GTable::TYPE_FILE);
+	glades::NNInfo* info = new glades::NNInfo(netName, tab);
+	loadNNet(info);
 }
 
 /*!

@@ -104,20 +104,34 @@ protected:
 	RULabel* lblNeuralNet;
 	RUDropdown* ddNeuralNet;
 
-	RULabel* lblNeuralNetWeights;
-	RUDropdown* ddNeuralNetWeights;
-
 	RULabel* lblNetName;
 	RUTextbox* tbNetName;
 
 	RUButton* btnSave;
 	RUButton* btnDelete;
 
-	RULabel* lblNetNameWeights;
-	RUTextbox* tbNetNameWeights;
+	// Modern training features / config
+	RULabel* lblNetType;
+	RUDropdown* ddNetType; // DFF/RNN/GRU/LSTM
 
-	RUButton* btnSaveWeights;
-	RUButton* btnDeleteWeights;
+	RULabel* lblLRSchedule;
+	RUDropdown* ddLRSchedule; // none|step|exp|cosine
+	RULabel* lblStepSize;
+	RUTextbox* tbStepSize;
+	RULabel* lblGamma;
+	RUTextbox* tbGamma;
+	RULabel* lblTMax;
+	RUTextbox* tbTMax;
+	RULabel* lblMinMult;
+	RUTextbox* tbMinMult;
+
+	RULabel* lblGradClipNorm;
+	RUTextbox* tbGradClipNorm;
+	RULabel* lblPerElemClip;
+	RUTextbox* tbPerElemClip;
+
+	RULabel* lblTBPTT;
+	RUTextbox* tbTBPTT;
 
 	RUTabContainer* layerTabs;
 	GLinearLayout* inputOverallLayout;
@@ -229,7 +243,6 @@ public:
 	void loadDatasets();
 
 	void clickedSave(const shmea::GString&, int, int);
-	void clickedSaveWeights(const shmea::GString&, int, int);
 	void clickedEditSwitch(const shmea::GString&, int, int);
 	void clickedDSTypeSwitch(int);
 	void clickedRun(const shmea::GString&, int, int);
@@ -241,13 +254,11 @@ public:
 	void clickedKill(const shmea::GString&, int, int);
 	void clickedContinue(const shmea::GString&, int, int);
 	void clickedDelete(const shmea::GString&, int, int);
-	void clickedDeleteWeights(const shmea::GString&, int, int);
 	void clickedPreviewTrain(const shmea::GString&, int, int);
 	void clickedPreviewTest(const shmea::GString&, int, int);
 	void clickedPrevious(const shmea::GString&, int, int);
 	void clickedNext(const shmea::GString&, int, int);
 	void nnSelectorChanged(int);
-	void nnWeightsSelectorChanged(int);
 	void resetSim();
 };
 

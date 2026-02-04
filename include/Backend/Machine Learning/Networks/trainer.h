@@ -14,69 +14,36 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
+// Trainer: the training/inference driver for models.
+//
+// This module owns the "run loop" (epochs, scheduling, termination, callbacks), but it does NOT:
+// - print to stdout/stderr
+// - send GUI/network messages
+// - instantiate any default callbacks
+//
+// It currently drives the existing `NNetwork` model representation. The intent is to keep
+// model representation (parameters + forward/backward/update) separate from training orchestration.
+//
+#ifndef _GLADES_TRAINER_H_
+#define _GLADES_TRAINER_H_
 
-#ifndef _RUITEMAREA
-#define _RUITEMAREA
+namespace glades {
 
-#include "../Graphics/GfxTypes.h"
-#include <map>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <string>
-#include <vector>
+class NNetwork;
+class DataInput;
+class ITrainingCallbacks;
+struct NNetworkStatus;
 
-class RUItemArea
+class Trainer
 {
-
-protected:
-	int x;
-	int y;
-	int width;
-	int height;
-	int paddingX;
-	int paddingY;
-	int marginX;
-	int marginY;
-	bool visible;
-	bool drawUpdate;
-
-	// events
-	bool inRange(int, int) const;
-
 public:
-	RUItemArea();
-	RUItemArea(int, int, int, int);
-	virtual ~RUItemArea();
-
-	// gets
-	int getX() const;
-	int getY() const;
-	virtual int getWidth() const;
-	virtual int getHeight() const;
-	int getPaddingX() const;
-	int getPaddingY() const;
-	int getMarginX() const;
-	int getMarginY() const;
-	GfxRect getLocationRect() const;
-	bool isVisible() const;
-	bool getDrawUpdateRequired() const;
-
-	// sets
-	void setX(int);
-	void setY(int);
-	void setWidth(int);
-	void setHeight(int);
-	void setPadding(int);
-	void setPaddingX(int);
-	void setPaddingY(int);
-	void setMargin(int);
-	void setMarginX(int);
-	void setMarginY(int);
-	void setVisible(bool);
-	void show();
-	void hide();
-	void requireDrawUpdate();
+	// Run a single train/test loop using the provided callbacks (may be NULL).
+	// This function is synchronous and does not retain the callbacks pointer.
+	static NNetworkStatus run(NNetwork& net, const DataInput* data, int runType, ITrainingCallbacks* callbacks);
 };
 
+} // namespace glades
+
 #endif
+

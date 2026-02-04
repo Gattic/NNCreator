@@ -1,4 +1,4 @@
-// Copyright 2020-2025 gfxplusplus contributors
+// Copyright 2026-2025 gfxplusplus contributors
 // Minimal rendering abstraction to support SDL2 and OpenGL backends
 #ifndef _GFX_RENDERER_H
 #define _GFX_RENDERER_H
