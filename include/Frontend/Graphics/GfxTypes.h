@@ -413,7 +413,13 @@ struct GfxNativeRendererOpaque; typedef GfxNativeRendererOpaque GfxNativeRendere
 #define GFXK_PERCENT '%'
 
 // Lightweight wrappers no-ops when SDL is absent
+#if defined(GFX_HAVE_OPENGL)
+// OpenGL backend supplies a real texture type + destructor.
+void gfxDestroyTexture(GfxTexture* texture);
+#define GFX_DestroyTexture gfxDestroyTexture
+#else
 #define GFX_DestroyTexture(...)
+#endif
 #define GFX_CreateRGBSurface(...) (NULL)
 #define GFX_FreeSurface(...)
 #define GFX_ConvertSurface(...) (NULL)

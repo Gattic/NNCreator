@@ -61,6 +61,8 @@ public:
 	GfxRect getLocationRect() const;
 	bool isVisible() const;
 	bool getDrawUpdateRequired() const;
+	// Public hit-test helper (wraps protected inRange for cross-object checks).
+	bool containsPoint(int px, int py) const { return inRange(px, py); }
 
 	// sets
 	void setX(int);

@@ -41,6 +41,8 @@ protected:
 
 	std::queue<const shmea::ServiceData*> updateQueue;
 	pthread_mutex_t* qMutex;
+	// Cache last hovered top-level item for mouse motion; avoids full-tree scans on every move.
+	GItem* lastMouseMotionItem;
 
 	void processQ(gfxpp*);
 	void popQ();

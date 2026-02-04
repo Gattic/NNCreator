@@ -186,6 +186,7 @@ public:
 	void removeItem(int); // id
 	GItem* getItemByID(int);
 	void setFocus(GItem*);
+	GItem* getFocusedItem() const { return focusedItem; }
 	GfxCursor* getSystemCursor();
 	void setCursor(GfxCursor*);
 	int getWidth() const;

@@ -33,6 +33,7 @@ class RUMouseMotion : public virtual RUItemArea
 {
 protected:
 	bool unhovered;
+	bool hoverState;
 	GfxSystemCursor cursor;
 	GfxCursor* cursorPtr;
 	bool customCursor;

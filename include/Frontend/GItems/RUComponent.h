@@ -31,6 +31,8 @@ class EventTracker;
 class RUComponent : public GItem
 {
 protected:
+	// Cache last hovered direct child for mouse motion dispatch.
+	GItem* lastMouseMotionSubItem;
 	virtual void updateBackground(gfxpp*) = 0;
 
 public:
