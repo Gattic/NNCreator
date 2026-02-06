@@ -15,6 +15,7 @@
 #include "Backend/Database/ServiceData.h"
 #include "Backend/Machine Learning/DataObjects/ImageInput.h"
 #include "Backend/Machine Learning/DataObjects/NumberInput.h"
+#include "Backend/Machine Learning/DataObjects/TokenInput.h"
 #include "Backend/Machine Learning/Networks/metanetwork.h"
 #include "Backend/Machine Learning/Networks/network.h"
 #include "Backend/Machine Learning/State/Terminator.h"
@@ -87,6 +88,28 @@ public:
 		//  [9]=globalGradClipNorm (float)
 		//  [10]=perElementGradClip (float)
 		//  [11]=tbpttWindowOverride (int)
+		//  [12]=minibatchSizeOverride (int; 0 disables)
+		//  [13]=optimizerType (int: 0 SGD_MOMENTUM, 1 ADAMW)
+		//  [14]=adamBeta1 (float)
+		//  [15]=adamBeta2 (float)
+		//  [16]=adamEps (float)
+		//  [17]=adamBiasCorrection (int: 0/1)
+		//  [18]=tr.nHeadsOverride (int)
+		//  [19]=tr.nKVHeadsOverride (int)
+		//  [20]=tr.dFFOverride (int)
+		//  [21]=tr.enableTokenEmbedding (int: 0/1)
+		//  [22]=tr.vocabSizeOverride (int)
+		//  [23]=tr.tieEmbeddings (int: 0/1)
+		//  [24]=tr.padTokenId (int)
+		//  [25]=tr.positionalEncoding (int: 0 none, 1 sin, 2 rope)
+		//  [26]=tr.normType (int: 0 LN, 1 RMS)
+		//  [27]=tr.ffnKind (int: 0 MLP, 1 SwiGLU)
+		//  [28]=tr.ffnActivation (int: 0 ReLU, 1 GELU)
+		//  [29]=tr.kvCacheDType (int: 0 F32, 1 F16, 2 BF16)
+		//  [30]=tr.ropeDimOverride (int)
+		//  [31]=tr.ropeTheta (float)
+		//  [32]=tr.tokenLmLossKind (int: 0 full, 1 sampled)
+		//  [33]=tr.tokenLmSampledNegatives (int)
 		//
 		// Backward compatibility:
 		// - If [3] is a string, treat it as legacy weights filename (nn-state) and ignore modern fields.
@@ -99,6 +122,30 @@ public:
 		float clipNorm = 0.0f;
 		float perElemClip = 10.0f;
 		int tbpttOverride = 0;
+		int minibatchOverride = 0;
+
+		int optimizerType = 0;
+		float adamBeta1 = 0.9f;
+		float adamBeta2 = 0.999f;
+		float adamEps = 1e-8f;
+		int adamBiasCorr = 1;
+
+		int trHeads = 0;
+		int trKVHeads = 0;
+		int trDFF = 0;
+		int trTokenEmbedding = 0;
+		int trVocabOverride = 0;
+		int trTieEmb = 1;
+		int trPadTokenId = -1;
+		int trPosEnc = 1;
+		int trNorm = 0;
+		int trFFNKind = 0;
+		int trFFNAct = 0;
+		int trKVCacheDType = 0;
+		int trRoPEDim = 0;
+		float trRoPETheta = 10000.0f;
+		int trLossKind = 0;
+		int trNeg = 64;
 		// Legacy (pre-unified) weights filename (database/nn-state/<file>).
 		// This service no longer loads these directly because NNetwork's internal graph state
 		// is private; unified model packages should be used instead.
@@ -106,6 +153,7 @@ public:
 		bool hasLegacyWeights = false;
 
 		int idx = 3;
+		bool hasModernConfig = false;
 		if (cList.size() > idx)
 		{
 			const shmea::GType t = cList[idx];
@@ -116,6 +164,7 @@ public:
 			}
 			else
 			{
+				hasModernConfig = true;
 				netTypeOverride = cList.getInt(idx);
 				++idx;
 				if (cList.size() > idx) { schedType = cList.getInt(idx); ++idx; }
@@ -126,6 +175,29 @@ public:
 				if (cList.size() > idx) { clipNorm = cList.getFloat(idx); ++idx; }
 				if (cList.size() > idx) { perElemClip = cList.getFloat(idx); ++idx; }
 				if (cList.size() > idx) { tbpttOverride = cList.getInt(idx); ++idx; }
+				if (cList.size() > idx) { minibatchOverride = cList.getInt(idx); ++idx; }
+				if (cList.size() > idx) { optimizerType = cList.getInt(idx); ++idx; }
+				if (cList.size() > idx) { adamBeta1 = cList.getFloat(idx); ++idx; }
+				if (cList.size() > idx) { adamBeta2 = cList.getFloat(idx); ++idx; }
+				if (cList.size() > idx) { adamEps = cList.getFloat(idx); ++idx; }
+				if (cList.size() > idx) { adamBiasCorr = cList.getInt(idx); ++idx; }
+
+				if (cList.size() > idx) { trHeads = cList.getInt(idx); ++idx; }
+				if (cList.size() > idx) { trKVHeads = cList.getInt(idx); ++idx; }
+				if (cList.size() > idx) { trDFF = cList.getInt(idx); ++idx; }
+				if (cList.size() > idx) { trTokenEmbedding = cList.getInt(idx); ++idx; }
+				if (cList.size() > idx) { trVocabOverride = cList.getInt(idx); ++idx; }
+				if (cList.size() > idx) { trTieEmb = cList.getInt(idx); ++idx; }
+				if (cList.size() > idx) { trPadTokenId = cList.getInt(idx); ++idx; }
+				if (cList.size() > idx) { trPosEnc = cList.getInt(idx); ++idx; }
+				if (cList.size() > idx) { trNorm = cList.getInt(idx); ++idx; }
+				if (cList.size() > idx) { trFFNKind = cList.getInt(idx); ++idx; }
+				if (cList.size() > idx) { trFFNAct = cList.getInt(idx); ++idx; }
+				if (cList.size() > idx) { trKVCacheDType = cList.getInt(idx); ++idx; }
+				if (cList.size() > idx) { trRoPEDim = cList.getInt(idx); ++idx; }
+				if (cList.size() > idx) { trRoPETheta = cList.getFloat(idx); ++idx; }
+				if (cList.size() > idx) { trLossKind = cList.getInt(idx); ++idx; }
+				if (cList.size() > idx) { trNeg = cList.getInt(idx); ++idx; }
 			}
 		}
 		/*int64_t maxTimeStamp = cList.getLong(3);
@@ -148,8 +220,11 @@ public:
 		}
 		else if (inputType == glades::DataInput::TEXT)
 		{
-			// TODO
-			return NULL;
+			inputFName = "datasets/" + inputFName;
+			glades::TokenInput* ti = new glades::TokenInput();
+			const int padId = (trTokenEmbedding ? trPadTokenId : -1);
+			ti->setPadTokenId(padId);
+			di = ti;
 		}
 		else
 			return NULL;
@@ -160,37 +235,75 @@ public:
 		// Load the input data
 		di->import(inputFName);
 
-		// Load the model (unified model package preferred; legacy fallback).
+		// Load the model (unified model package).
 		if (cNetwork.getEpochs() == 0)
 		{
 			const glades::NNetworkStatus st = cNetwork.loadModel(std::string(modelName.c_str()), di, netTypeOverride);
 			if (!st.ok())
 			{
-				if (!cNetwork.load(modelName))
-				{
-					printf("[NN] Unable to load model \"%s\": %s\n", modelName.c_str(), st.message.c_str());
-					return NULL;
-				}
+				printf("[NN] Unable to load model \"%s\": %s\n", modelName.c_str(), st.message.c_str());
+				delete di;
+				return NULL;
 			}
 		}
 
 		// Apply optional overrides (modern features).
-		if (netTypeOverride >= 0 && netTypeOverride <= 3)
+		if (hasModernConfig)
 		{
-			// netType is a constructor-time trait, but loadModel(netTypeOverride) handles override.
-			// If we're on legacy load(), best-effort set cNetwork.netType via a rebuild path inside training.
+			glades::TrainingConfig cfg = cNetwork.getTrainingConfig();
+
+			// Schedule
+			if (schedType == 1)
+				cfg.lrSchedule.setStep(stepSize, gamma);
+			else if (schedType == 2)
+				cfg.lrSchedule.setExp(gamma);
+			else if (schedType == 3)
+				cfg.lrSchedule.setCosine(tMax, minMult);
+			else
+				cfg.lrSchedule.setNone();
+
+			// Core overrides
+			cfg.globalGradClipNorm = clipNorm;
+			cfg.perElementGradClip = perElemClip;
+			cfg.tbpttWindowOverride = tbpttOverride;
+			cfg.minibatchSizeOverride = minibatchOverride;
+
+			// Optimizer
+			if (optimizerType == 1)
+			{
+				cfg.optimizer.type = glades::OptimizerConfig::ADAMW;
+				cfg.optimizer.adamBeta1 = adamBeta1;
+				cfg.optimizer.adamBeta2 = adamBeta2;
+				cfg.optimizer.adamEps = adamEps;
+				cfg.optimizer.adamBiasCorrection = (adamBiasCorr != 0);
+			}
+			else
+			{
+				cfg.optimizer.type = glades::OptimizerConfig::SGD_MOMENTUM;
+			}
+
+			// Transformer
+			cfg.transformer.nHeadsOverride = trHeads;
+			cfg.transformer.nKVHeadsOverride = trKVHeads;
+			cfg.transformer.dFFOverride = trDFF;
+			cfg.transformer.enableTokenEmbedding = (trTokenEmbedding != 0);
+			cfg.transformer.vocabSizeOverride = trVocabOverride;
+			cfg.transformer.tieEmbeddings = (trTieEmb != 0);
+			cfg.transformer.padTokenId = trPadTokenId;
+			cfg.transformer.positionalEncoding = static_cast<glades::TransformerRunConfig::PositionalEncodingType>(trPosEnc);
+			cfg.transformer.normType = static_cast<glades::TransformerRunConfig::NormType>(trNorm);
+			cfg.transformer.ffnKind = static_cast<glades::TransformerRunConfig::FFNKind>(trFFNKind);
+			cfg.transformer.ffnActivation = static_cast<glades::TransformerRunConfig::FFNActivationType>(trFFNAct);
+			cfg.transformer.kvCacheDType = static_cast<glades::TransformerRunConfig::KVCacheDType>(trKVCacheDType);
+			cfg.transformer.ropeDimOverride = trRoPEDim;
+			cfg.transformer.ropeTheta = trRoPETheta;
+			cfg.transformer.tokenLmLossKind = static_cast<glades::TransformerRunConfig::TokenLMLossKind>(trLossKind);
+			cfg.transformer.tokenLmSampledNegatives = trNeg;
+
+			const glades::NNetworkStatus stCfg = cNetwork.setTrainingConfig(cfg);
+			if (!stCfg.ok())
+				printf("[NN] warning: invalid training config overrides ignored: %s\n", stCfg.message.c_str());
 		}
-		if (schedType == 1)
-			cNetwork.setLearningRateScheduleStep(stepSize, gamma);
-		else if (schedType == 2)
-			cNetwork.setLearningRateScheduleExp(gamma);
-		else if (schedType == 3)
-			cNetwork.setLearningRateScheduleCosine(tMax, minMult);
-		else
-			cNetwork.setLearningRateScheduleNone();
-		cNetwork.setGlobalGradClipNorm(clipNorm);
-		cNetwork.setPerElementGradClip(perElemClip);
-		cNetwork.getTrainingConfigMutable().tbpttWindowOverride = tbpttOverride;
 
 		// Legacy weights load (pre-unified persistence).
 		// Intentionally not supported here anymore; these should be migrated into model packages.
@@ -204,9 +317,7 @@ public:
 		cNetwork.terminator.setAccuracy(maxAccuracy);*/
 
 		// Run the training and retrieve a metanetwork
-		glades::MetaNetwork* newTrainNet =
-			glades::train(&cNetwork, di, serverInstance, destination);
-		cNetwork.setMustdBuildMeat(true);
+		(void)glades::train(&cNetwork, di, serverInstance, destination);
 
 		return NULL;
 	}

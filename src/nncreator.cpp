@@ -30,6 +30,7 @@
 #include "Backend/Database/GType.h"
 #include "Backend/Machine Learning/DataObjects/ImageInput.h"
 #include "Backend/Machine Learning/DataObjects/NumberInput.h"
+#include "Backend/Machine Learning/DataObjects/TokenInput.h"
 #include "Backend/Machine Learning/GMath/gmath.h"
 #include "Backend/Machine Learning/Networks/network.h"
 #include "Backend/Machine Learning/Structure/hiddenlayerinfo.h"
@@ -442,12 +443,14 @@ void NNCreatorPanel::buildPanel()
 	ddNetType = new RUDropdown();
 	ddNetType->setWidth(220);
 	ddNetType->setHeight(30);
-	ddNetType->setOptionsShown(4);
+	ddNetType->setOptionsShown(6);
 	ddNetType->setName("ddNetType");
 	ddNetType->addOption("DFF");
 	ddNetType->addOption("RNN");
 	ddNetType->addOption("GRU");
 	ddNetType->addOption("LSTM");
+	ddNetType->addOption("Transformer (Enc)");
+	ddNetType->addOption("Transformer (Dec)");
 	ddNetType->setSelectedIndex(0);
 	netTypeLayout->addSubItem(ddNetType);
 
@@ -580,6 +583,354 @@ void NNCreatorPanel::buildPanel()
 	tbTBPTT->setText("0");
 	tbTBPTT->setName("tbTBPTT");
 	tbpttLayout->addSubItem(tbTBPTT);
+
+	// ==== TrainingConfig overrides (minibatch + optimizer + transformer knobs) ====
+	GLinearLayout* minibatchOverrideLayout = new GLinearLayout("minibatchOverrideLayout");
+	minibatchOverrideLayout->setOrientation(GLinearLayout::HORIZONTAL);
+	trainingSettingsLayout->addSubItem(minibatchOverrideLayout);
+
+	lblMinibatchOverride = new RULabel();
+	lblMinibatchOverride->setWidth(200);
+	lblMinibatchOverride->setHeight(30);
+	lblMinibatchOverride->setText("Minibatch Override");
+	lblMinibatchOverride->setName("lblMinibatchOverride");
+	minibatchOverrideLayout->addSubItem(lblMinibatchOverride);
+
+	tbMinibatchOverride = new RUTextbox();
+	tbMinibatchOverride->setWidth(220);
+	tbMinibatchOverride->setHeight(30);
+	tbMinibatchOverride->setText("0");
+	tbMinibatchOverride->setName("tbMinibatchOverride");
+	minibatchOverrideLayout->addSubItem(tbMinibatchOverride);
+
+	GLinearLayout* optLayout = new GLinearLayout("optLayout");
+	optLayout->setOrientation(GLinearLayout::HORIZONTAL);
+	trainingSettingsLayout->addSubItem(optLayout);
+
+	lblOptimizer = new RULabel();
+	lblOptimizer->setWidth(200);
+	lblOptimizer->setHeight(30);
+	lblOptimizer->setText("Optimizer");
+	lblOptimizer->setName("lblOptimizer");
+	optLayout->addSubItem(lblOptimizer);
+
+	ddOptimizer = new RUDropdown();
+	ddOptimizer->setWidth(220);
+	ddOptimizer->setHeight(30);
+	ddOptimizer->setOptionsShown(2);
+	ddOptimizer->setName("ddOptimizer");
+	ddOptimizer->addOption("SGD+Momentum");
+	ddOptimizer->addOption("AdamW");
+	ddOptimizer->setSelectedIndex(0);
+	optLayout->addSubItem(ddOptimizer);
+
+	GLinearLayout* adam1Layout = new GLinearLayout("adam1Layout");
+	adam1Layout->setOrientation(GLinearLayout::HORIZONTAL);
+	trainingSettingsLayout->addSubItem(adam1Layout);
+
+	lblAdamBeta1 = new RULabel();
+	lblAdamBeta1->setWidth(120);
+	lblAdamBeta1->setHeight(30);
+	lblAdamBeta1->setText("Adam beta1");
+	lblAdamBeta1->setName("lblAdamBeta1");
+	adam1Layout->addSubItem(lblAdamBeta1);
+
+	tbAdamBeta1 = new RUTextbox();
+	tbAdamBeta1->setWidth(80);
+	tbAdamBeta1->setHeight(30);
+	tbAdamBeta1->setText("0.9");
+	tbAdamBeta1->setName("tbAdamBeta1");
+	adam1Layout->addSubItem(tbAdamBeta1);
+
+	lblAdamBeta2 = new RULabel();
+	lblAdamBeta2->setWidth(80);
+	lblAdamBeta2->setHeight(30);
+	lblAdamBeta2->setText("beta2");
+	lblAdamBeta2->setName("lblAdamBeta2");
+	adam1Layout->addSubItem(lblAdamBeta2);
+
+	tbAdamBeta2 = new RUTextbox();
+	tbAdamBeta2->setWidth(120);
+	tbAdamBeta2->setHeight(30);
+	tbAdamBeta2->setText("0.999");
+	tbAdamBeta2->setName("tbAdamBeta2");
+	adam1Layout->addSubItem(tbAdamBeta2);
+
+	GLinearLayout* adam2Layout = new GLinearLayout("adam2Layout");
+	adam2Layout->setOrientation(GLinearLayout::HORIZONTAL);
+	trainingSettingsLayout->addSubItem(adam2Layout);
+
+	lblAdamEps = new RULabel();
+	lblAdamEps->setWidth(120);
+	lblAdamEps->setHeight(30);
+	lblAdamEps->setText("Adam eps");
+	lblAdamEps->setName("lblAdamEps");
+	adam2Layout->addSubItem(lblAdamEps);
+
+	tbAdamEps = new RUTextbox();
+	tbAdamEps->setWidth(80);
+	tbAdamEps->setHeight(30);
+	tbAdamEps->setText("1e-8");
+	tbAdamEps->setName("tbAdamEps");
+	adam2Layout->addSubItem(tbAdamEps);
+
+	chkAdamBiasCorrection = new RUCheckbox("Bias Corr");
+	chkAdamBiasCorrection->setWidth(200);
+	chkAdamBiasCorrection->setHeight(30);
+	chkAdamBiasCorrection->setName("chkAdamBiasCorrection");
+	chkAdamBiasCorrection->setCheck(true);
+	adam2Layout->addSubItem(chkAdamBiasCorrection);
+
+	// Transformer config block (always visible; only used for transformer net types)
+	lblTransformerHeader = new RULabel();
+	lblTransformerHeader->setPadding(6);
+	lblTransformerHeader->setText("Transformer");
+	lblTransformerHeader->setName("lblTransformerHeader");
+	trainingSettingsLayout->addSubItem(lblTransformerHeader);
+
+	GLinearLayout* trDimsLayout = new GLinearLayout("trDimsLayout");
+	trDimsLayout->setOrientation(GLinearLayout::HORIZONTAL);
+	trainingSettingsLayout->addSubItem(trDimsLayout);
+
+	lblTrHeads = new RULabel();
+	lblTrHeads->setWidth(120);
+	lblTrHeads->setHeight(30);
+	lblTrHeads->setText("Heads");
+	lblTrHeads->setName("lblTrHeads");
+	trDimsLayout->addSubItem(lblTrHeads);
+	tbTrHeads = new RUTextbox();
+	tbTrHeads->setWidth(60);
+	tbTrHeads->setHeight(30);
+	tbTrHeads->setText("0");
+	tbTrHeads->setName("tbTrHeads");
+	trDimsLayout->addSubItem(tbTrHeads);
+
+	lblTrKVHeads = new RULabel();
+	lblTrKVHeads->setWidth(80);
+	lblTrKVHeads->setHeight(30);
+	lblTrKVHeads->setText("KV");
+	lblTrKVHeads->setName("lblTrKVHeads");
+	trDimsLayout->addSubItem(lblTrKVHeads);
+	tbTrKVHeads = new RUTextbox();
+	tbTrKVHeads->setWidth(60);
+	tbTrKVHeads->setHeight(30);
+	tbTrKVHeads->setText("0");
+	tbTrKVHeads->setName("tbTrKVHeads");
+	trDimsLayout->addSubItem(tbTrKVHeads);
+
+	lblTrDFF = new RULabel();
+	lblTrDFF->setWidth(60);
+	lblTrDFF->setHeight(30);
+	lblTrDFF->setText("dFF");
+	lblTrDFF->setName("lblTrDFF");
+	trDimsLayout->addSubItem(lblTrDFF);
+	tbTrDFF = new RUTextbox();
+	tbTrDFF->setWidth(80);
+	tbTrDFF->setHeight(30);
+	tbTrDFF->setText("0");
+	tbTrDFF->setName("tbTrDFF");
+	trDimsLayout->addSubItem(tbTrDFF);
+
+	GLinearLayout* trTokLayout = new GLinearLayout("trTokLayout");
+	trTokLayout->setOrientation(GLinearLayout::HORIZONTAL);
+	trainingSettingsLayout->addSubItem(trTokLayout);
+
+	chkTrTokenEmbedding = new RUCheckbox("Token Embedding");
+	chkTrTokenEmbedding->setWidth(200);
+	chkTrTokenEmbedding->setHeight(30);
+	chkTrTokenEmbedding->setName("chkTrTokenEmbedding");
+	chkTrTokenEmbedding->setCheck(false);
+	trTokLayout->addSubItem(chkTrTokenEmbedding);
+
+	lblTrVocabSize = new RULabel();
+	lblTrVocabSize->setWidth(80);
+	lblTrVocabSize->setHeight(30);
+	lblTrVocabSize->setText("Vocab");
+	lblTrVocabSize->setName("lblTrVocabSize");
+	trTokLayout->addSubItem(lblTrVocabSize);
+	tbTrVocabSize = new RUTextbox();
+	tbTrVocabSize->setWidth(70);
+	tbTrVocabSize->setHeight(30);
+	tbTrVocabSize->setText("0");
+	tbTrVocabSize->setName("tbTrVocabSize");
+	trTokLayout->addSubItem(tbTrVocabSize);
+
+	chkTrTieEmbeddings = new RUCheckbox("Tie");
+	chkTrTieEmbeddings->setWidth(70);
+	chkTrTieEmbeddings->setHeight(30);
+	chkTrTieEmbeddings->setName("chkTrTieEmbeddings");
+	chkTrTieEmbeddings->setCheck(true);
+	trTokLayout->addSubItem(chkTrTieEmbeddings);
+
+	lblTrPadTokenId = new RULabel();
+	lblTrPadTokenId->setWidth(50);
+	lblTrPadTokenId->setHeight(30);
+	lblTrPadTokenId->setText("Pad");
+	lblTrPadTokenId->setName("lblTrPadTokenId");
+	trTokLayout->addSubItem(lblTrPadTokenId);
+	tbTrPadTokenId = new RUTextbox();
+	tbTrPadTokenId->setWidth(60);
+	tbTrPadTokenId->setHeight(30);
+	tbTrPadTokenId->setText("-1");
+	tbTrPadTokenId->setName("tbTrPadTokenId");
+	trTokLayout->addSubItem(tbTrPadTokenId);
+
+	GLinearLayout* trStyleLayout = new GLinearLayout("trStyleLayout");
+	trStyleLayout->setOrientation(GLinearLayout::HORIZONTAL);
+	trainingSettingsLayout->addSubItem(trStyleLayout);
+
+	lblTrPosEnc = new RULabel();
+	lblTrPosEnc->setWidth(120);
+	lblTrPosEnc->setHeight(30);
+	lblTrPosEnc->setText("PosEnc");
+	lblTrPosEnc->setName("lblTrPosEnc");
+	trStyleLayout->addSubItem(lblTrPosEnc);
+	ddTrPosEnc = new RUDropdown();
+	ddTrPosEnc->setWidth(120);
+	ddTrPosEnc->setHeight(30);
+	ddTrPosEnc->setOptionsShown(3);
+	ddTrPosEnc->setName("ddTrPosEnc");
+	ddTrPosEnc->addOption("None");
+	ddTrPosEnc->addOption("Sin");
+	ddTrPosEnc->addOption("RoPE");
+	ddTrPosEnc->setSelectedIndex(1);
+	trStyleLayout->addSubItem(ddTrPosEnc);
+
+	lblTrNorm = new RULabel();
+	lblTrNorm->setWidth(60);
+	lblTrNorm->setHeight(30);
+	lblTrNorm->setText("Norm");
+	lblTrNorm->setName("lblTrNorm");
+	trStyleLayout->addSubItem(lblTrNorm);
+	ddTrNorm = new RUDropdown();
+	ddTrNorm->setWidth(100);
+	ddTrNorm->setHeight(30);
+	ddTrNorm->setOptionsShown(2);
+	ddTrNorm->setName("ddTrNorm");
+	ddTrNorm->addOption("LN");
+	ddTrNorm->addOption("RMS");
+	ddTrNorm->setSelectedIndex(0);
+	trStyleLayout->addSubItem(ddTrNorm);
+
+	GLinearLayout* trFfnLayout = new GLinearLayout("trFfnLayout");
+	trFfnLayout->setOrientation(GLinearLayout::HORIZONTAL);
+	trainingSettingsLayout->addSubItem(trFfnLayout);
+
+	lblTrFFNKind = new RULabel();
+	lblTrFFNKind->setWidth(120);
+	lblTrFFNKind->setHeight(30);
+	lblTrFFNKind->setText("FFN");
+	lblTrFFNKind->setName("lblTrFFNKind");
+	trFfnLayout->addSubItem(lblTrFFNKind);
+	ddTrFFNKind = new RUDropdown();
+	ddTrFFNKind->setWidth(120);
+	ddTrFFNKind->setHeight(30);
+	ddTrFFNKind->setOptionsShown(2);
+	ddTrFFNKind->setName("ddTrFFNKind");
+	ddTrFFNKind->addOption("MLP");
+	ddTrFFNKind->addOption("SwiGLU");
+	ddTrFFNKind->setSelectedIndex(0);
+	trFfnLayout->addSubItem(ddTrFFNKind);
+
+	lblTrFFNAct = new RULabel();
+	lblTrFFNAct->setWidth(60);
+	lblTrFFNAct->setHeight(30);
+	lblTrFFNAct->setText("Act");
+	lblTrFFNAct->setName("lblTrFFNAct");
+	trFfnLayout->addSubItem(lblTrFFNAct);
+	ddTrFFNAct = new RUDropdown();
+	ddTrFFNAct->setWidth(100);
+	ddTrFFNAct->setHeight(30);
+	ddTrFFNAct->setOptionsShown(2);
+	ddTrFFNAct->setName("ddTrFFNAct");
+	ddTrFFNAct->addOption("ReLU");
+	ddTrFFNAct->addOption("GELU");
+	ddTrFFNAct->setSelectedIndex(0);
+	trFfnLayout->addSubItem(ddTrFFNAct);
+
+	GLinearLayout* trRopeLayout = new GLinearLayout("trRopeLayout");
+	trRopeLayout->setOrientation(GLinearLayout::HORIZONTAL);
+	trainingSettingsLayout->addSubItem(trRopeLayout);
+
+	lblTrRoPEDim = new RULabel();
+	lblTrRoPEDim->setWidth(120);
+	lblTrRoPEDim->setHeight(30);
+	lblTrRoPEDim->setText("RoPE Dim");
+	lblTrRoPEDim->setName("lblTrRoPEDim");
+	trRopeLayout->addSubItem(lblTrRoPEDim);
+	tbTrRoPEDim = new RUTextbox();
+	tbTrRoPEDim->setWidth(60);
+	tbTrRoPEDim->setHeight(30);
+	tbTrRoPEDim->setText("0");
+	tbTrRoPEDim->setName("tbTrRoPEDim");
+	trRopeLayout->addSubItem(tbTrRoPEDim);
+
+	lblTrRoPETheta = new RULabel();
+	lblTrRoPETheta->setWidth(80);
+	lblTrRoPETheta->setHeight(30);
+	lblTrRoPETheta->setText("Theta");
+	lblTrRoPETheta->setName("lblTrRoPETheta");
+	trRopeLayout->addSubItem(lblTrRoPETheta);
+	tbTrRoPETheta = new RUTextbox();
+	tbTrRoPETheta->setWidth(120);
+	tbTrRoPETheta->setHeight(30);
+	tbTrRoPETheta->setText("10000");
+	tbTrRoPETheta->setName("tbTrRoPETheta");
+	trRopeLayout->addSubItem(tbTrRoPETheta);
+
+	GLinearLayout* trLossLayout = new GLinearLayout("trLossLayout");
+	trLossLayout->setOrientation(GLinearLayout::HORIZONTAL);
+	trainingSettingsLayout->addSubItem(trLossLayout);
+
+	lblTrLossKind = new RULabel();
+	lblTrLossKind->setWidth(120);
+	lblTrLossKind->setHeight(30);
+	lblTrLossKind->setText("LM Loss");
+	lblTrLossKind->setName("lblTrLossKind");
+	trLossLayout->addSubItem(lblTrLossKind);
+	ddTrLossKind = new RUDropdown();
+	ddTrLossKind->setWidth(140);
+	ddTrLossKind->setHeight(30);
+	ddTrLossKind->setOptionsShown(2);
+	ddTrLossKind->setName("ddTrLossKind");
+	ddTrLossKind->addOption("Full");
+	ddTrLossKind->addOption("Sampled");
+	ddTrLossKind->setSelectedIndex(0);
+	trLossLayout->addSubItem(ddTrLossKind);
+
+	lblTrNegSamples = new RULabel();
+	lblTrNegSamples->setWidth(60);
+	lblTrNegSamples->setHeight(30);
+	lblTrNegSamples->setText("Neg");
+	lblTrNegSamples->setName("lblTrNegSamples");
+	trLossLayout->addSubItem(lblTrNegSamples);
+	tbTrNegSamples = new RUTextbox();
+	tbTrNegSamples->setWidth(80);
+	tbTrNegSamples->setHeight(30);
+	tbTrNegSamples->setText("64");
+	tbTrNegSamples->setName("tbTrNegSamples");
+	trLossLayout->addSubItem(tbTrNegSamples);
+
+	GLinearLayout* trKvLayout = new GLinearLayout("trKvLayout");
+	trKvLayout->setOrientation(GLinearLayout::HORIZONTAL);
+	trainingSettingsLayout->addSubItem(trKvLayout);
+
+	lblTrKVCacheDType = new RULabel();
+	lblTrKVCacheDType->setWidth(120);
+	lblTrKVCacheDType->setHeight(30);
+	lblTrKVCacheDType->setText("KV Cache");
+	lblTrKVCacheDType->setName("lblTrKVCacheDType");
+	trKvLayout->addSubItem(lblTrKVCacheDType);
+	ddTrKVCacheDType = new RUDropdown();
+	ddTrKVCacheDType->setWidth(220);
+	ddTrKVCacheDType->setHeight(30);
+	ddTrKVCacheDType->setOptionsShown(3);
+	ddTrKVCacheDType->setName("ddTrKVCacheDType");
+	ddTrKVCacheDType->addOption("F32");
+	ddTrKVCacheDType->addOption("F16");
+	ddTrKVCacheDType->addOption("BF16");
+	ddTrKVCacheDType->setSelectedIndex(0);
+	trKvLayout->addSubItem(ddTrKVCacheDType);
 
 	// Input/Output Data Type Layout
 	GLinearLayout* dataTypeLayout = new GLinearLayout("dataTypeLayout");
@@ -1629,6 +1980,8 @@ void NNCreatorPanel::clickedSave(const shmea::GString& cmpName, int x, int y)
 	glades::NNetwork net(formInfo, netType);
 
 	// Apply modern training config (will be persisted into the model manifest).
+	glades::TrainingConfig cfg = net.getTrainingConfig();
+
 	const int schedIdx = (ddLRSchedule ? ddLRSchedule->getSelectedIndex() : 0);
 	const int schedType = scheduleTypeFromIndex(schedIdx);
 
@@ -1637,22 +1990,74 @@ void NNCreatorPanel::clickedSave(const shmea::GString& cmpName, int x, int y)
 	const int tMax = (tbTMax ? shmea::GString::Typify(tbTMax->getText(), tbTMax->getText().size()).getInt() : 0);
 	const float minMult = (tbMinMult ? shmea::GString::Typify(tbMinMult->getText(), tbMinMult->getText().size()).getFloat() : 0.0f);
 
-	if (schedType == 1)
-		net.setLearningRateScheduleStep(stepSize, gamma);
-	else if (schedType == 2)
-		net.setLearningRateScheduleExp(gamma);
-	else if (schedType == 3)
-		net.setLearningRateScheduleCosine(tMax, minMult);
-	else
-		net.setLearningRateScheduleNone();
-
 	const float clipNorm = (tbGradClipNorm ? shmea::GString::Typify(tbGradClipNorm->getText(), tbGradClipNorm->getText().size()).getFloat() : 0.0f);
 	const float perElem = (tbPerElemClip ? shmea::GString::Typify(tbPerElemClip->getText(), tbPerElemClip->getText().size()).getFloat() : 10.0f);
-	net.setGlobalGradClipNorm(clipNorm);
-	net.setPerElementGradClip(perElem);
-
 	const int tbpttOverride = (tbTBPTT ? shmea::GString::Typify(tbTBPTT->getText(), tbTBPTT->getText().size()).getInt() : 0);
-	net.getTrainingConfigMutable().tbpttWindowOverride = tbpttOverride;
+	const int minibatchOverride = (tbMinibatchOverride ? shmea::GString::Typify(tbMinibatchOverride->getText(), tbMinibatchOverride->getText().size()).getInt() : 0);
+
+	// Schedule
+	if (schedType == 1)
+		cfg.lrSchedule.setStep(stepSize, gamma);
+	else if (schedType == 2)
+		cfg.lrSchedule.setExp(gamma);
+	else if (schedType == 3)
+		cfg.lrSchedule.setCosine(tMax, minMult);
+	else
+		cfg.lrSchedule.setNone();
+
+	// Core overrides
+	cfg.globalGradClipNorm = clipNorm;
+	cfg.perElementGradClip = perElem;
+	cfg.tbpttWindowOverride = tbpttOverride;
+	cfg.minibatchSizeOverride = minibatchOverride;
+
+	// Optimizer
+	const int optIdx = (ddOptimizer ? ddOptimizer->getSelectedIndex() : 0);
+	if (optIdx == 1)
+	{
+		cfg.optimizer.type = glades::OptimizerConfig::ADAMW;
+		cfg.optimizer.adamBeta1 = (tbAdamBeta1 ? shmea::GString::Typify(tbAdamBeta1->getText(), tbAdamBeta1->getText().size()).getFloat() : 0.9f);
+		cfg.optimizer.adamBeta2 = (tbAdamBeta2 ? shmea::GString::Typify(tbAdamBeta2->getText(), tbAdamBeta2->getText().size()).getFloat() : 0.999f);
+		cfg.optimizer.adamEps = (tbAdamEps ? shmea::GString::Typify(tbAdamEps->getText(), tbAdamEps->getText().size()).getFloat() : 1e-8f);
+		cfg.optimizer.adamBiasCorrection = (chkAdamBiasCorrection ? chkAdamBiasCorrection->isChecked() : true);
+	}
+	else
+	{
+		cfg.optimizer.type = glades::OptimizerConfig::SGD_MOMENTUM;
+	}
+
+	// Transformer knobs (used only for transformer net types; safe to always populate)
+	cfg.transformer.nHeadsOverride = (tbTrHeads ? shmea::GString::Typify(tbTrHeads->getText(), tbTrHeads->getText().size()).getInt() : 0);
+	cfg.transformer.nKVHeadsOverride = (tbTrKVHeads ? shmea::GString::Typify(tbTrKVHeads->getText(), tbTrKVHeads->getText().size()).getInt() : 0);
+	cfg.transformer.dFFOverride = (tbTrDFF ? shmea::GString::Typify(tbTrDFF->getText(), tbTrDFF->getText().size()).getInt() : 0);
+
+	cfg.transformer.enableTokenEmbedding = (chkTrTokenEmbedding ? chkTrTokenEmbedding->isChecked() : false);
+	cfg.transformer.vocabSizeOverride = (tbTrVocabSize ? shmea::GString::Typify(tbTrVocabSize->getText(), tbTrVocabSize->getText().size()).getInt() : 0);
+	cfg.transformer.tieEmbeddings = (chkTrTieEmbeddings ? chkTrTieEmbeddings->isChecked() : true);
+	cfg.transformer.padTokenId = (tbTrPadTokenId ? shmea::GString::Typify(tbTrPadTokenId->getText(), tbTrPadTokenId->getText().size()).getInt() : -1);
+
+	cfg.transformer.positionalEncoding = static_cast<glades::TransformerRunConfig::PositionalEncodingType>(ddTrPosEnc ? ddTrPosEnc->getSelectedIndex() : glades::TransformerRunConfig::POSENC_SINUSOIDAL);
+	cfg.transformer.normType = static_cast<glades::TransformerRunConfig::NormType>(ddTrNorm ? ddTrNorm->getSelectedIndex() : glades::TransformerRunConfig::NORM_LAYERNORM);
+	cfg.transformer.ffnKind = static_cast<glades::TransformerRunConfig::FFNKind>(ddTrFFNKind ? ddTrFFNKind->getSelectedIndex() : glades::TransformerRunConfig::FFN_MLP);
+	cfg.transformer.ffnActivation = static_cast<glades::TransformerRunConfig::FFNActivationType>(ddTrFFNAct ? ddTrFFNAct->getSelectedIndex() : glades::TransformerRunConfig::FFN_RELU);
+	cfg.transformer.kvCacheDType = static_cast<glades::TransformerRunConfig::KVCacheDType>(ddTrKVCacheDType ? ddTrKVCacheDType->getSelectedIndex() : glades::TransformerRunConfig::KV_CACHE_F32);
+
+	cfg.transformer.ropeDimOverride = (tbTrRoPEDim ? shmea::GString::Typify(tbTrRoPEDim->getText(), tbTrRoPEDim->getText().size()).getInt() : 0);
+	cfg.transformer.ropeTheta = (tbTrRoPETheta ? shmea::GString::Typify(tbTrRoPETheta->getText(), tbTrRoPETheta->getText().size()).getFloat() : 10000.0f);
+
+	cfg.transformer.tokenLmLossKind = static_cast<glades::TransformerRunConfig::TokenLMLossKind>(ddTrLossKind ? ddTrLossKind->getSelectedIndex() : glades::TransformerRunConfig::TOKEN_LM_FULL_SOFTMAX);
+	cfg.transformer.tokenLmSampledNegatives = (tbTrNegSamples ? shmea::GString::Typify(tbTrNegSamples->getText(), tbTrNegSamples->getText().size()).getInt() : 64);
+
+	// Apply config as a single validated update.
+	{
+		const glades::NNetworkStatus stCfg = net.setTrainingConfig(cfg);
+		if (!stCfg.ok())
+		{
+			const shmea::GString msg = "Invalid training config: " + shmea::GString(stCfg.message.c_str());
+			RUMsgBox::MsgBox(this, "Model Package", msg, RUMsgBox::MESSAGEBOX);
+			return;
+		}
+	}
 
 	// Best-effort: initialize the model's weight tensors based on the current dataset selection.
 	// If no dataset is selected, saveModel() may still succeed depending on implementation.
@@ -1669,6 +2074,16 @@ void NNCreatorPanel::clickedSave(const shmea::GString& cmpName, int x, int y)
 		else if (dtype == "Image")
 		{
 			di = new glades::ImageInput();
+		}
+		else if (dtype == "Text")
+		{
+			inputFName = "datasets/" + inputFName;
+			glades::TokenInput* ti = new glades::TokenInput();
+			// If token embedding mode is enabled, use padTokenId for next-token targets when provided.
+			// Otherwise leave it disabled (<0) so sequence-final targets are omitted.
+			const int padId = (cfg.transformer.enableTokenEmbedding ? cfg.transformer.padTokenId : -1);
+			ti->setPadTokenId(padId);
+			di = ti;
 		}
 
 		if (di)
@@ -1806,6 +2221,30 @@ void NNCreatorPanel::clickedRun(const shmea::GString& cmpName, int x, int y)
 	wData.addFloat(tbGradClipNorm ? shmea::GString::Typify(tbGradClipNorm->getText(), tbGradClipNorm->getText().size()).getFloat() : 0.0f);
 	wData.addFloat(tbPerElemClip ? shmea::GString::Typify(tbPerElemClip->getText(), tbPerElemClip->getText().size()).getFloat() : 10.0f);
 	wData.addInt(tbTBPTT ? shmea::GString::Typify(tbTBPTT->getText(), tbTBPTT->getText().size()).getInt() : 0);
+	// TrainingConfig extras (v2+)
+	wData.addInt(tbMinibatchOverride ? shmea::GString::Typify(tbMinibatchOverride->getText(), tbMinibatchOverride->getText().size()).getInt() : 0);
+	wData.addInt(ddOptimizer ? ddOptimizer->getSelectedIndex() : 0);
+	wData.addFloat(tbAdamBeta1 ? shmea::GString::Typify(tbAdamBeta1->getText(), tbAdamBeta1->getText().size()).getFloat() : 0.9f);
+	wData.addFloat(tbAdamBeta2 ? shmea::GString::Typify(tbAdamBeta2->getText(), tbAdamBeta2->getText().size()).getFloat() : 0.999f);
+	wData.addFloat(tbAdamEps ? shmea::GString::Typify(tbAdamEps->getText(), tbAdamEps->getText().size()).getFloat() : 1e-8f);
+	wData.addInt((chkAdamBiasCorrection && chkAdamBiasCorrection->isChecked()) ? 1 : 0);
+
+	wData.addInt(tbTrHeads ? shmea::GString::Typify(tbTrHeads->getText(), tbTrHeads->getText().size()).getInt() : 0);
+	wData.addInt(tbTrKVHeads ? shmea::GString::Typify(tbTrKVHeads->getText(), tbTrKVHeads->getText().size()).getInt() : 0);
+	wData.addInt(tbTrDFF ? shmea::GString::Typify(tbTrDFF->getText(), tbTrDFF->getText().size()).getInt() : 0);
+	wData.addInt((chkTrTokenEmbedding && chkTrTokenEmbedding->isChecked()) ? 1 : 0);
+	wData.addInt(tbTrVocabSize ? shmea::GString::Typify(tbTrVocabSize->getText(), tbTrVocabSize->getText().size()).getInt() : 0);
+	wData.addInt((chkTrTieEmbeddings && chkTrTieEmbeddings->isChecked()) ? 1 : 0);
+	wData.addInt(tbTrPadTokenId ? shmea::GString::Typify(tbTrPadTokenId->getText(), tbTrPadTokenId->getText().size()).getInt() : -1);
+	wData.addInt(ddTrPosEnc ? ddTrPosEnc->getSelectedIndex() : 1);
+	wData.addInt(ddTrNorm ? ddTrNorm->getSelectedIndex() : 0);
+	wData.addInt(ddTrFFNKind ? ddTrFFNKind->getSelectedIndex() : 0);
+	wData.addInt(ddTrFFNAct ? ddTrFFNAct->getSelectedIndex() : 0);
+	wData.addInt(ddTrKVCacheDType ? ddTrKVCacheDType->getSelectedIndex() : 0);
+	wData.addInt(tbTrRoPEDim ? shmea::GString::Typify(tbTrRoPEDim->getText(), tbTrRoPEDim->getText().size()).getInt() : 0);
+	wData.addFloat(tbTrRoPETheta ? shmea::GString::Typify(tbTrRoPETheta->getText(), tbTrRoPETheta->getText().size()).getFloat() : 10000.0f);
+	wData.addInt(ddTrLossKind ? ddTrLossKind->getSelectedIndex() : 0);
+	wData.addInt(tbTrNegSamples ? shmea::GString::Typify(tbTrNegSamples->getText(), tbTrNegSamples->getText().size()).getInt() : 64);
 
 	/*wData.addLong(trainPct);
 	wData.addLong(testPct);
@@ -1894,6 +2333,30 @@ void NNCreatorPanel::clickedContinue(const shmea::GString& cmpName, int x, int y
 	wData.addFloat(tbGradClipNorm ? shmea::GString::Typify(tbGradClipNorm->getText(), tbGradClipNorm->getText().size()).getFloat() : 0.0f);
 	wData.addFloat(tbPerElemClip ? shmea::GString::Typify(tbPerElemClip->getText(), tbPerElemClip->getText().size()).getFloat() : 10.0f);
 	wData.addInt(tbTBPTT ? shmea::GString::Typify(tbTBPTT->getText(), tbTBPTT->getText().size()).getInt() : 0);
+	// TrainingConfig extras (v2+)
+	wData.addInt(tbMinibatchOverride ? shmea::GString::Typify(tbMinibatchOverride->getText(), tbMinibatchOverride->getText().size()).getInt() : 0);
+	wData.addInt(ddOptimizer ? ddOptimizer->getSelectedIndex() : 0);
+	wData.addFloat(tbAdamBeta1 ? shmea::GString::Typify(tbAdamBeta1->getText(), tbAdamBeta1->getText().size()).getFloat() : 0.9f);
+	wData.addFloat(tbAdamBeta2 ? shmea::GString::Typify(tbAdamBeta2->getText(), tbAdamBeta2->getText().size()).getFloat() : 0.999f);
+	wData.addFloat(tbAdamEps ? shmea::GString::Typify(tbAdamEps->getText(), tbAdamEps->getText().size()).getFloat() : 1e-8f);
+	wData.addInt((chkAdamBiasCorrection && chkAdamBiasCorrection->isChecked()) ? 1 : 0);
+
+	wData.addInt(tbTrHeads ? shmea::GString::Typify(tbTrHeads->getText(), tbTrHeads->getText().size()).getInt() : 0);
+	wData.addInt(tbTrKVHeads ? shmea::GString::Typify(tbTrKVHeads->getText(), tbTrKVHeads->getText().size()).getInt() : 0);
+	wData.addInt(tbTrDFF ? shmea::GString::Typify(tbTrDFF->getText(), tbTrDFF->getText().size()).getInt() : 0);
+	wData.addInt((chkTrTokenEmbedding && chkTrTokenEmbedding->isChecked()) ? 1 : 0);
+	wData.addInt(tbTrVocabSize ? shmea::GString::Typify(tbTrVocabSize->getText(), tbTrVocabSize->getText().size()).getInt() : 0);
+	wData.addInt((chkTrTieEmbeddings && chkTrTieEmbeddings->isChecked()) ? 1 : 0);
+	wData.addInt(tbTrPadTokenId ? shmea::GString::Typify(tbTrPadTokenId->getText(), tbTrPadTokenId->getText().size()).getInt() : -1);
+	wData.addInt(ddTrPosEnc ? ddTrPosEnc->getSelectedIndex() : 1);
+	wData.addInt(ddTrNorm ? ddTrNorm->getSelectedIndex() : 0);
+	wData.addInt(ddTrFFNKind ? ddTrFFNKind->getSelectedIndex() : 0);
+	wData.addInt(ddTrFFNAct ? ddTrFFNAct->getSelectedIndex() : 0);
+	wData.addInt(ddTrKVCacheDType ? ddTrKVCacheDType->getSelectedIndex() : 0);
+	wData.addInt(tbTrRoPEDim ? shmea::GString::Typify(tbTrRoPEDim->getText(), tbTrRoPEDim->getText().size()).getInt() : 0);
+	wData.addFloat(tbTrRoPETheta ? shmea::GString::Typify(tbTrRoPETheta->getText(), tbTrRoPETheta->getText().size()).getFloat() : 10000.0f);
+	wData.addInt(ddTrLossKind ? ddTrLossKind->getSelectedIndex() : 0);
+	wData.addInt(tbTrNegSamples ? shmea::GString::Typify(tbTrNegSamples->getText(), tbTrNegSamples->getText().size()).getInt() : 64);
 	/*wData.addLong(trainPct);
 	wData.addLong(testPct);
 	wData.addLong(validationPct);*/
@@ -2115,70 +2578,146 @@ void NNCreatorPanel::nnSelectorChanged(int newIndex)
 	tbNetName->setText(netName);
 	formInfo->setName(netName.c_str());
 
-	// Load NNInfo + modern config from unified model package.
+	// Load NNInfo from the unified model package.
 	const std::string modelName(netName.c_str());
 	const std::string base = std::string("database/models/") + modelName + "/";
 	const std::string nninfoPath = base + "nninfo.csv";
-	const std::string manifestPath = base + "manifest.txt";
 
-	// Parse manifest (best-effort; defaults preserved if fields are missing).
+	// Attempt to load the full model (weights + TrainingConfig) via the production API.
+	// This requires a DataInput instance for shaping tensors.
+	glades::DataInput* di = NULL;
+	if (ddDataType && ddDatasets && ddDatasets->getSelectedText().length() > 0)
 	{
-		std::ifstream mf(manifestPath.c_str());
-		std::string line;
-		while (mf && std::getline(mf, line))
+		shmea::GString inputFName = ddDatasets->getSelectedText();
+		const shmea::GString dtype = ddDataType->getSelectedText();
+		if (dtype == "CSV")
 		{
-			if (line.find("netType=") == 0)
-			{
-				const int v = atoi(line.substr(strlen("netType=")).c_str());
-				if (ddNetType && v >= 0 && v <= 3)
-					ddNetType->setSelectedIndex(v);
-			}
-			else if (line.find("lrScheduleType=") == 0)
-			{
-				const int v = atoi(line.substr(strlen("lrScheduleType=")).c_str());
-				if (ddLRSchedule && v >= 0 && v <= 3)
-					ddLRSchedule->setSelectedIndex(v);
-			}
-			else if (line.find("lrSchedule=") == 0)
-			{
-				const std::string v = line.substr(strlen("lrSchedule="));
-				if (ddLRSchedule)
-				{
-					if (v == "none") ddLRSchedule->setSelectedIndex(0);
-					else if (v == "step") ddLRSchedule->setSelectedIndex(1);
-					else if (v == "exp") ddLRSchedule->setSelectedIndex(2);
-					else if (v == "cosine") ddLRSchedule->setSelectedIndex(3);
-				}
-			}
-			else if (line.find("stepSize=") == 0 && tbStepSize)
-				tbStepSize->setText(line.substr(strlen("stepSize=")).c_str());
-			else if (line.find("gamma=") == 0 && tbGamma)
-				tbGamma->setText(line.substr(strlen("gamma=")).c_str());
-			else if ((line.find("tMax=") == 0 || line.find("cosineTMaxEpochs=") == 0) && tbTMax)
-			{
-				const char* key = (line.find("tMax=") == 0) ? "tMax=" : "cosineTMaxEpochs=";
-				tbTMax->setText(line.substr(strlen(key)).c_str());
-			}
-			else if ((line.find("minMult=") == 0 || line.find("minMultiplier=") == 0) && tbMinMult)
-			{
-				const char* key = (line.find("minMult=") == 0) ? "minMult=" : "minMultiplier=";
-				tbMinMult->setText(line.substr(strlen(key)).c_str());
-			}
-			else if (line.find("globalGradClipNorm=") == 0 && tbGradClipNorm)
-				tbGradClipNorm->setText(line.substr(strlen("globalGradClipNorm=")).c_str());
-			else if (line.find("perElementGradClip=") == 0 && tbPerElemClip)
-				tbPerElemClip->setText(line.substr(strlen("perElementGradClip=")).c_str());
-			else if ((line.find("tbpttWindowOverride=") == 0 || line.find("tbpttWindow=") == 0) && tbTBPTT)
-			{
-				const char* key = (line.find("tbpttWindowOverride=") == 0) ? "tbpttWindowOverride=" : "tbpttWindow=";
-				tbTBPTT->setText(line.substr(strlen(key)).c_str());
-			}
+			inputFName = "datasets/" + inputFName;
+			di = new glades::NumberInput();
 		}
+		else if (dtype == "Image")
+		{
+			di = new glades::ImageInput();
+		}
+		else if (dtype == "Text")
+		{
+			inputFName = "datasets/" + inputFName;
+			glades::TokenInput* ti = new glades::TokenInput();
+			// Use current UI pad token id for shaping next-token targets (best-effort).
+			const int padId = (tbTrPadTokenId ? shmea::GString::Typify(tbTrPadTokenId->getText(), tbTrPadTokenId->getText().size()).getInt() : -1);
+			ti->setPadTokenId(padId);
+			di = ti;
+		}
+
+		if (di)
+			di->import(inputFName);
 	}
 
+	bool loadedFull = false;
+	if (di)
+	{
+		glades::NNetwork net(glades::NNetwork::TYPE_DFF);
+		const glades::NNetworkStatus stLoad = net.loadModel(modelName, di);
+		if (!stLoad.ok())
+		{
+			const shmea::GString msg = "Load failed: " + shmea::GString(stLoad.message.c_str());
+			RUMsgBox::MsgBox(this, "Model Package", msg, RUMsgBox::MESSAGEBOX);
+		}
+		else
+		{
+			loadedFull = true;
+
+			if (ddNetType)
+				ddNetType->setSelectedIndex(net.getNetType());
+
+			const glades::TrainingConfig& cfg = net.getTrainingConfig();
+			if (tbMinibatchOverride)
+				tbMinibatchOverride->setText(shmea::GString::intTOstring(cfg.minibatchSizeOverride));
+			if (tbTBPTT)
+				tbTBPTT->setText(shmea::GString::intTOstring(cfg.tbpttWindowOverride));
+			if (tbGradClipNorm)
+				tbGradClipNorm->setText(shmea::GString::floatTOstring(cfg.globalGradClipNorm));
+			if (tbPerElemClip)
+				tbPerElemClip->setText(shmea::GString::floatTOstring(cfg.perElementGradClip));
+
+			if (ddLRSchedule)
+				ddLRSchedule->setSelectedIndex(static_cast<int>(cfg.lrSchedule.type));
+			if (tbStepSize)
+				tbStepSize->setText(shmea::GString::intTOstring(cfg.lrSchedule.stepSizeEpochs));
+			if (tbGamma)
+				tbGamma->setText(shmea::GString::floatTOstring(cfg.lrSchedule.gamma));
+			if (tbTMax)
+				tbTMax->setText(shmea::GString::intTOstring(cfg.lrSchedule.cosineTMaxEpochs));
+			if (tbMinMult)
+				tbMinMult->setText(shmea::GString::floatTOstring(cfg.lrSchedule.minMultiplier));
+
+			// Optimizer
+			if (ddOptimizer)
+				ddOptimizer->setSelectedIndex(static_cast<int>(cfg.optimizer.type));
+			if (tbAdamBeta1)
+				tbAdamBeta1->setText(shmea::GString::floatTOstring(cfg.optimizer.adamBeta1));
+			if (tbAdamBeta2)
+				tbAdamBeta2->setText(shmea::GString::floatTOstring(cfg.optimizer.adamBeta2));
+			if (tbAdamEps)
+				tbAdamEps->setText(shmea::GString::floatTOstring(cfg.optimizer.adamEps));
+			if (chkAdamBiasCorrection)
+				chkAdamBiasCorrection->setCheck(cfg.optimizer.adamBiasCorrection);
+
+			// Transformer
+			if (tbTrHeads)
+				tbTrHeads->setText(shmea::GString::intTOstring(cfg.transformer.nHeadsOverride));
+			if (tbTrKVHeads)
+				tbTrKVHeads->setText(shmea::GString::intTOstring(cfg.transformer.nKVHeadsOverride));
+			if (tbTrDFF)
+				tbTrDFF->setText(shmea::GString::intTOstring(cfg.transformer.dFFOverride));
+
+			if (chkTrTokenEmbedding)
+				chkTrTokenEmbedding->setCheck(cfg.transformer.enableTokenEmbedding);
+			if (tbTrVocabSize)
+				tbTrVocabSize->setText(shmea::GString::intTOstring(cfg.transformer.vocabSizeOverride));
+			if (chkTrTieEmbeddings)
+				chkTrTieEmbeddings->setCheck(cfg.transformer.tieEmbeddings);
+			if (tbTrPadTokenId)
+				tbTrPadTokenId->setText(shmea::GString::intTOstring(cfg.transformer.padTokenId));
+
+			if (ddTrPosEnc)
+				ddTrPosEnc->setSelectedIndex(static_cast<int>(cfg.transformer.positionalEncoding));
+			if (ddTrNorm)
+				ddTrNorm->setSelectedIndex(static_cast<int>(cfg.transformer.normType));
+			if (ddTrFFNKind)
+				ddTrFFNKind->setSelectedIndex(static_cast<int>(cfg.transformer.ffnKind));
+			if (ddTrFFNAct)
+				ddTrFFNAct->setSelectedIndex(static_cast<int>(cfg.transformer.ffnActivation));
+			if (ddTrKVCacheDType)
+				ddTrKVCacheDType->setSelectedIndex(static_cast<int>(cfg.transformer.kvCacheDType));
+			if (tbTrRoPEDim)
+				tbTrRoPEDim->setText(shmea::GString::intTOstring(cfg.transformer.ropeDimOverride));
+			if (tbTrRoPETheta)
+				tbTrRoPETheta->setText(shmea::GString::floatTOstring(cfg.transformer.ropeTheta));
+			if (ddTrLossKind)
+				ddTrLossKind->setSelectedIndex(static_cast<int>(cfg.transformer.tokenLmLossKind));
+			if (tbTrNegSamples)
+				tbTrNegSamples->setText(shmea::GString::intTOstring(cfg.transformer.tokenLmSampledNegatives));
+		}
+	}
+	else
+	{
+		RUMsgBox::MsgBox(this, "Model Package",
+		                 "Select a dataset to fully load weights/config (loadModel requires DataInput).",
+		                 RUMsgBox::MESSAGEBOX);
+	}
+
+	if (di)
+		delete di;
+
+	// Always load the NNInfo table for editing/preview.
 	shmea::GTable tab(nninfoPath.c_str(), ',', shmea::GTable::TYPE_FILE);
 	glades::NNInfo* info = new glades::NNInfo(netName, tab);
 	loadNNet(info);
+
+	// If loadNNet() overwrote the name box, keep it aligned.
+	if (loadedFull && tbNetName)
+		tbNetName->setText(netName);
 }
 
 /*!

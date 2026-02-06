@@ -112,7 +112,59 @@ protected:
 
 	// Modern training features / config
 	RULabel* lblNetType;
-	RUDropdown* ddNetType; // DFF/RNN/GRU/LSTM
+	RUDropdown* ddNetType; // DFF/RNN/GRU/LSTM/TransformerEnc/TransformerDec
+
+	// TrainingConfig overrides (new persistence v2+)
+	RULabel* lblMinibatchOverride;
+	RUTextbox* tbMinibatchOverride; // 0 = use NNInfo batch size
+
+	// Optimizer config
+	RULabel* lblOptimizer;
+	RUDropdown* ddOptimizer; // SGD+Momentum | AdamW
+	RULabel* lblAdamBeta1;
+	RUTextbox* tbAdamBeta1;
+	RULabel* lblAdamBeta2;
+	RUTextbox* tbAdamBeta2;
+	RULabel* lblAdamEps;
+	RUTextbox* tbAdamEps;
+	RUCheckbox* chkAdamBiasCorrection;
+
+	// Transformer config (TrainingConfig.transformer)
+	RULabel* lblTransformerHeader;
+	RULabel* lblTrHeads;
+	RUTextbox* tbTrHeads;
+	RULabel* lblTrKVHeads;
+	RUTextbox* tbTrKVHeads;
+	RULabel* lblTrDFF;
+	RUTextbox* tbTrDFF;
+
+	RUCheckbox* chkTrTokenEmbedding;
+	RULabel* lblTrVocabSize;
+	RUTextbox* tbTrVocabSize;
+	RUCheckbox* chkTrTieEmbeddings;
+	RULabel* lblTrPadTokenId;
+	RUTextbox* tbTrPadTokenId;
+
+	RULabel* lblTrPosEnc;
+	RUDropdown* ddTrPosEnc; // None | Sinusoidal | RoPE
+	RULabel* lblTrNorm;
+	RUDropdown* ddTrNorm; // LayerNorm | RMSNorm
+	RULabel* lblTrFFNKind;
+	RUDropdown* ddTrFFNKind; // MLP | SwiGLU
+	RULabel* lblTrFFNAct;
+	RUDropdown* ddTrFFNAct; // ReLU | GELU
+	RULabel* lblTrKVCacheDType;
+	RUDropdown* ddTrKVCacheDType; // F32 | F16 | BF16
+
+	RULabel* lblTrRoPEDim;
+	RUTextbox* tbTrRoPEDim;
+	RULabel* lblTrRoPETheta;
+	RUTextbox* tbTrRoPETheta;
+
+	RULabel* lblTrLossKind;
+	RUDropdown* ddTrLossKind; // FullSoftmax | SampledSoftmax
+	RULabel* lblTrNegSamples;
+	RUTextbox* tbTrNegSamples;
 
 	RULabel* lblLRSchedule;
 	RUDropdown* ddLRSchedule; // none|step|exp|cosine
