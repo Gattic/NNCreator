@@ -126,6 +126,9 @@ class GServer
 	bool cryptEnabled;
 	pthread_t* commandThread;
 	pthread_t* writerThread;
+	// Thread lifecycle bookkeeping (pthread_join is only valid if started).
+	bool commandThreadStarted;
+	bool writerThreadStarted;
 	pthread_mutex_t* clientMutex;
 	pthread_mutex_t* serverMutex;
 	pthread_mutex_t* writersMutex;
@@ -134,7 +137,12 @@ class GServer
 	// Accessed only while holding `writersMutex`.
 	unsigned int writerWakeups;
 	bool LOCAL_ONLY;
-	bool running;
+	// This flag is accessed from multiple threads. It must not be cached across loop iterations.
+	// (We can't use C++11 atomics here; `volatile` is the best available visibility tool in this C++98 codebase.)
+	volatile bool running;
+
+	// Best-effort: force-blocking syscalls (send/select/accept) to unblock during shutdown.
+	void interruptAllIO();
 
 	// Protects service registry maps and running-service keyed locks.
 	pthread_mutex_t* servicesMutex;
@@ -200,7 +208,7 @@ public:
 	void LaunchUDPInstance(const shmea::GString&, const shmea::GString&, const shmea::GString&);
 	Connection* getOrCreateUDPConnection(const shmea::GString&, const shmea::GString&, const shmea::GString&);
 	void LaunchInstance(const shmea::GString&, const shmea::GString&, const shmea::GString&);
-	const bool& getRunning() const;
+	bool getRunning() const;
 	shmea::GString getPort() const;
 	void stop();
 	void run(shmea::GString, bool);
