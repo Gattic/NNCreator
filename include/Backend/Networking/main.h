@@ -87,6 +87,13 @@ class GServer
 
 	shmea::GPointer<GNet::Sockets> socks;
 
+	// Detached outbound connect launcher threads (LaunchInstance) must be accounted for so
+	// GServer can shut down safely without use-after-free.
+	pthread_mutex_t* launchMutex;
+	pthread_cond_t* launchCond;
+	unsigned int launchInFlight;
+	void waitForLaunchThreads();
+
 	// Bounded worker pool for executing Services (replaces thread-per-request)
 	pthread_mutex_t* serviceMutex;
 	pthread_cond_t* serviceCond;
