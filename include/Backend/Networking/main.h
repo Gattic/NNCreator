@@ -18,16 +18,20 @@
 #define _GNET
 
 #include "../Database/GString.h"
+#include "../Database/GPointer.h"
 #include "../Database/GLogger.h"
 #include "socket.h"
 #include <errno.h>
 #include <iostream>
 #include <map>
 #include <pthread.h>
+#include <queue>
+#include <set>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <string>
+#include <sys/types.h>
 #include <sys/signal.h>
 #include <unistd.h>
 #include <vector>
@@ -69,8 +73,8 @@ class newServiceArgs
 public:
 	class GServer* serverInstance;
 	class Connection* cConnection;
-	const shmea::ServiceData* sockData;
-	pthread_t* sThread;
+	shmea::GPointer<shmea::ServiceData> sockData;
+	pthread_t sThread;
 	shmea::GString command;
 	shmea::GString serviceKey;
 	int stIndex;
@@ -82,6 +86,26 @@ class GServer
 	friend Service;
 
 	shmea::GPointer<GNet::Sockets> socks;
+
+	// Bounded worker pool for executing Services (replaces thread-per-request)
+	pthread_mutex_t* serviceMutex;
+	pthread_cond_t* serviceCond;
+	std::queue<newServiceArgs*> serviceQueue;
+	std::vector<pthread_t> serviceWorkers;
+	unsigned int serviceQueueMax;
+	bool serviceStopRequested;
+
+	// Thread-safe logout requests from worker threads
+	pthread_mutex_t* logoutMutex;
+	std::queue<Connection*> logoutQueue;
+	void drainLogoutQueue();
+
+	// Connections that have been logged out but cannot be deleted yet because
+	// worker/writer threads still reference them. The server thread reaps them
+	// once in-flight and pending-send counters drop to zero.
+	std::set<Connection*> retiredConnections;
+	void reapRetiredConnections();
+	void shutdownAllConnections();
 
 	// Key is ip address
 	//IP, [socfd, sockfd, sockfd, ...]
@@ -99,8 +123,16 @@ class GServer
 	pthread_mutex_t* serverMutex;
 	pthread_mutex_t* writersMutex;
 	pthread_cond_t* writersBlock;
+	// Protects `writersBlock` wakeups to avoid missed signals.
+	// Accessed only while holding `writersMutex`.
+	unsigned int writerWakeups;
 	bool LOCAL_ONLY;
 	bool running;
+
+	// Protects service registry maps and running-service keyed locks.
+	pthread_mutex_t* servicesMutex;
+	std::map<shmea::GString, pthread_mutex_t*> runningServiceLocks;
+
 	std::map<shmea::GString, Service*> service_depot;
 	std::map<shmea::GString, Service*> running_services;
 
@@ -113,14 +145,25 @@ class GServer
 	static void* commandLauncher(void*);
 	void commandCatcher(void*);
 
+	static void* ServiceWorkerLauncher(void*);
+	void ServiceWorker(void*);
+	void startServicePool(unsigned int workerCount = 0, unsigned int maxQueue = 0);
+	void stopServicePool();
+	bool enqueueService(shmea::GPointer<shmea::ServiceData> sockData, Connection* cConnection);
+
 	static void* LaunchInstanceLauncher(void*);
 	void LaunchInstanceHelper(void*);
 
 	void wakeWriter();
 	static void* ListWLauncher(void*);
 	void ListWriter(void*);
+	void pruneIdleUDPClients();
 	void LaunchLocalInstance(const shmea::GString&);
 	void LogoutInstance(Connection*);
+
+	// Returns a mutex used to serialize access to `running_services[key]`.
+	// Caller should lock/unlock it (may return NULL if key is empty).
+	pthread_mutex_t* getOrCreateRunningServiceMutex(const shmea::GString& key);
 
 	int getSockFD();
 	const std::vector<Connection*> getClientConnections();
@@ -139,7 +182,7 @@ public:
 
 	shmea::GPointer<shmea::GLogger> logger;
 
-	void send(shmea::ServiceData*);
+	void send(shmea::GPointer<shmea::ServiceData>);
 
 	unsigned int addService(Service*);
 	Service* DoService(shmea::GString, shmea::GString = "");
@@ -158,6 +201,9 @@ public:
 	bool isEncryptedByDefault() const;
 	void enableEncryption();
 	void disableEncryption();
+
+	// Request a connection logout from any thread. The main thread drains these.
+	void requestLogout(Connection*);
 
 	Connection* getLocalConnection();
 	void removeClientConnection(Connection*);
