@@ -118,11 +118,15 @@ class GeneralGraphable
 
 		virtual ~GraphableModel()
 		{
-			//
+			delete g;
 		}
 	};
 
 	GraphableConcept* object;
+
+	// Non-copyable (C++98 idiom)
+	GeneralGraphable(const GeneralGraphable&);
+	GeneralGraphable& operator=(const GeneralGraphable&);
 
 public:
 
@@ -206,7 +210,7 @@ public:
 
 	virtual ~GeneralGraphable()
 	{
-		//
+		delete object;
 	}
 };
 

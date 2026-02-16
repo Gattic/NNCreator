@@ -19,6 +19,7 @@
 #define _RUGENERALLISTENER
 
 #include "Backend/Database/GString.h"
+#include "Backend/Database/GPointer.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -55,34 +56,34 @@ class GeneralListener
 	protected:
 
 		T* cbPanel;
-		void (T::*listener0)() = NULL;
-		void (T::*listener1)(int) = NULL;
-		void (T::*listener2)(int, int) = NULL;
-		void (T::*listener3)(const shmea::GString&, int, int) = NULL;
-		void (T::*listener4)(const shmea::GString&) = NULL;
+		void (T::*listener0)();
+		void (T::*listener1)(int);
+		void (T::*listener2)(int, int);
+		void (T::*listener3)(const shmea::GString&, int, int);
+		void (T::*listener4)(const shmea::GString&);
 
 	public:
-		ListenerModel(T* t, void (T::*newListener)()) : cbPanel(t), listener0(newListener)
+		ListenerModel(T* t, void (T::*newListener)()) : cbPanel(t), listener0(newListener), listener1(NULL), listener2(NULL), listener3(NULL), listener4(NULL)
 		{
 			//
 		}
 
-		ListenerModel(T* t, void (T::*newListener)(int)) : cbPanel(t), listener1(newListener)
+		ListenerModel(T* t, void (T::*newListener)(int)) : cbPanel(t), listener0(NULL), listener1(newListener), listener2(NULL), listener3(NULL), listener4(NULL)
 		{
 			//
 		}
 
-		ListenerModel(T* t, void (T::*newListener)(int, int)) : cbPanel(t), listener2(newListener)
+		ListenerModel(T* t, void (T::*newListener)(int, int)) : cbPanel(t), listener0(NULL), listener1(NULL), listener2(newListener), listener3(NULL), listener4(NULL)
 		{
 			//
 		}
 
-		ListenerModel(T* t, void (T::*newListener)(const shmea::GString&, int, int)) : cbPanel(t), listener3(newListener)
+		ListenerModel(T* t, void (T::*newListener)(const shmea::GString&, int, int)) : cbPanel(t), listener0(NULL), listener1(NULL), listener2(NULL), listener3(newListener), listener4(NULL)
 		{
 			//
 		}
 
-		ListenerModel(T* t, void (T::*newListener)(const shmea::GString&)) : cbPanel(t), listener4(newListener)
+		ListenerModel(T* t, void (T::*newListener)(const shmea::GString&)) : cbPanel(t), listener0(NULL), listener1(NULL), listener2(NULL), listener3(NULL), listener4(newListener)
 		{
 			//
 		}
@@ -133,43 +134,42 @@ class GeneralListener
 		}
 	};
 
-	ListenerConcept* object;
+	shmea::GPointer<ListenerConcept> object;
 
 public:
 
 	GeneralListener()
 	{
-		object = NULL;
 	}
 
 	template< typename T>
 	GeneralListener(T* callbackPanel, void (T::*newListener)())
 	{
-		object = new ListenerModel<T>(callbackPanel, newListener);
+		object = shmea::GPointer<ListenerConcept>(new ListenerModel<T>(callbackPanel, newListener));
 	}
 
 	template< typename T>
 	GeneralListener(T* callbackPanel, void (T::*newListener)(int))
 	{
-		object = new ListenerModel<T>(callbackPanel, newListener);
+		object = shmea::GPointer<ListenerConcept>(new ListenerModel<T>(callbackPanel, newListener));
 	}
 
 	template< typename T>
 	GeneralListener(T* callbackPanel, void (T::*newListener)(int, int))
 	{
-		object = new ListenerModel<T>(callbackPanel, newListener);
+		object = shmea::GPointer<ListenerConcept>(new ListenerModel<T>(callbackPanel, newListener));
 	}
 
 	template< typename T>
 	GeneralListener(T* callbackPanel, void (T::*newListener)(const shmea::GString&, int, int))
 	{
-		object = new ListenerModel<T>(callbackPanel, newListener);
+		object = shmea::GPointer<ListenerConcept>(new ListenerModel<T>(callbackPanel, newListener));
 	}
 
 	template< typename T>
 	GeneralListener(T* callbackPanel, void (T::*newListener)(const shmea::GString&))
 	{
-		object = new ListenerModel<T>(callbackPanel, newListener);
+		object = shmea::GPointer<ListenerConcept>(new ListenerModel<T>(callbackPanel, newListener));
 	}
 
 	void call()
@@ -204,10 +204,7 @@ public:
 
 	virtual ~GeneralListener()
 	{
-		//
 	}
 };
-
-void lExample();
 
 #endif

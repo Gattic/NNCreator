@@ -75,6 +75,7 @@ public:
 	// render
 	virtual void updateBackground(gfxpp*);
 	virtual shmea::GString getType() const;
+	virtual bool isDropdown() const;
 };
 
 #endif

@@ -40,6 +40,7 @@ public:
 	virtual void hover(gfxpp*);
 	virtual void unhover(gfxpp*);
 	virtual shmea::GString getType() const;
+	virtual bool isTextInput() const;
 };
 
 #endif

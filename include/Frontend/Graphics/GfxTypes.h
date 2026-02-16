@@ -151,6 +151,7 @@ typedef SDL_Renderer GfxNativeRenderer;
 #define GFX_GetError SDL_GetError
 #define GFX_CreateSystemCursor SDL_CreateSystemCursor
 #define GFX_SetCursor SDL_SetCursor
+#define GFX_FreeCursor SDL_FreeCursor
 
 // Image helpers and texture creation
 #define GFX_IMG_Load IMG_Load
@@ -432,6 +433,7 @@ void gfxDestroyTexture(GfxTexture* texture);
 #define GFX_GetError() ("SDL2 not enabled")
 #define GFX_CreateSystemCursor(...) (NULL)
 #define GFX_SetCursor(...)
+#define GFX_FreeCursor(...)
 #define GFX_IMG_Load(...) (NULL)
 #define GFX_IMG_GetError() ("SDL2_image not enabled")
 #define GFX_CreateTextureFromSurface(...) (NULL)

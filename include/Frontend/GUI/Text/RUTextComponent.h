@@ -50,7 +50,7 @@ public:
 class RUTextComponent : public RUComponent
 {
 protected:
-	static const int CUROSR_LEFT = 0;
+	static const int CURSOR_LEFT = 0;
 	static const int CURSOR_RIGHT = 1;
 
 	int FONT_COLOR;
@@ -90,7 +90,7 @@ public:
 	RUTextComponent();
 	virtual ~RUTextComponent();
 	virtual void unsetFocus();
-	virtual void updateBackgroundHelper(gfxpp*) override;
+	virtual void updateBackgroundHelper(gfxpp*);
 
 	// gets
 	shmea::GString getText() const;

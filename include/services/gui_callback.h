@@ -53,7 +53,10 @@ public:
 		if (!cPanel)
 			return NULL;
 
-		cPanel->addToQ(data);
+		// Deep-copy: the service framework deletes `data` after execute() returns,
+		// but the GUI thread reads from the queue asynchronously.
+		shmea::ServiceData* copy = new shmea::ServiceData(*data);
+		cPanel->addToQ(copy);
 
 		return NULL;
 	}

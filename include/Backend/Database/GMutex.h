@@ -15,38 +15,63 @@
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#ifndef _GLAYOUT
-#define _GLAYOUT
+#ifndef _GMUTEX
+#define _GMUTEX
 
-#include "GItem.h"
-#include "Backend/Database/GString.h"
-#include <map>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <vector>
+#include <pthread.h>
 
-class gfxpp;
+namespace shmea {
 
-class GLayout : public GItem
+class GMutex
 {
+private:
+	pthread_mutex_t mutex;
+
+	GMutex(const GMutex&);
+	GMutex& operator=(const GMutex&);
+
 public:
-	enum LayoutType { LAYOUT_RELATIVE = 0, LAYOUT_LINEAR = 1 };
+	GMutex()
+	{
+		pthread_mutex_init(&mutex, NULL);
+	}
 
-protected:
-	LayoutType layoutType;
+	~GMutex()
+	{
+		pthread_mutex_destroy(&mutex);
+	}
 
-public:
-	GLayout();
-	virtual ~GLayout();
+	void lock()
+	{
+		pthread_mutex_lock(&mutex);
+	}
 
-	// gets
-	LayoutType getLayoutType() const;
-
-	virtual bool wantsAutoSize() const;
-	virtual void hover(gfxpp*);
-	virtual void unhover(gfxpp*);
-	virtual shmea::GString getType() const = 0;
+	void unlock()
+	{
+		pthread_mutex_unlock(&mutex);
+	}
 };
 
+class GMutexLock
+{
+private:
+	GMutex* mutex;
+
+	GMutexLock(const GMutexLock&);
+	GMutexLock& operator=(const GMutexLock&);
+
+public:
+	GMutexLock(GMutex* m) : mutex(m)
+	{
+		if (mutex)
+			mutex->lock();
+	}
+
+	~GMutexLock()
+	{
+		if (mutex)
+			mutex->unlock();
+	}
+};
+};
 #endif

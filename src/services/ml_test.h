@@ -32,39 +32,133 @@
 #include "Backend/Database/GList.h"
 #include "Backend/Database/GTable.h"
 #include "Backend/Database/ServiceData.h"
+#include "Backend/Machine Learning/DataObjects/ImageInput.h"
+#include "Backend/Machine Learning/DataObjects/NumberInput.h"
+#include "Backend/Machine Learning/DataObjects/TokenInput.h"
+#include "Backend/Machine Learning/Networks/metanetwork.h"
+#include "Backend/Machine Learning/Networks/network.h"
+#include "Backend/Machine Learning/Networks/training_callbacks.h"
 #include "Backend/Machine Learning/State/Terminator.h"
 #include "Backend/Machine Learning/Structure/hiddenlayerinfo.h"
 #include "Backend/Machine Learning/Structure/inputlayerinfo.h"
 #include "Backend/Machine Learning/Structure/nninfo.h"
 #include "Backend/Machine Learning/Structure/outputlayerinfo.h"
 #include "Backend/Machine Learning/main.h"
-#include "Backend/Machine Learning/network.h"
 #include "Backend/Networking/service.h"
-#include "Backend/Networking/socket.h"
-#include "Frontend/GUI/RUMsgBox.h"
-#include "Frontend/Graphics/graphics.h"
+#include "Frontend/GItems/GPanel.h"
+#include "ml_train.h"
+#include <string>
 
-class ML_Test : public Service
+class ML_Test : public GNet::Service
 {
+private:
+	GNet::GServer* serverInstance;
+	GPanel* cPanel;
+	bool* killFlag;
+	glades::NNetwork cNetwork;
+
 public:
-	GList execute(class Connection* cConnection, const GList& data)
+	ML_Test()
 	{
-		GList retList;
-		if (data.size() < 3)
-			return retList;
+		serverInstance = NULL;
+		cPanel = NULL;
+		killFlag = NULL;
+	}
 
-		std::string netName = data.getString(0);
-		std::string testFName = data.getString(1);
-		int importType = data.getInt(2);
+	ML_Test(GNet::GServer* newInstance)
+	{
+		serverInstance = newInstance;
+		cPanel = NULL;
+		killFlag = NULL;
+	}
 
-		// load the neural network
-		NNetwork* cNetwork = GQL::getNeuralNetwork(netName);
+	ML_Test(GNet::GServer* newInstance, GPanel* newPanel, bool* kf = NULL)
+	{
+		serverInstance = newInstance;
+		cPanel = newPanel;
+		killFlag = kf;
+	}
 
-		// Run the testing and retrieve a metanetwork
-		GTable inputTable(testFName, ',', shmea::GTable::TYPE_FILE);
-		MetaNetwork* newTestNet = GQL::test(cNetwork, inputTable);
+	~ML_Test()
+	{
+		serverInstance = NULL;
+		cPanel = NULL;
+		killFlag = NULL;
+	}
 
-		return retList;
+	shmea::ServiceData* execute(const shmea::ServiceData* data)
+	{
+		class GNet::Connection* destination = data->getConnection();
+
+		if (data->getType() != shmea::ServiceData::TYPE_LIST)
+			return NULL;
+
+		shmea::GList cList = data->getList();
+		if (cList.size() < 3)
+			return NULL;
+
+		shmea::GString modelName = cList.getString(0);
+		shmea::GString inputFName = cList.getString(1);
+		int inputType = cList.getInt(2);
+
+		// Create the appropriate DataInput
+		glades::DataInput* di = NULL;
+		if (inputType == glades::DataInput::CSV)
+		{
+			inputFName = "datasets/" + inputFName;
+			di = new glades::NumberInput();
+		}
+		else if (inputType == glades::DataInput::IMAGE)
+		{
+			di = new glades::ImageInput();
+		}
+		else if (inputType == glades::DataInput::TEXT)
+		{
+			inputFName = "datasets/" + inputFName;
+			di = new glades::TokenInput();
+		}
+		else
+			return NULL;
+
+		if (!di)
+			return NULL;
+
+		// Load the input data
+		di->import(inputFName);
+
+		// Load the model
+		if (cNetwork.getEpochs() == 0)
+		{
+			const glades::NNetworkStatus st = cNetwork.loadModel(std::string(modelName.c_str()), di);
+			if (!st.ok())
+			{
+				printf("[NN] Unable to load model \"%s\": %s\n", modelName.c_str(), st.message.c_str());
+				delete di;
+				return NULL;
+			}
+		}
+
+		// Run testing with direct panel callbacks that bypass the socket/service
+		// framework, same as ML_Train.
+		DirectPanelCallbacks panelCb(cPanel, killFlag);
+		glades::MetaNetwork* result = glades::test(&cNetwork, di,
+			cPanel ? static_cast<glades::ITrainingCallbacks*>(&panelCb) : static_cast<glades::ITrainingCallbacks*>(NULL),
+			serverInstance, destination);
+		delete result;
+		delete di;
+
+		return NULL;
+	}
+
+	GNet::Service* MakeService(GNet::GServer* newInstance) const
+	{
+		return new ML_Test(newInstance, cPanel, killFlag);
+	}
+
+	shmea::GString getName() const
+	{
+		return "ML_Test";
 	}
 };
+
 #endif

@@ -18,10 +18,11 @@
 #define _GPANEL
 
 #include "GItem.h"
+#include "Backend/Database/GMutex.h"
 #include "Backend/Database/ServiceData.h"
 #include "Backend/Database/GString.h"
+#include "Backend/Database/GPointer.h"
 #include <map>
-#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -40,7 +41,7 @@ class GPanel : public GItem
 protected:
 
 	std::queue<const shmea::ServiceData*> updateQueue;
-	pthread_mutex_t* qMutex;
+	shmea::GPointer<shmea::GMutex> qMutex;
 	// Cache last hovered top-level item for mouse motion; avoids full-tree scans on every move.
 	GItem* lastMouseMotionItem;
 
@@ -63,6 +64,7 @@ public:
 
 	void addToQ(const shmea::ServiceData*);
 	virtual void addSubItem(GItem*, unsigned int = Z_FRONT);
+	virtual void clearItems(unsigned int = 0);
 	virtual void calculateSubItemPositions(std::pair<int, int>);
 
 	// events

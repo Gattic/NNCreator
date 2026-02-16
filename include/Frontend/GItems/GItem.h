@@ -29,6 +29,7 @@
 #include "Mini/RUMouseWheel.h"
 #include "RUItemArea.h"
 #include "GeneralListener.h"
+#include "Backend/Database/GPointer.h"
 #include <map>
 #include <stdio.h>
 #include <stdlib.h>
@@ -36,9 +37,10 @@
 #include <string>
 #include <vector>
 
+#include "../GFXUtilities/EventTracker.h"
+
 class gfxpp;
 class GPanel;
-class EventTracker;
 
 class GItem : public RUBackgroundComponent,
 			  public RUBorderComponent,
@@ -58,7 +60,7 @@ protected:
 	GfxTexture* background;
 	std::vector<GItem*> subitems;
 
-	EventTracker* eventsStatus;
+	shmea::GPointer<EventTracker> eventsStatus;
 
 	// render
 	virtual void updateBackground(gfxpp*) = 0;
@@ -69,7 +71,6 @@ public:
 	static const unsigned int Z_BACK = -2; // max unsigned int -1
 
 	GItem();
-	GItem(int, int, int, int);
 	virtual ~GItem();
 
 	// gets
@@ -79,7 +80,7 @@ public:
 	GItem* getItemByName(const shmea::GString&);
 	unsigned int getZIndex() const;
 	GfxTexture* getBackground();
-	std::vector<GItem*> getItems() const;
+	const std::vector<GItem*>& getItems() const;
 
 	// sets
 	void setID(int);
@@ -92,18 +93,25 @@ public:
 	virtual void addSubItem(GItem*, unsigned int = Z_FRONT);
 	void removeItem(gfxpp*, int);
 	void removeItem(gfxpp*, const shmea::GString&);
-	void clearItems(unsigned int = 0);
+	virtual void clearItems(unsigned int = 0);
 
 	virtual void calculateSubItemPositions(std::pair<int, int>) = 0;
 
 	// render
 	virtual void updateBackgroundHelper(gfxpp*) = 0;
+	bool rebuildTexture(gfxpp*);
+	bool blitTexture(gfxpp*);
 
 	// event functions
 	EventTracker* processEvents(gfxpp*, GPanel*, GfxEvent, int, int);
 	virtual void processSubItemEvents(gfxpp*, EventTracker*, GPanel*, GfxEvent, int, int) = 0;
+	void dispatchSubItemEvents(gfxpp*, EventTracker*, GPanel*, GfxEvent, int, int);
 
+	// type queries
 	virtual shmea::GString getType() const = 0;
+	virtual bool isDropdown() const;
+	virtual bool isTextInput() const;
+	virtual bool wantsAutoSize() const;
 };
 
 #endif

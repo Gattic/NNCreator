@@ -14,39 +14,40 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+#ifndef _GFX_GLFW_EVENT_BRIDGE_H
+#define _GFX_GLFW_EVENT_BRIDGE_H
 
-#ifndef _GLAYOUT
-#define _GLAYOUT
+#ifdef GFX_HAVE_OPENGL
 
-#include "GItem.h"
-#include "Backend/Database/GString.h"
-#include <map>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "GfxTypes.h"
 #include <vector>
 
-class gfxpp;
+struct GLFWwindow;
 
-class GLayout : public GItem
+class GlfwEventBridge
 {
+private:
+	std::vector<GfxEvent> eventQueue;
+	int logicalW;
+	int logicalH;
+	bool closeRequested;
+
+	static void windowCloseCb(GLFWwindow* w);
+	static void keyCb(GLFWwindow* w, int key, int scancode, int action, int mods);
+	static void mouseButtonCb(GLFWwindow* w, int button, int action, int mods);
+	static void cursorPosCb(GLFWwindow* w, double x, double y);
+	static void scrollCb(GLFWwindow* w, double xoffset, double yoffset);
+	static void framebufferSizeCb(GLFWwindow* w, int ww, int hh);
+
 public:
-	enum LayoutType { LAYOUT_RELATIVE = 0, LAYOUT_LINEAR = 1 };
+	GlfwEventBridge();
 
-protected:
-	LayoutType layoutType;
-
-public:
-	GLayout();
-	virtual ~GLayout();
-
-	// gets
-	LayoutType getLayoutType() const;
-
-	virtual bool wantsAutoSize() const;
-	virtual void hover(gfxpp*);
-	virtual void unhover(gfxpp*);
-	virtual shmea::GString getType() const = 0;
+	void attach(GLFWwindow* window, int logicalWidth, int logicalHeight);
+	void detach(GLFWwindow* window);
+	void drainEvents(std::vector<GfxEvent>& out);
+	bool isCloseRequested() const;
+	void setLogicalSize(int w, int h);
 };
 
+#endif // GFX_HAVE_OPENGL
 #endif

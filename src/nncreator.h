@@ -79,6 +79,7 @@ protected:
 	int currentHiddenLayerIndex;
 	unsigned int netCount;
 	bool keepGraping;
+	bool killRequested;
 	unsigned int trainingRowIndex;
 	unsigned int testingRowIndex;
 	int prevImageFlag;
@@ -100,6 +101,14 @@ protected:
 
 	RULabel* lblEpochs;
 	RULabel* lblAccuracy;
+	RULabel* lblLoss;
+	RULabel* lblPerplexity;
+	RULabel* lblLR;
+	RULabel* lblGradNorm;
+	RULabel* lblF1;
+	RULabel* lblMCC;
+	RULabel* lblMAE;
+	RULabel* lblRMSE;
 
 	RULabel* lblNeuralNet;
 	RUDropdown* ddNeuralNet;

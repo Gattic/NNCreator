@@ -14,39 +14,36 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+#ifndef _GFX_INPUT_STATE_H
+#define _GFX_INPUT_STATE_H
 
-#ifndef _GLAYOUT
-#define _GLAYOUT
+#include "GfxTypes.h"
 
-#include "GItem.h"
-#include "Backend/Database/GString.h"
-#include <map>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <vector>
-
-class gfxpp;
-
-class GLayout : public GItem
+class InputState
 {
 public:
-	enum LayoutType { LAYOUT_RELATIVE = 0, LAYOUT_LINEAR = 1 };
+	int mouseX;
+	int mouseY;
 
-protected:
-	LayoutType layoutType;
+	bool CTRLPressed;
+	bool ALTPressed;
+	bool spacePressed;
+	bool fPressed;
+	bool uPressed;
+	bool qPressed;
+	bool gPressed;
+	bool rPressed;
+	bool lPressed;
+	bool upPressed;
+	bool downPressed;
+	bool leftPressed;
+	bool rightPressed;
 
-public:
-	GLayout();
-	virtual ~GLayout();
+	InputState();
+	void reset();
 
-	// gets
-	LayoutType getLayoutType() const;
-
-	virtual bool wantsAutoSize() const;
-	virtual void hover(gfxpp*);
-	virtual void unhover(gfxpp*);
-	virtual shmea::GString getType() const = 0;
+	// Returns true if a quit key combination was pressed
+	bool handleKeyEvent(int eventType, GfxKeycode key);
 };
 
 #endif

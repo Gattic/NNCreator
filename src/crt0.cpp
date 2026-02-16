@@ -35,6 +35,7 @@
 #include "core/version.h"
 #include "main.h"
 #include "services/bayes_train.h"
+#include "services/ml_test.h"
 #include "services/ml_train.h"
 
 bool NNCreator::running = true;
@@ -80,6 +81,9 @@ int main(int argc, char* argv[])
 	// Add services
 	ML_Train* ml_train_srvc = new ML_Train(serverInstance);
 	serverInstance->addService(ml_train_srvc);
+
+	ML_Test* ml_test_srvc = new ML_Test(serverInstance);
+	serverInstance->addService(ml_test_srvc);
 
 	Bayes_Train* bayes_train_srvc = new Bayes_Train(serverInstance);
 	serverInstance->addService(bayes_train_srvc);

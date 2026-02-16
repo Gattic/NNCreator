@@ -17,6 +17,7 @@
 #define _GRAPHICS
 
 #include "Backend/Database/GString.h"
+#include "Backend/Database/GPointer.h"
 #ifdef GFX_HAVE_SDL2
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
@@ -30,6 +31,11 @@
 #include <map>
 #include <string>
 #include "GfxTypes.h"
+#include "InputState.h"
+#include "FontManager.h"
+#ifdef GFX_HAVE_OPENGL
+#include "GlfwEventBridge.h"
+#endif
 
 // Forward declaration to avoid heavy GLFW include in header
 struct GLFWwindow;
@@ -47,28 +53,6 @@ class GLTextRenderer;
 
 class gfxpp
 {
-	friend class RUComponent;
-	friend class RUTextComponent;
-	friend class RUImageComponent;
-	friend class RUButton;
-	friend class RULabel;
-	friend class RUTextbox;
-	friend class RUGraph;
-	friend class RUProgressBar;
-	friend class RUScrollbar;
-	friend class RUListbox;
-	friend class RUDropdown;
-	friend class RUKeyDown;
-	friend class RUKeyUp;
-
-	// GLFW callback helpers need access to private state
-	friend void glfw_window_close_cb(GLFWwindow*);
-	friend void glfw_key_cb(GLFWwindow*, int, int, int, int);
-	friend void glfw_mouse_button_cb(GLFWwindow*, int, int, int);
-	friend void glfw_cursor_pos_cb(GLFWwindow*, double, double);
-	friend void glfw_scroll_cb(GLFWwindow*, double, double);
-	friend void glfw_framebuffer_size_cb(GLFWwindow*, int, int);
-
 public:
 	enum RenderBackend
 	{
@@ -81,8 +65,6 @@ private:
 	bool running;
 	int width;
 	int height;
-	float hunterZolomon; // zoom
-
 	int32_t frames;
 	float fps;
 	bool rotate;
@@ -90,24 +72,7 @@ private:
 	int32_t now;
 	int32_t then;
 
-	// for mouse
-	int mouseX;
-	int mouseY;
-
-	// for key presses
-	bool CTRLPressed;
-	bool ALTPressed;
-	bool spacePressed;
-	bool fPressed;
-	bool uPressed;
-	bool qPressed;
-	bool gPressed;
-	bool rPressed;
-	bool lPressed;
-	bool upPressed;
-	bool downPressed;
-	bool leftPressed;
-	bool rightPressed;
+	InputState input;
 
 	#ifdef GFX_HAVE_SDL2
 	SDL_Window* window;
@@ -117,21 +82,28 @@ private:
 	GLFWwindow* glfwWindow;
 	bool glfwInitialized;
 	RenderBackend renderBackend;
-	GfxRenderer* draw;
+	shmea::GPointer<GfxRenderer> draw;
 	bool ttfReady;
 	bool finalized;
+	bool ownsWindow;
 
+	int nextItemID;
 	std::vector<GItem*> guiElements; // < RUComponent* || GLayout* >
 
 	#ifdef GFX_HAVE_SDL2
 	SDL_Cursor* systemCursor;
 	#endif
 	GItem* focusedItem;
+	GPanel* focusedPanel;
 
 	// External event listeners use unified GfxEvent (SDL-backed or stubbed)
 	typedef void (*EventListenerFn)(const GfxEvent&, void*);
 	struct EventListener { EventListenerFn fn; void* userData; };
 	std::vector<EventListener> listeners;
+
+	// initialization
+	void initMembers();
+	void initFonts(GfxNativeRenderer* sdlRenderer);
 
 	// main
 	void display();
@@ -140,13 +112,15 @@ private:
 	int initOpenGL();
 	void clean2D();
 
-	// For GLFW-based OpenGL path: synthetic event queue (GfxEvent container)
-	std::vector<GfxEvent> glfwEventQueue;
+	// input
+	bool updateKeyState(int eventType, GfxKeycode key);
 
-	// OpenGL text cache (fontPath+size -> renderer)
+	// For GLFW-based OpenGL path: event bridge
 #ifdef GFX_HAVE_OPENGL
-	std::map<std::string, GLTextRenderer*> glTextCache;
+	GlfwEventBridge* glfwBridge;
 #endif
+
+	FontManager fontManager;
 
 public:
 	static const float MAX_FRAMES_PER_SECOND;
@@ -176,12 +150,8 @@ public:
 	// GFX Utils
 	static unsigned int RGBfromHue(double, int8_t*, int8_t*, int8_t*);
 
-	// 2D
-	GFont* cFont;
-	std::map<int, GFont*> graphicsFonts;
-
-	GPanel* focusedPanel;
-	void addGradient(int, int, int);
+	GPanel* getFocusedPanel() const { return focusedPanel; }
+	void setFocusedPanel(GPanel* panel) { focusedPanel = panel; }
 	void addItem(GItem*);
 	void removeItem(int); // id
 	GItem* getItemByID(int);
@@ -191,6 +161,11 @@ public:
 	void setCursor(GfxCursor*);
 	int getWidth() const;
 	int getHeight() const;
+	bool isCTRLPressed() const { return input.CTRLPressed; }
+	bool isALTPressed() const { return input.ALTPressed; }
+	int getMouseX() const { return input.mouseX; }
+	int getMouseY() const { return input.mouseY; }
+	FontManager* getFontManager() { return &fontManager; }
 
 	// main
 	void run();
@@ -200,11 +175,6 @@ public:
 	// called after run()/display() return.
 	void requestFinish() { running = false; }
 	bool getRunning() const;
-
-	// Get a cached GL text renderer for a font path and pixel height; created on demand
-#ifdef GFX_HAVE_OPENGL
-	GLTextRenderer* getGLText(const std::string& fontPath, int pixelHeight);
-#endif
 
 	// Event listeners (available for both SDL2 and OpenGL builds)
 	void addEventListener(EventListenerFn fn, void* userData) { if(fn) listeners.push_back((EventListener){fn, userData}); }

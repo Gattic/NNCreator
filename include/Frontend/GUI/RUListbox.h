@@ -67,7 +67,6 @@ public:
 	void addSelection(unsigned int);
 	void clearSelections();
 	void clearOptions();
-	// void clear();
 
 	// render
 	virtual void updateBackground(gfxpp*);

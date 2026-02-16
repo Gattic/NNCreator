@@ -59,6 +59,8 @@
 #include "crt0.h"
 #include "main.h"
 #include "services/gui_callback.h"
+#include "services/ml_train.h"
+#include "services/ml_test.h"
 #include <algorithm>
 #include <dirent.h>
 #include <errno.h>
@@ -193,9 +195,20 @@ void NNCreatorPanel::buildPanel()
 	pthread_mutex_init(lcMutex, NULL);
 	pthread_mutex_init(rocMutex, NULL);
 
+	nn = NULL;
+	killRequested = false;
+
 	// Add services
 	GUI_Callback* gui_cb_srvc = new GUI_Callback(serverInstance, this);
 	serverInstance->addService(gui_cb_srvc);
+
+	// Re-register ML services with the panel pointer so DirectPanelCallbacks
+	// can push metrics straight into the GPanel queue.
+	ML_Train* ml_train_srvc = new ML_Train(serverInstance, this, &killRequested);
+	serverInstance->addService(ml_train_srvc);
+
+	ML_Test* ml_test_srvc = new ML_Test(serverInstance, this, &killRequested);
+	serverInstance->addService(ml_test_srvc);
 
 	currentHiddenLayerIndex = 0;
 	InputLayerInfo* newInputLayer = new InputLayerInfo(1, 0.01f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0.0f);
@@ -332,6 +345,59 @@ void NNCreatorPanel::buildPanel()
 	lblAccuracy->setText("");
 	lblAccuracy->setName("lblAccuracy");
 	statsLayout->addSubItem(lblAccuracy);
+
+	// Loss Label
+	lblLoss = new RULabel();
+	lblLoss->setText("");
+	lblLoss->setName("lblLoss");
+	statsLayout->addSubItem(lblLoss);
+
+	// Perplexity Label
+	lblPerplexity = new RULabel();
+	lblPerplexity->setText("");
+	lblPerplexity->setName("lblPerplexity");
+	statsLayout->addSubItem(lblPerplexity);
+
+	// Second row of stats
+	GLinearLayout* statsLayout2 = new GLinearLayout("statsLayout2");
+	statsLayout2->setOrientation(GLinearLayout::HORIZONTAL);
+	leftSideLayout->addSubItem(statsLayout2);
+
+	// Learning Rate Label
+	lblLR = new RULabel();
+	lblLR->setText("");
+	lblLR->setName("lblLR");
+	statsLayout2->addSubItem(lblLR);
+
+	// Gradient Norm Label
+	lblGradNorm = new RULabel();
+	lblGradNorm->setText("");
+	lblGradNorm->setName("lblGradNorm");
+	statsLayout2->addSubItem(lblGradNorm);
+
+	// F1 Label
+	lblF1 = new RULabel();
+	lblF1->setText("");
+	lblF1->setName("lblF1");
+	statsLayout2->addSubItem(lblF1);
+
+	// MCC Label
+	lblMCC = new RULabel();
+	lblMCC->setText("");
+	lblMCC->setName("lblMCC");
+	statsLayout2->addSubItem(lblMCC);
+
+	// MAE Label
+	lblMAE = new RULabel();
+	lblMAE->setText("");
+	lblMAE->setName("lblMAE");
+	statsLayout2->addSubItem(lblMAE);
+
+	// RMSE Label
+	lblRMSE = new RULabel();
+	lblRMSE->setText("");
+	lblRMSE->setName("lblRMSE");
+	statsLayout2->addSubItem(lblRMSE);
 
 	//============FORM============
 
@@ -2094,7 +2160,7 @@ void NNCreatorPanel::clickedSave(const shmea::GString& cmpName, int x, int y)
 		}
 	}
 
-	const glades::NNetworkStatus st = net.saveModel(std::string(modelName.c_str()));
+	const glades::NNetworkStatus st = net.saveModel(std::string(modelName.c_str()), di);
 	if (!st.ok())
 	{
 		const shmea::GString msg = "Save failed: " + shmea::GString(st.message.c_str());
@@ -2203,6 +2269,7 @@ void NNCreatorPanel::clickedRun(const shmea::GString& cmpName, int x, int y)
 	// Get the event listener ready
 	resetSim();
 	keepGraping = true;
+	killRequested = false;
 
 	// Run a machine learning service
 	shmea::GList wData;
@@ -2316,6 +2383,7 @@ void NNCreatorPanel::clickedContinue(const shmea::GString& cmpName, int x, int y
 
 	// Get the event listener ready
 	keepGraping = true;
+	killRequested = false;
 
 	// Run a machine learning service
 	shmea::GList wData;
@@ -2465,20 +2533,8 @@ void NNCreatorPanel::checkedCV(const shmea::GString& cmpName, int x, int y)
 
 void NNCreatorPanel::clickedKill(const shmea::GString& cmpName, int x, int y)
 {
-	shmea::GString serverIP = "127.0.0.1";
-	GNet::Connection* cConnection = serverInstance->getConnection(serverIP);
-	if (!cConnection)
-		return;
-
 	keepGraping = false;
-
-	// Kill a neural network instance
-	shmea::GList wData;
-	wData.addString("KILL");
-
-	shmea::GPointer<shmea::ServiceData> cSrvc(new shmea::ServiceData(cConnection, "ML_Train"));
-	cSrvc->set("net" + shmea::GString::intTOstring(netCount - 1), wData);
-	serverInstance->send(cSrvc);
+	killRequested = true;
 }
 
 void NNCreatorPanel::clickedDelete(const shmea::GString& cmpName, int x, int y)
@@ -2790,17 +2846,86 @@ void NNCreatorPanel::updateFromQ(const shmea::ServiceData* data)
 		if (data->getType() != shmea::ServiceData::TYPE_LIST)
 			return;
 
-		// Update components by tick
 		shmea::GList cList = data->getList();
 		if (cList.size() < 2)
 			return;
 
+		// Core fields (always present)
 		int epochs = cList.getInt(0);
 		float accuracy = cList.getFloat(1);
-		char accBuf[64];
-		sprintf(accBuf, "%.2f", accuracy);
+		char buf[64];
+		sprintf(buf, "%.2f", accuracy);
 		lblEpochs->setText(shmea::GString::intTOstring(epochs) + "(t)");
-		lblAccuracy->setText(shmea::GString(accBuf) + "% Accuracy");
+		lblAccuracy->setText(shmea::GString(buf) + "% Accuracy");
+
+		// Extended metrics (sent by the enhanced GuiCallbacks)
+		if (cList.size() >= 18)
+		{
+			float totalError = cList.getFloat(2);
+			float perplexity = cList.getFloat(3);
+			int outputType = cList.getInt(4);
+			float regMAE = cList.getFloat(5);
+			float regRMSE = cList.getFloat(6);
+			// classAccuracy = cList.getFloat(7); // already in totalAccuracy for class
+			// classPrecision = cList.getFloat(8);
+			// classRecall = cList.getFloat(9);
+			// classSpecificity = cList.getFloat(10);
+			float classF1 = cList.getFloat(11);
+			float classMCC = cList.getFloat(12);
+			float learningRate = cList.getFloat(13);
+			// lrMultiplier = cList.getFloat(14);
+			float gradNorm = cList.getFloat(15);
+			// gradNormScale = cList.getFloat(16);
+			// runType = cList.getInt(17);
+
+			sprintf(buf, "%.6f", totalError);
+			lblLoss->setText(shmea::GString("Loss: ") + shmea::GString(buf));
+
+			if (perplexity > 0.0f)
+			{
+				sprintf(buf, "%.2f", perplexity);
+				lblPerplexity->setText(shmea::GString("PPL: ") + shmea::GString(buf));
+			}
+			else
+				lblPerplexity->setText("");
+
+			if (learningRate > 0.0f)
+			{
+				sprintf(buf, "%.2e", learningRate);
+				lblLR->setText(shmea::GString("LR: ") + shmea::GString(buf));
+			}
+
+			if (gradNorm > 0.0f)
+			{
+				sprintf(buf, "%.4f", gradNorm);
+				lblGradNorm->setText(shmea::GString("GradNorm: ") + shmea::GString(buf));
+			}
+
+			// Classification metrics (outputType 1=CLASSIFICATION, 2=KL)
+			if (outputType == 1 || outputType == 2)
+			{
+				sprintf(buf, "%.4f", classF1);
+				lblF1->setText(shmea::GString("F1: ") + shmea::GString(buf));
+
+				sprintf(buf, "%.4f", classMCC);
+				lblMCC->setText(shmea::GString("MCC: ") + shmea::GString(buf));
+
+				lblMAE->setText("");
+				lblRMSE->setText("");
+			}
+			// Regression metrics (outputType 0=REGRESSION)
+			else if (outputType == 0)
+			{
+				sprintf(buf, "%.4f", regMAE);
+				lblMAE->setText(shmea::GString("MAE: ") + shmea::GString(buf));
+
+				sprintf(buf, "%.4f", regRMSE);
+				lblRMSE->setText(shmea::GString("RMSE: ") + shmea::GString(buf));
+
+				lblF1->setText("");
+				lblMCC->setText("");
+			}
+		}
 	}
 	else if (cName == "CONF")
 	{
@@ -2843,38 +2968,34 @@ void NNCreatorPanel::updateFromQ(const shmea::ServiceData* data)
 	}
 	else if (cName == "ACTIVATIONS")
 	{
-
 		shmea::GList activations = data->getList();
+		if (activations.size() == 0)
+			return;
+
 		if (activations[0].getType() == shmea::GType::INT_TYPE)
 		{
+			// Layer-size message: (re)create the NN visualizer
+			if (nn)
+				delete nn;
+			nn = new DrawNeuralNet(activations.size());
 			for (unsigned int i = 0; i < activations.size(); i++)
 			{
-				// Initialize the neural network visualizer
-				if (activations[i].getType() == shmea::GType::INT_TYPE)
-				{
-					if (i == 0)
-					{
-						nn = new DrawNeuralNet(activations.size());
-						nn->setInputLayer(activations.getInt(i));
-					}
-					else if (i == activations.size() - 1)
-					{
-						nn->setOutputLayer(activations.getInt(i));
-					}
-					else
-					{
-						nn->setHiddenLayer(i, activations.getInt(i));
-					}
-				}
+				if (activations[i].getType() != shmea::GType::INT_TYPE)
+					continue;
+
+				if (i == 0)
+					nn->setInputLayer(activations.getInt(i));
+				else if (i == activations.size() - 1)
+					nn->setOutputLayer(activations.getInt(i));
+				else
+					nn->setHiddenLayer(i, activations.getInt(i));
 			}
 		}
-		else
+		else if (nn)
 		{
 			nn->setActivation(activations);
 			neuralNetGraph->set("nn", nn);
 		}
-
-		// nn->displayNeuralNet(); // DEBUGGING ONLY
 	}
 	else if (cName == "WEIGHTS")
 	{
@@ -2882,7 +3003,7 @@ void NNCreatorPanel::updateFromQ(const shmea::ServiceData* data)
 		// Update weights
 		shmea::GList weights = data->getList();
 
-		if (weights.size() < 1 && nn == NULL)
+		if (weights.size() < 1 || nn == NULL)
 			return;
 
 		nn->setWeights(weights);
@@ -2903,12 +3024,22 @@ void NNCreatorPanel::resetSim()
 	rocCurveGraph->update();
 	pthread_mutex_unlock(rocMutex);
 
-	// Reset the NN updates
-	pthread_mutex_lock(qMutex);
-	std::queue<const shmea::ServiceData*> emptyQ;
-	std::swap(updateQueue, emptyQ);
-	pthread_mutex_unlock(qMutex);
+	// Reset the NN visualization
+	if (nn)
+	{
+		delete nn;
+		nn = NULL;
+	}
+	neuralNetGraph->clear(true);
 
 	lblEpochs->setText("0(t)");
 	lblAccuracy->setText("N/A Accuracy");
+	lblLoss->setText("");
+	lblPerplexity->setText("");
+	lblLR->setText("");
+	lblGradNorm->setText("");
+	lblF1->setText("");
+	lblMCC->setText("");
+	lblMAE->setText("");
+	lblRMSE->setText("");
 }

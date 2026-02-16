@@ -38,6 +38,7 @@ protected:
 public:
 	RUComponent();
 
+	virtual void clearItems(unsigned int = 0);
 	virtual void calculateSubItemPositions(std::pair<int, int>);
 
 	// events

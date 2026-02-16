@@ -82,6 +82,7 @@ public:
 	virtual void addSubItem(GItem*, unsigned int = Z_FRONT);
 	void addSubItemAligned(GItem*, Alignment, unsigned int = Z_FRONT);
 	void setItemAlignment(GItem*, Alignment);
+	virtual void clearItems(unsigned int = 0);
 
 	// Access computed content size (excludes padding)
 	int getComputedContentWidth() const { return computedContentWidth; }

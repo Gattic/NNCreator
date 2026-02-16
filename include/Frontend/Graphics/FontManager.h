@@ -14,39 +14,41 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+#ifndef _GFX_FONT_MANAGER_H
+#define _GFX_FONT_MANAGER_H
 
-#ifndef _GLAYOUT
-#define _GLAYOUT
-
-#include "GItem.h"
-#include "Backend/Database/GString.h"
+#include "GfxTypes.h"
+#include "Backend/Database/GPointer.h"
+#include "../GUI/Text/GFont.h"
 #include <map>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <vector>
+#include <string>
 
-class gfxpp;
+#ifdef GFX_HAVE_OPENGL
+class GLTextRenderer;
+#endif
 
-class GLayout : public GItem
+class FontManager
 {
+private:
+	shmea::GPointer<GFont> cFont;
+	std::map<int, shmea::GPointer<GFont> > graphicsFonts;
+#ifdef GFX_HAVE_OPENGL
+	std::map<std::string, GLTextRenderer*> glTextCache;
+#endif
+
 public:
-	enum LayoutType { LAYOUT_RELATIVE = 0, LAYOUT_LINEAR = 1 };
+	FontManager();
 
-protected:
-	LayoutType layoutType;
+	void initSDL(GfxNativeRenderer* sdlRenderer);
+	void initOpenGL();
+	void cleanup(bool isOpenGL);
 
-public:
-	GLayout();
-	virtual ~GLayout();
+	GFont* getDefaultFont();
+	GFont* getFontByColor(int fontColor);
 
-	// gets
-	LayoutType getLayoutType() const;
-
-	virtual bool wantsAutoSize() const;
-	virtual void hover(gfxpp*);
-	virtual void unhover(gfxpp*);
-	virtual shmea::GString getType() const = 0;
+#ifdef GFX_HAVE_OPENGL
+	GLTextRenderer* getGLText(const std::string& fontPath, int pixelHeight);
+#endif
 };
 
 #endif
