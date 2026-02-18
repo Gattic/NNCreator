@@ -109,6 +109,21 @@ struct GpuTransformerWeights
 
 	Block* blocks;  // array of nLayers blocks
 
+	// Persistent device arrays for batched Adam optimizer.
+	// Pointer arrays (device arrays of float*): param, grad, m, v.
+	float** d_adamParams;
+	float** d_adamGrads;
+	float** d_adamM;
+	float** d_adamV;
+	// Per-group scalars (device arrays of float): lr, wd.
+	float* d_adamLr;
+	float* d_adamWd;
+	// Per-group element counts (device array of int).
+	int* d_adamSizes;
+	int adamGroupCount;   // number of parameter groups
+	int adamMaxSize;      // largest element count across groups
+	bool adamPtrsUploaded; // true after pointer arrays uploaded once
+
 	GpuTransformerWeights();
 	~GpuTransformerWeights();
 
@@ -193,6 +208,12 @@ struct GpuTransformerScratch
 	GpuBuffer<int> lossCount;    // [1]  (valid token count)
 	GpuBuffer<int> correctCount; // [1]  (argmax matches)
 	GpuBuffer<int> validCount;   // [1]  (valid tokens for accuracy)
+	GpuBuffer<int> lossPack;     // [4]  (packed loss scalars for single D2H download)
+
+	// Persistent device arrays for batch-zeroing dK/dV (2 pointers + 2 sizes).
+	// Raw device pointers (not GpuBuffer) to avoid needing a float* specialization.
+	float** d_dKdVZeroPtrs;  // device array of 2 float*
+	int*    d_dKdVZeroSizes; // device array of 2 ints
 
 	GpuTransformerScratch();
 	~GpuTransformerScratch();

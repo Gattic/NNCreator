@@ -87,6 +87,11 @@ bool rope_apply(float* x, const float* invFreq,
                 int T, int nHeads, int dHead,
                 int halfDim = 0, bool inverse = false);
 
+// Fused Q+K RoPE: apply RoPE to both Q and K arrays in a single kernel launch.
+bool rope_apply_qk(float* Q, float* K, const float* invFreq,
+                    int T, int nQHeads, int nKVHeads, int dHead,
+                    int halfDim = 0, bool inverse = false);
+
 // ---------------------------------------------------------------------------
 // Simple vector ops
 // ---------------------------------------------------------------------------
@@ -96,6 +101,9 @@ bool add_bias(float* out, const float* bias, int rows, int cols);
 
 // out[n] += residual[n]
 bool add_residual(float* out, const float* residual, int n);
+
+// out[n] = a[n] + b[n]
+bool add_two(float* out, const float* a, const float* b, int n);
 
 // y[n] += alpha * x[n]
 bool axpy(float alpha, const float* x, float* y, int n);
@@ -121,9 +129,22 @@ bool embedding_scatter_add(float* dE, const int* tokenIds,
 // ---------------------------------------------------------------------------
 
 // In-place Adam update for n parameters.
+// gradScale is applied to grad before the update (use 1.0f for no scaling).
 bool adam_update(float* param, const float* grad, float* m, float* v,
                  float lr, float beta1, float beta2, float eps,
-                 float weightDecay, int step, int n);
+                 float weightDecay, float gradScale, int step, int n);
+
+// Batched Adam: process all parameter groups in a single kernel launch.
+// d_params/d_grads/d_ms/d_vs are device arrays of groupCount pointers.
+// d_lrs/d_wds are device arrays of groupCount floats (per-group lr/wd).
+// d_sizes is a device array of groupCount ints (element counts).
+// maxSize is the largest element count across all groups.
+bool adam_update_batch(float** d_params, float** d_grads,
+                       float** d_ms, float** d_vs,
+                       const float* d_lrs, const float* d_wds,
+                       const int* d_sizes, int maxSize,
+                       float beta1, float beta2, float eps,
+                       float gradScale, int step, int groupCount);
 
 // ---------------------------------------------------------------------------
 // Flash attention (simplified single-head)
@@ -179,11 +200,11 @@ bool reduce_rows_sum(const float* input, int rows, int cols,
 // Each (batch, row) block: set S[i,j]==-FLT_MAX for j>i, then stable softmax.
 bool causal_mask_softmax_inplace(float* S, int batchSize, int T);
 
-// Softmax backward for attention: dS = P * (dP - row_sum(dP * P)),
+// Softmax backward for attention: dS = outputScale * P * (dP - row_sum(dP * P)),
 // zero above-diagonal for causal mask.
 // P, dP, dS are [batchSize, T, T] row-major.
 bool softmax_backward_attn(const float* P, const float* dP,
-                           int batchSize, int T, float* dS);
+                           int batchSize, int T, float outputScale, float* dS);
 
 // ---------------------------------------------------------------------------
 // Loss computation
@@ -205,6 +226,24 @@ bool cross_entropy_nll_loss(const float* probs, const int* targets,
 bool argmax_count_matches(const float* probs, const int* targets,
                           int T, int vocabSize, int padToken,
                           int* correct_count, int* valid_count);
+
+// ---------------------------------------------------------------------------
+// Batch zero: zero multiple GPU buffers with a single kernel launch
+// ---------------------------------------------------------------------------
+
+// d_ptrs[count] and d_sizes[count] must be device pointers.
+// Each buffer d_ptrs[i] of d_sizes[i] floats is zeroed.
+bool zero_buffers_batch(float** d_ptrs, const int* d_sizes, int count);
+
+// ---------------------------------------------------------------------------
+// Pack loss scalars: copy 4 device scalars into a contiguous 16-byte buffer
+// ---------------------------------------------------------------------------
+
+// Packs lossSum (float), lossCount (int), correctCount (int), validCount (int)
+// into out[4] as raw int bits (lossSum reinterpreted). Single D2H download.
+bool pack_loss_scalars(const float* lossSum, const int* lossCount,
+                       const int* correctCount, const int* validCount,
+                       int* out);
 
 // ---------------------------------------------------------------------------
 // Device memory operations (callable from .cpp files without cuda_runtime.h)
@@ -246,27 +285,33 @@ inline bool swiglu_forward(const float*, int, int, float*) { return false; }
 inline bool swiglu_backward(const float*, const float*, int, int, float*) { return false; }
 
 inline bool rope_apply(float*, const float*, int, int, int, int = 0, bool = false) { return false; }
+inline bool rope_apply_qk(float*, float*, const float*, int, int, int, int, int = 0, bool = false) { return false; }
 
 inline bool add_bias(float*, const float*, int, int) { return false; }
 inline bool add_residual(float*, const float*, int) { return false; }
+inline bool add_two(float*, const float*, const float*, int) { return false; }
 inline bool axpy(float, const float*, float*, int) { return false; }
 inline bool scale_array(float*, float, int) { return false; }
 
 inline bool embedding_gather(const float*, const int*, int, int, int, float*) { return false; }
 inline bool embedding_scatter_add(float*, const int*, const float*, int, int, int) { return false; }
 
-inline bool adam_update(float*, const float*, float*, float*, float, float, float, float, float, int, int) { return false; }
+inline bool adam_update(float*, const float*, float*, float*, float, float, float, float, float, float, int, int) { return false; }
+inline bool adam_update_batch(float**, float**, float**, float**, const float*, const float*, const int*, int, float, float, float, float, int, int) { return false; }
 
 inline bool flash_attention_forward(const float*, const float*, const float*, int, int, int, bool, float*) { return false; }
 inline bool flash_attention_backward(const float*, const float*, const float*, const float*, const float*, int, int, int, bool, float*, float*, float*) { return false; }
 
 inline bool reduce_rows_sum(const float*, int, int, float, float*) { return false; }
 inline bool causal_mask_softmax_inplace(float*, int, int) { return false; }
-inline bool softmax_backward_attn(const float*, const float*, int, int, float*) { return false; }
+inline bool softmax_backward_attn(const float*, const float*, int, int, float, float*) { return false; }
 inline bool cross_entropy_nll_loss(const float*, const int*, int, int, int, float*, int*) { return false; }
 inline bool argmax_count_matches(const float*, const int*, int, int, int, int*, int*) { return false; }
 
 inline bool kv_attention_incremental(const float*, const float*, const float*, float*, const unsigned char*, int, int, int, int, int, int, float, float*) { return false; }
+
+inline bool zero_buffers_batch(float**, const int*, int) { return false; }
+inline bool pack_loss_scalars(const float*, const int*, const int*, const int*, int*) { return false; }
 
 inline void device_memcpy_d2d(void*, const void*, size_t) {}
 inline void device_memcpy_h2d(void*, const void*, size_t) {}
