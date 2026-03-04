@@ -84,7 +84,7 @@ public:
 	// render
 	virtual void updateBackground(gfxpp*);
 	void updateLabels();
-	virtual void unhover();
+	virtual void unhover(gfxpp*);
 	virtual shmea::GString getType() const;
 };
 

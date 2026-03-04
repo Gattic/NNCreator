@@ -46,7 +46,7 @@ class RULabel;
 class GPanel;
 class Object;
 class GFont;
-class GfxRenderer;
+#include "GfxRenderer.h"
 #ifdef GFX_HAVE_OPENGL
 class GLTextRenderer;
 #endif
